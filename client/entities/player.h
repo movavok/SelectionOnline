@@ -13,6 +13,7 @@ public:
     QRectF bounds() const override;
 
     void setInput(MoveDirection, bool);
+    QPointF moveDistance(float) const;
 
 private:
     float m_speed = 150.0f;

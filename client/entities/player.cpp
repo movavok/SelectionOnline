@@ -17,16 +17,20 @@ void Player::setInput(MoveDirection direction, bool pressed)
     }
 }
 
+QPointF Player::moveDistance(float dt) const {
+    QPointF delta(0, 0);
+
+    if (m_movingUp) delta.ry() -= m_speed * dt;
+    if (m_movingDown) delta.ry() += m_speed * dt;
+    if (m_movingLeft) delta.rx() -= m_speed * dt;
+    if (m_movingRight) delta.rx() += m_speed * dt;
+
+    return delta;
+}
+
 void Player::update(float deltaTime)
 {
-    QPointF delta(0.0f, 0.0f);
 
-    if (m_movingUp) delta.ry() -= m_speed * deltaTime;
-    if (m_movingDown) delta.ry() += m_speed * deltaTime;
-    if (m_movingLeft) delta.rx() -= m_speed * deltaTime;
-    if (m_movingRight) delta.rx() += m_speed * deltaTime;
-
-    m_position += delta;
 }
 
 QRectF Player::bounds() const { return QRectF(m_position.x() - (m_width / 2), m_position.y() - (m_height / 2), m_width, m_height); }

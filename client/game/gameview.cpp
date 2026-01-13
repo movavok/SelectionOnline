@@ -12,9 +12,9 @@ GameView::GameView(QWidget* parent)
     playerPx.fill(Qt::blue);
 
     m_playerItem->setPixmap(playerPx);
-    m_playerItem->setOffset(-15, -15);
+    m_playerItem->setOffset(0, 0);
 
-    m_scene->setSceneRect(-1000, -1000, 2000, 2000);
+    m_scene->setSceneRect(m_game.getWorldBounds());
     m_scene->addItem(m_playerItem);
 
     connect(m_timer, &QTimer::timeout, this, &GameView::onTick);

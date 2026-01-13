@@ -2,14 +2,40 @@
 
 Game::Game()
 {
+    m_worldBounds = QRectF(-1000, -1000, 2000, 2000);
+
     m_player = new Player(QPointF(0, 0));
     m_entities.push_back(m_player);
 }
 
+bool Game::canMove(const Entity* entity, const QPointF& newPos) const
+{
+    QRectF newBounds = entity->bounds();
+    newBounds.moveTo(newPos);
+
+    if (!m_worldBounds.contains(newBounds)) return false;
+
+    for (Entity* other : m_entities) {
+        if (other == entity || !other->isAlive()) continue;
+
+        if (newBounds.intersects(other->bounds())) return false;
+    }
+
+    return true;
+}
+
 void Game::update(float deltaTime)
 {
-    for (Entity* &entity : m_entities)
-        if (entity->isAlive()) entity->update(deltaTime);
+    for (Entity* &entity : m_entities) {
+        if (!entity->isAlive()) continue;
+
+        entity->update(deltaTime);
+
+        if (Player* player = dynamic_cast<Player*>(entity)) {
+            QPointF nextPos = player->getPosition() + player->moveDistance(deltaTime);
+            if (canMove(player, nextPos)) player->setPosition(nextPos);
+        }
+    }
 }
 
 void Game::setPlayerInput(MoveDirection key, bool pressed) {
@@ -17,3 +43,5 @@ void Game::setPlayerInput(MoveDirection key, bool pressed) {
 }
 
 Player* Game::getPlayer() const { return m_player; }
+
+QRectF Game::getWorldBounds() const { return m_worldBounds; }

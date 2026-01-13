@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "../game/gameView.h"
+#include "../game/gameview.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,4 +23,5 @@ private:
     Ui::MainWindow *ui;
     GameView* m_gameView;
 };
+
 #endif // MAINWINDOW_H
