@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    m_gameView = ui->gameViewHolder;
+    m_gameView->useMovementScheme(MovementScheme::WASD);
 }
 
 MainWindow::~MainWindow()
