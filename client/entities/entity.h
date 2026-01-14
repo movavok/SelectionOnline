@@ -16,6 +16,9 @@ public:
     void setPosition(const QPointF&);
     QPointF getPosition() const;
 
+    unsigned short getWidth() const;
+    unsigned short getHeight() const;
+
     bool isAlive() const;
     void destroy();
 

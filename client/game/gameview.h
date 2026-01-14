@@ -23,8 +23,6 @@ protected:
     void keyReleaseEvent(QKeyEvent*) override;
     void mousePressEvent(QMouseEvent*) override;
 
-
-
 private:
     Game m_game;
 
@@ -41,9 +39,13 @@ private:
     bool m_left = false;
     bool m_right = false;
 
+    QPointF m_cameraPos;
+    float m_cameraFollowSpeed = 8.0f;
+
     // helper
     void handleKeyEvent(QKeyEvent*, bool);
     void buildMap();
+    void updateCamera();
 
 private slots:
     void onTick();

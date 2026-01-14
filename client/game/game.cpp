@@ -15,7 +15,7 @@ Game::Game()
 bool Game::canMove(const Entity* entity, const QPointF& newPos) const
 {
     QRectF newBounds = entity->bounds();
-    newBounds.moveTo(newPos);
+    newBounds.moveCenter(newPos);
 
     if (!m_worldBounds.contains(newBounds)) return false;
     if (m_map.intersectsAnyTiles(newBounds, { Tile::TileType::Wall }))
@@ -34,12 +34,10 @@ void Game::update(float deltaTime)
     for (Entity* &entity : m_entities) {
         if (!entity->isAlive()) continue;
 
-        entity->update(deltaTime);
-
         if (Player* player = dynamic_cast<Player*>(entity)) {
             QPointF nextPos = player->getPosition() + player->moveDistance(deltaTime);
-            if (canMove(player, nextPos)) player->setPosition(nextPos);
-        }
+            if (canMove(player, nextPos)) player->setPosition(nextPos); // todo rework moving resolution
+        } else entity->update(deltaTime);
     }
 }
 

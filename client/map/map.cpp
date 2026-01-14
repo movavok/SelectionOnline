@@ -67,10 +67,10 @@ void Map::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {
     const double mapHeight = static_cast<double>(m_tileCountY) * TILE_SIZE;
     const QRectF local = rect.translated(mapWidth / 2.0, mapHeight / 2.0);
 
-    int startX = std::floor(local.left() / TILE_SIZE);
-    int startY = std::floor(local.top() / TILE_SIZE);
-    int endX = std::floor(local.right() / TILE_SIZE);
-    int endY = std::floor(local.bottom() / TILE_SIZE);
+    int startX = std::floor((local.left() + 1) / TILE_SIZE);
+    int startY = std::floor((local.top() + 1) / TILE_SIZE);
+    int endX = std::floor((local.right() - 1) / TILE_SIZE);
+    int endY = std::floor((local.bottom() - 1) / TILE_SIZE);
 
     out.clear();
     for (int y = startY; y <= endY; ++y)

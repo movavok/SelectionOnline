@@ -12,7 +12,6 @@ GameView::GameView(QWidget* parent)
     playerPx.fill(Qt::blue);
 
     m_playerItem->setPixmap(playerPx);
-    m_playerItem->setOffset(0, 0);
 
     m_scene->setSceneRect(m_game.getWorldBounds());
     buildMap();
@@ -76,11 +75,15 @@ void GameView::useMovementScheme(MovementScheme scheme) {
     m_keyMap[keyRight] = MoveDirection::MoveRight;
 }
 
+void GameView::updateCamera() {
+    if (Player* player = m_game.getPlayer()) {
+        m_playerItem->setPos(player->getPosition() - QPointF(player->getWidth() / 2, player->getHeight() / 2));
+        m_cameraPos = m_cameraPos * 0.95 + player->getPosition() * 0.05;
+        centerOn(m_cameraPos);
+    }
+}
+
 void GameView::onTick() {
     m_game.update(deltaTime);
-
-    if (Player* player = m_game.getPlayer()) {
-        m_playerItem->setPos(player->getPosition());
-        centerOn(m_playerItem);
-    }
+    updateCamera();
 }
