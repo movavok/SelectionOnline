@@ -56,10 +56,37 @@ bool Map::loadFromFile(const QString& path) {
     return generateFromText(lines);
 }
 
-const Tile &Map::tileAt(int x, int y) const {
+const Tile& Map::tileAt(int x, int y) const {
     static Tile emptyTile(Tile::TileType::Empty);
     if (y < 0 || y >= m_tileCountY || x < 0 || x >= m_tileCountX) return emptyTile;
     return m_tilesGrid[y][x];
 }
 
+void Map::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {
+    const double mapWidth = static_cast<double>(m_tileCountX) * TILE_SIZE;
+    const double mapHeight = static_cast<double>(m_tileCountY) * TILE_SIZE;
+    const QRectF local = rect.translated(mapWidth / 2.0, mapHeight / 2.0);
 
+    int startX = std::floor(local.left() / TILE_SIZE);
+    int startY = std::floor(local.top() / TILE_SIZE);
+    int endX = std::floor(local.right() / TILE_SIZE);
+    int endY = std::floor(local.bottom() / TILE_SIZE);
+
+    out.clear();
+    for (int y = startY; y <= endY; ++y)
+        for (int x = startX; x <= endX; ++x)
+            out.append({x, y});
+}
+
+bool Map::intersectsAnyTiles(const QRectF& rect, const QVector<Tile::TileType>& types) const {
+    QVector<QPoint> coords;
+    tilesInRect(rect, coords);
+
+    for (const QPoint& point : coords) {
+        if (point.y() < 0 || point.y() >= m_tileCountY || point.x() < 0 || point.x() >= m_tileCountX)
+            continue;
+        if (types.contains(m_tilesGrid[point.y()][point.x()].getType()))
+            return true;
+    }
+    return false;
+}

@@ -18,10 +18,11 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const
     newBounds.moveTo(newPos);
 
     if (!m_worldBounds.contains(newBounds)) return false;
+    if (m_map.intersectsAnyTiles(newBounds, { Tile::TileType::Wall }))
+        return false;
 
     for (Entity* other : m_entities) {
         if (other == entity || !other->isAlive()) continue;
-
         if (newBounds.intersects(other->bounds())) return false;
     }
 

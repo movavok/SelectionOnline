@@ -46,8 +46,6 @@ void GameView::buildMap() {
             tileItem->setBrush(visual.color);
             tileItem->setPen(Qt::NoPen);
 
-            tileItem->setData(0, visual.solid);
-
             m_scene->addItem(tileItem);
         }
     }

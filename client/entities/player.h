@@ -16,7 +16,7 @@ public:
     QPointF moveDistance(float) const;
 
 private:
-    float m_speed = 150.0f;
+    float m_speed = 100.0f;
     int m_hp = 100;
 
     bool m_movingUp = false;
