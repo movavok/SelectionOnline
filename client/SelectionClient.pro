@@ -12,6 +12,8 @@ SOURCES += \
     entities/entity.cpp \
     entities/player.cpp \
     game/game.cpp \
+    game/map.cpp \
+    game/tile.cpp \
     main.cpp \
     game/gameview.cpp \
     ui/mainwindow.cpp
@@ -21,6 +23,8 @@ HEADERS += \
     entities/player.h \
     game/game.h \
     game/gameview.h \
+    game/map.h \
+    game/tile.h \
     input/inputtypes.h \
     ui/mainwindow.h
 
@@ -31,3 +35,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resourses.qrc

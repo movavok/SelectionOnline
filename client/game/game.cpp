@@ -2,7 +2,11 @@
 
 Game::Game()
 {
-    m_worldBounds = QRectF(-1000, -1000, 2000, 2000);
+    m_map.loadFromFile(":/maps/default.txt");
+
+    int mapWidth = m_map.getTileCountX() * Map::TILE_SIZE;
+    int mapHeight = m_map.getTileCountY() * Map::TILE_SIZE;
+    m_worldBounds = QRectF(-mapWidth / 2, -mapHeight / 2, mapWidth, mapHeight);
 
     m_player = new Player(QPointF(0, 0));
     m_entities.push_back(m_player);
@@ -43,5 +47,7 @@ void Game::setPlayerInput(MoveDirection key, bool pressed) {
 }
 
 Player* Game::getPlayer() const { return m_player; }
+
+const Map& Game::getMap() const { return m_map; }
 
 QRectF Game::getWorldBounds() const { return m_worldBounds; }

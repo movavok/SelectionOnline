@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/maps">
+        <file alias="default.txt">assets/maps/default.txt</file>
+    </qresource>
+</RCC>
