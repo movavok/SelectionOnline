@@ -15,6 +15,7 @@ GameView::GameView(QWidget* parent)
     m_playerItem->setOffset(0, 0);
 
     m_scene->setSceneRect(m_game.getWorldBounds());
+    buildMap();
     m_scene->addItem(m_playerItem);
 
     connect(m_timer, &QTimer::timeout, this, &GameView::onTick);
@@ -23,6 +24,33 @@ GameView::GameView(QWidget* parent)
     setFocusPolicy(Qt::StrongFocus);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+}
+
+void GameView::buildMap() {
+    const Map& map = m_game.getMap();
+
+    int mapWidth = map.getTileCountX() * Map::TILE_SIZE;
+    int mapHeight = map.getTileCountY() * Map::TILE_SIZE;
+    double offsetX = -mapWidth / 2.0;
+    double offsetY = -mapHeight / 2.0;
+
+    for (int y = 0; y < map.getTileCountY(); ++y) {
+        for (int x = 0; x < map.getTileCountX(); ++x) {
+            const TileVisual& visual = tileVisual(map.tileAt(x, y).getType());
+            if (visual.color == Qt::transparent) continue;
+
+            QRectF rect(x * Map::TILE_SIZE + offsetX, y * Map::TILE_SIZE + offsetY,
+                        Map::TILE_SIZE, Map::TILE_SIZE);
+
+            QGraphicsRectItem* tileItem = new QGraphicsRectItem(rect);
+            tileItem->setBrush(visual.color);
+            tileItem->setPen(Qt::NoPen);
+
+            tileItem->setData(0, visual.solid);
+
+            m_scene->addItem(tileItem);
+        }
+    }
 }
 
 void GameView::handleKeyEvent(QKeyEvent* event, bool pressed) {

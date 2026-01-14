@@ -4,7 +4,8 @@
 #include <QList>
 
 #include "../entities/player.h"
-#include "map.h"
+#include "../map/map.h"
+#include "../map/tilevisual.h"
 
 class Game
 {

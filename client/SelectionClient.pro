@@ -12,10 +12,11 @@ SOURCES += \
     entities/entity.cpp \
     entities/player.cpp \
     game/game.cpp \
-    game/map.cpp \
-    game/tile.cpp \
+    map/map.cpp \
+    map/tile.cpp \
     main.cpp \
     game/gameview.cpp \
+    map/tilevisual.cpp \
     ui/mainwindow.cpp
 
 HEADERS += \
@@ -23,9 +24,10 @@ HEADERS += \
     entities/player.h \
     game/game.h \
     game/gameview.h \
-    game/map.h \
-    game/tile.h \
+    map/map.h \
+    map/tile.h \
     input/inputtypes.h \
+    map/tilevisual.h \
     ui/mainwindow.h
 
 FORMS += \

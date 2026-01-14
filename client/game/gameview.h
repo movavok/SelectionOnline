@@ -23,6 +23,8 @@ protected:
     void keyReleaseEvent(QKeyEvent*) override;
     void mousePressEvent(QMouseEvent*) override;
 
+
+
 private:
     Game m_game;
 
@@ -41,6 +43,7 @@ private:
 
     // helper
     void handleKeyEvent(QKeyEvent*, bool);
+    void buildMap();
 
 private slots:
     void onTick();
