@@ -18,7 +18,7 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const
     newBounds.moveCenter(newPos);
 
     if (!m_worldBounds.contains(newBounds)) return false;
-    if (m_map.intersectsAnyTiles(newBounds, { Tile::TileType::Wall }))
+    if (m_map.intersectsSolid(newBounds, Map::CollisionActor::Person))
         return false;
 
     for (Entity* other : m_entities) {

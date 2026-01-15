@@ -9,11 +9,13 @@
 #include <QRectF>
 #include <QDebug>
 
-#include "tile.h"
+#include "tilecollision.h"
 
 class Map
 {
 public:
+    enum class CollisionActor { Person, Projectile };
+
     static constexpr unsigned short TILE_SIZE = 32;
 
     unsigned short getTileCountX() const;
@@ -22,7 +24,7 @@ public:
     bool loadFromFile(const QString&);
     const Tile& tileAt(int x, int y) const;
 
-    bool intersectsAnyTiles(const QRectF&, const QVector<Tile::TileType>&) const;
+    bool intersectsSolid(const QRectF&, CollisionActor) const;
 
 private:
     unsigned short m_tileCountX = 0;

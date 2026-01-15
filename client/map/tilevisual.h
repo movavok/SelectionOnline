@@ -5,11 +5,7 @@
 
 #include "tile.h"
 
-struct TileVisual {
-    QColor color;
-    bool personSolid;
-    bool projectileSolid;
-};
+struct TileVisual { QColor color; };
 
 const TileVisual& tileVisual(Tile::TileType);
 

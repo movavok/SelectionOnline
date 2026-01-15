@@ -16,6 +16,7 @@ SOURCES += \
     map/tile.cpp \
     main.cpp \
     game/gameview.cpp \
+    map/tilecollision.cpp \
     map/tilevisual.cpp \
     ui/mainwindow.cpp
 
@@ -27,6 +28,7 @@ HEADERS += \
     map/map.h \
     map/tile.h \
     input/inputtypes.h \
+    map/tilecollision.h \
     map/tilevisual.h \
     ui/mainwindow.h
 

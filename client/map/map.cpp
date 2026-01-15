@@ -67,10 +67,10 @@ void Map::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {
     const double mapHeight = static_cast<double>(m_tileCountY) * TILE_SIZE;
     const QRectF local = rect.translated(mapWidth / 2.0, mapHeight / 2.0);
 
-    int startX = std::floor((local.left() + 1) / TILE_SIZE);
-    int startY = std::floor((local.top() + 1) / TILE_SIZE);
-    int endX = std::floor((local.right() - 1) / TILE_SIZE);
-    int endY = std::floor((local.bottom() - 1) / TILE_SIZE);
+    int startX = std::floor(local.left() / TILE_SIZE);
+    int startY = std::floor(local.top() / TILE_SIZE);
+    int endX = std::floor(local.right() / TILE_SIZE);
+    int endY = std::floor(local.bottom() / TILE_SIZE);
 
     out.clear();
     for (int y = startY; y <= endY; ++y)
@@ -78,15 +78,15 @@ void Map::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {
             out.append({x, y});
 }
 
-bool Map::intersectsAnyTiles(const QRectF& rect, const QVector<Tile::TileType>& types) const {
+bool Map::intersectsSolid(const QRectF& rect, CollisionActor actor) const {
     QVector<QPoint> coords;
     tilesInRect(rect, coords);
 
     for (const QPoint& point : coords) {
-        if (point.y() < 0 || point.y() >= m_tileCountY || point.x() < 0 || point.x() >= m_tileCountX)
-            continue;
-        if (types.contains(m_tilesGrid[point.y()][point.x()].getType()))
-            return true;
+        const TileCollision& collision = tileCollision(tileAt(point.x(), point.y()).getType());
+
+        if (actor == CollisionActor::Person && collision.personSolid) return true;
+        if (actor == CollisionActor::Projectile && collision.projectileSolid) return true;
     }
     return false;
 }

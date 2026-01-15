@@ -40,7 +40,6 @@ private:
     bool m_right = false;
 
     QPointF m_cameraPos;
-    float m_cameraFollowSpeed = 8.0f;
 
     // helper
     void handleKeyEvent(QKeyEvent*, bool);
