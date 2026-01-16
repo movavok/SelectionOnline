@@ -7,10 +7,22 @@ Player::Player(const QPointF& startPos)
     m_height = 30;
 }
 
+Player::~Player() {
+    delete m_weapon;
+}
+
 unsigned short Player::getCurrentHp() const { return m_hp; }
 unsigned short Player::getMaxHp() const { return m_maxHp; }
 
 void Player::setCurrentHp(unsigned short hp) { m_hp = hp; }
+
+void Player::startAiming() { m_attackState = AttackState::Aim; }
+void Player::stopAiming() { m_attackState = AttackState::Idle; }
+
+Player::AttackState Player::getAttackState() const { return m_attackState; }
+
+void Player::setWeapon(Weapon* weapon) { delete m_weapon; m_weapon = weapon; }
+const Weapon* Player::getWeapon() const { return m_weapon; }
 
 void Player::setInput(MoveDirection direction, bool pressed)
 {
@@ -33,9 +45,6 @@ QPointF Player::moveDistance(float dt) const {
     return delta;
 }
 
-void Player::update(float)
-{
-
-}
+void Player::update(float) {}
 
 QRectF Player::bounds() const { return QRectF(m_position.x() - (m_width / 2), m_position.y() - (m_height / 2), m_width, m_height); }

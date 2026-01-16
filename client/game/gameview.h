@@ -22,6 +22,8 @@ protected:
     void keyPressEvent(QKeyEvent*) override;
     void keyReleaseEvent(QKeyEvent*) override;
     void mousePressEvent(QMouseEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
+    void mouseMoveEvent(QMouseEvent*) override;
 
 private:
     Game m_game;
@@ -33,7 +35,11 @@ private:
     //camera
     QPointF m_cameraPos;
 
-    QGraphicsPixmapItem* m_playerItem = nullptr;
+    QGraphicsEllipseItem* m_playerItem = nullptr;
+
+    QGraphicsPathItem* m_attackIndicator = nullptr;
+
+    QPointF m_mouseScenePos;
 
     //hp bar
     QGraphicsRectItem* m_hpBack = nullptr;
@@ -52,13 +58,16 @@ private:
     bool m_right = false;
 
     //helper
+    void initPlayerUi();
     void initHpBar();
+    void initAttackIndicator();
     void buildMap();
 
     void handleKeyEvent(QKeyEvent*, bool);
 
     void updateCamera();
     void updateHpBar();
+    void updateAttackIndicator();
 
 private slots:
     void onTick();

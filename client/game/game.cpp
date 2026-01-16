@@ -1,7 +1,6 @@
 #include "game.h"
 
-Game::Game()
-{
+Game::Game() {
     m_map.loadFromFile(":/maps/default.txt");
 
     int mapWidth = m_map.getTileCountX() * Map::TILE_SIZE;
@@ -9,11 +8,11 @@ Game::Game()
     m_worldBounds = QRectF(-mapWidth / 2, -mapHeight / 2, mapWidth, mapHeight);
 
     m_player = new Player(QPointF(0, 0));
+    m_player->setWeapon(WeaponManager::create("Katana"));
     m_entities.push_back(m_player);
 }
 
-bool Game::canMove(const Entity* entity, const QPointF& newPos) const
-{
+bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
     QRectF newBounds = entity->bounds();
     newBounds.moveCenter(newPos);
 
@@ -29,8 +28,7 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const
     return true;
 }
 
-void Game::update(float deltaTime)
-{
+void Game::update(float deltaTime) {
     for (Entity* &entity : m_entities) {
         if (!entity->isAlive()) continue;
 

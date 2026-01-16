@@ -6,6 +6,7 @@
 #include "../entities/player.h"
 #include "../map/map.h"
 #include "../map/tilevisual.h"
+#include "../combat/weaponmanager.h"
 
 class Game
 {

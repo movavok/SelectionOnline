@@ -4,16 +4,10 @@ GameView::GameView(QWidget* parent)
     : QGraphicsView(parent)
     , m_scene(new QGraphicsScene(this))
     , m_timer(new QTimer(this))
-    , m_playerItem(new QGraphicsPixmapItem())
 {
     setScene(m_scene);
 
-    QPixmap playerPx(30, 30); // temp drawing
-    playerPx.fill(Qt::blue);
-
-    m_playerItem->setPixmap(playerPx);
-
-    initHpBar();
+    initPlayerUi();
 
     m_scene->setSceneRect(m_game.getWorldBounds());
     buildMap();
@@ -23,6 +17,7 @@ GameView::GameView(QWidget* parent)
     m_timer->start(16); // ~60fps
 
     setFocusPolicy(Qt::StrongFocus);
+    setMouseTracking(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
@@ -66,6 +61,32 @@ void GameView::initHpBar() {
     m_hpTextBlack = createTextItem(m_hpTextMask, Qt::black, 14);
 }
 
+void GameView::initAttackIndicator() {
+    m_attackIndicator = new QGraphicsPathItem(m_playerItem);
+    m_attackIndicator->setBrush(QColor(150, 150, 150, 120));
+    m_attackIndicator->setPen(Qt::NoPen);
+    m_attackIndicator->setZValue(-1);
+    m_attackIndicator->hide();
+    m_scene->addItem(m_attackIndicator);
+}
+
+void GameView::initPlayerUi() {
+    if (Player* player = m_game.getPlayer()) {
+        m_playerItem = new QGraphicsEllipseItem(0, 0, 30, 30);
+        m_playerItem->setBrush(Qt::blue);
+        m_playerItem->setPen(Qt::NoPen);
+
+        QPixmap sprite(":/sprites/player.png");
+        QGraphicsPixmapItem* spriteItem = new QGraphicsPixmapItem(sprite, m_playerItem);
+
+        spriteItem->setOffset(player->getWidth() / 2 - sprite.width() / 2,
+                              player->getHeight() / 2 - sprite.height() / 2);
+
+        initHpBar();
+        initAttackIndicator();
+    }
+}
+
 void GameView::buildMap() {
     const Map& map = m_game.getMap();
 
@@ -101,7 +122,15 @@ void GameView::handleKeyEvent(QKeyEvent* event, bool pressed) {
 void GameView::keyPressEvent(QKeyEvent* event) { handleKeyEvent(event, true); }
 void GameView::keyReleaseEvent(QKeyEvent* event) { handleKeyEvent(event, false); }
 
-void GameView::mousePressEvent(QMouseEvent*) {}
+void GameView::mousePressEvent(QMouseEvent* event) {
+    if(event->button() == Qt::LeftButton) m_game.getPlayer()->startAiming();
+}
+
+void GameView::mouseReleaseEvent(QMouseEvent* event) {
+    if(event->button() == Qt::LeftButton) m_game.getPlayer()->stopAiming();
+}
+
+void GameView::mouseMoveEvent(QMouseEvent* event) { m_mouseScenePos = mapToScene(event->pos()); }
 
 void GameView::useMovementScheme(MovementScheme scheme) {
     Qt::Key keyUp, keyDown, keyLeft, keyRight;
@@ -176,10 +205,35 @@ void GameView::updateHpBar() {
     m_hpTextBlack->setPos(centeredPos - m_hpTextMask->pos());
 }
 
+void GameView::updateAttackIndicator() {
+    Player* player = m_game.getPlayer();
+    if (!player || !player->getWeapon() || !m_attackIndicator) return;
+
+    if (player->getAttackState() == Player::AttackState::Idle) {
+        m_attackIndicator->hide();
+        return;
+    }
+
+    QPainterPath path = player->getWeapon()->indicatorShape(*player);
+
+    QPointF playerPos = player->getPosition();
+    QPointF dir = m_mouseScenePos - playerPos;
+
+    QTransform transform;
+    transform.rotate(qRadiansToDegrees(std::atan2(dir.y(), dir.x())));
+    path = transform.map(path);
+
+    path.translate(playerPos);
+
+    m_attackIndicator->setPath(path);
+    m_attackIndicator->show();
+}
+
 void GameView::onTick() {
     m_game.update(deltaTime);
     updateCamera();
     updateHpBar();
+    updateAttackIndicator();
     m_game.getPlayer()->setCurrentHp(m_game.getPlayer()->getCurrentHp() - 1);
     if (m_game.getPlayer()->getCurrentHp() <= 0) m_game.getPlayer()->setCurrentHp(m_game.getPlayer()->getMaxHp());
 }
