@@ -7,6 +7,11 @@ Player::Player(const QPointF& startPos)
     m_height = 30;
 }
 
+unsigned short Player::getCurrentHp() const { return m_hp; }
+unsigned short Player::getMaxHp() const { return m_maxHp; }
+
+void Player::setCurrentHp(unsigned short hp) { m_hp = hp; }
+
 void Player::setInput(MoveDirection direction, bool pressed)
 {
     switch (direction) {
@@ -28,7 +33,7 @@ QPointF Player::moveDistance(float dt) const {
     return delta;
 }
 
-void Player::update(float deltaTime)
+void Player::update(float)
 {
 
 }

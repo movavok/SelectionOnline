@@ -12,12 +12,18 @@ public:
     void update(float) override;
     QRectF bounds() const override;
 
+    unsigned short getCurrentHp() const;
+    unsigned short getMaxHp() const;
+    void setCurrentHp(unsigned short);
+
     void setInput(MoveDirection, bool);
     QPointF moveDistance(float) const;
 
 private:
     float m_speed = 100.0f;
-    int m_hp = 100;
+
+    unsigned short m_hp = 400;
+    unsigned short m_maxHp = 400;
 
     bool m_movingUp = false;
     bool m_movingDown = false;

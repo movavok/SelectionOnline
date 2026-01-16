@@ -26,9 +26,21 @@ protected:
 private:
     Game m_game;
 
-    QGraphicsScene* m_scene;
-    QGraphicsPixmapItem* m_playerItem;
-    QTimer* m_timer;
+    //scene
+    QGraphicsScene* m_scene = nullptr;
+    QTimer* m_timer = nullptr;
+
+    //camera
+    QPointF m_cameraPos;
+
+    QGraphicsPixmapItem* m_playerItem = nullptr;
+
+    //hp bar
+    QGraphicsRectItem* m_hpBack = nullptr;
+    QGraphicsRectItem* m_hpFill = nullptr;
+    QGraphicsRectItem* m_hpTextMask = nullptr;
+    QGraphicsTextItem* m_hpTextWhite = nullptr;
+    QGraphicsTextItem* m_hpTextBlack = nullptr;
 
     QMap<Qt::Key, MoveDirection> m_keyMap;
 
@@ -39,12 +51,14 @@ private:
     bool m_left = false;
     bool m_right = false;
 
-    QPointF m_cameraPos;
-
-    // helper
-    void handleKeyEvent(QKeyEvent*, bool);
+    //helper
+    void initHpBar();
     void buildMap();
+
+    void handleKeyEvent(QKeyEvent*, bool);
+
     void updateCamera();
+    void updateHpBar();
 
 private slots:
     void onTick();

@@ -82,7 +82,7 @@ bool Map::intersectsSolid(const QRectF& rect, CollisionActor actor) const {
     QVector<QPoint> coords;
     tilesInRect(rect, coords);
 
-    for (const QPoint& point : coords) {
+    for (QPoint& point : coords) {
         const TileCollision& collision = tileCollision(tileAt(point.x(), point.y()).getType());
 
         if (actor == CollisionActor::Person && collision.personSolid) return true;
