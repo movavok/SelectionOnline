@@ -7,11 +7,10 @@ GameView::GameView(QWidget* parent)
 {
     setScene(m_scene);
 
-    initPlayerUi();
+    initEntitiesUi();
 
     m_scene->setSceneRect(m_game.getWorldBounds());
     buildMap();
-    m_scene->addItem(m_playerItem);
 
     connect(m_timer, &QTimer::timeout, this, &GameView::onTick);
     m_timer->start(16); // ~60fps
@@ -40,50 +39,47 @@ QGraphicsTextItem* createTextItem(QGraphicsItem* parent, const QColor& color, in
     return item;
 }
 
-void GameView::initHpBar() {
-    const double barWidth = m_game.getPlayer()->getWidth();
-    const double barHeight = 10;
-    const double gap = 6;
+void GameView::initHpBar(Entity* entity, EntityUi& ui) {
+    double width = entity->getRadius() * 2;
+    double height = 10;
+    QPointF pos(0, -height - 6);
 
-    const QPointF pos(0, -barHeight - gap);
+    ui.hpBack = createRectItem(ui.body, QRectF(0, 0, width, height), QColor(50,50,50), 10);
+    ui.hpBack->setPos(pos);
 
-    m_hpBack = createRectItem(m_playerItem, QRectF(0, 0, barWidth, barHeight), QColor(50, 50, 50), 10);
-    m_hpBack->setPos(pos);
+    ui.hpFill = createRectItem(ui.hpBack, QRectF(0, 0, width, height), QColor(60,220,80), 11);
+    ui.hpFill->setPos(0, 0);
 
-    m_hpFill = createRectItem(m_playerItem, QRectF(0, 0, barWidth, barHeight), QColor(60, 220, 80), 11);
-    m_hpFill->setPos(pos);
+    ui.hpTextMask = createRectItem(ui.hpBack, QRectF(0, 0, width, height), Qt::transparent, 13);
+    ui.hpTextMask->setPos(0, 0);
+    ui.hpTextMask->setFlag(QGraphicsItem::ItemClipsChildrenToShape, true);
 
-    m_hpTextMask = createRectItem(m_playerItem, QRectF(0, 0, barWidth, barHeight), Qt::transparent, 13);
-    m_hpTextMask->setFlag(QGraphicsItem::ItemClipsChildrenToShape, true);
-    m_hpTextMask->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-
-    m_hpTextWhite = createTextItem(m_playerItem, Qt::white, 12);
-    m_hpTextBlack = createTextItem(m_hpTextMask, Qt::black, 14);
+    ui.hpTextWhite = createTextItem(ui.hpBack, Qt::white, 12);
+    ui.hpTextBlack = createTextItem(ui.hpTextMask, Qt::black, 14);
 }
 
-void GameView::initAttackIndicator() {
-    m_attackIndicator = new QGraphicsPathItem(m_playerItem);
-    m_attackIndicator->setBrush(QColor(150, 150, 150, 120));
-    m_attackIndicator->setPen(Qt::NoPen);
-    m_attackIndicator->setZValue(-1);
-    m_attackIndicator->hide();
-    m_scene->addItem(m_attackIndicator);
+void GameView::initAttackIndicator(EntityUi& ui) {
+    ui.attackIndicator = new QGraphicsPathItem(ui.body);
+    ui.attackIndicator->setBrush(QColor(150, 150, 150, 120));
+    ui.attackIndicator->setPen(Qt::NoPen);
+    ui.attackIndicator->setZValue(-1);
+    ui.attackIndicator->hide();
 }
 
-void GameView::initPlayerUi() {
-    if (Player* player = m_game.getPlayer()) {
-        m_playerItem = new QGraphicsEllipseItem(0, 0, 30, 30);
-        m_playerItem->setBrush(Qt::blue);
-        m_playerItem->setPen(Qt::NoPen);
+void GameView::initEntitiesUi() {
+    for (Entity* entity : m_game.getEntities()) {
+        EntityUi ui;
+        ui.body = new QGraphicsEllipseItem(0, 0, entity->getRadius() * 2, entity->getRadius() * 2);
+        ui.body->setBrush(dynamic_cast<Player*>(entity) ? Qt::blue : Qt::red);
+        ui.body->setPen(Qt::NoPen);
+        m_scene->addItem(ui.body);
 
-        QPixmap sprite(":/sprites/player.png");
-        QGraphicsPixmapItem* spriteItem = new QGraphicsPixmapItem(sprite, m_playerItem);
+        ui.body->setPos(entity->getPosition() - QPointF(entity->getRadius(), entity->getRadius()));
 
-        spriteItem->setOffset(player->getWidth() / 2 - sprite.width() / 2,
-                              player->getHeight() / 2 - sprite.height() / 2);
+        initHpBar(entity, ui);
+        initAttackIndicator(ui);
 
-        initHpBar();
-        initAttackIndicator();
+        m_entityItems.insert(entity, ui);
     }
 }
 
@@ -147,8 +143,11 @@ void GameView::useMovementScheme(MovementScheme scheme) {
 
 void GameView::updateCamera() {
     if (Player* player = m_game.getPlayer()) {
-        m_playerItem->setPos(player->getPosition() - QPointF(player->getWidth() / 2, player->getHeight() / 2));
-        m_cameraPos = m_cameraPos * 0.95 + player->getPosition() * 0.05;
+        const QPointF pos = player->getPosition();
+
+        m_entityItems[player].body->setPos(pos - QPointF(player->getRadius(), player->getRadius()));
+
+        m_cameraPos = m_cameraPos * 0.95 + pos * 0.05;
         centerOn(m_cameraPos);
     }
 }
@@ -174,66 +173,57 @@ QColor getHpBarColor(double ratio) {
     return QColor(red, green, 0);
 }
 
-void GameView::updateHpBar() {
-    Player* player = m_game.getPlayer();
-    if (!player || !m_hpFill) return;
+void GameView::updateEntityHp(Entity* entity, EntityUi& ui) {
+    const double ratio = double(entity->getCurrentHp()) / entity->getMaxHp();
+    const QRectF backRect = ui.hpBack->rect();
+    ui.hpFill->setRect(0, 0, backRect.width() * ratio, backRect.height());
+    ui.hpFill->setBrush(getHpBarColor(ratio));
 
-    const int hp = player->getCurrentHp();
-    const int maxHp = player->getMaxHp();
+    const QString text = QString::number(entity->getCurrentHp());
+    ui.hpTextWhite->setPlainText(text);
+    ui.hpTextBlack->setPlainText(text);
 
-    const double ratio = maxHp > 0 ? std::clamp(double(hp) / maxHp, 0.0, 1.0) : 0.0;
-
-    const QRectF backRect = m_hpBack->rect();
-    m_hpFill->setRect(0, 0, backRect.width() * ratio, backRect.height());
-    m_hpFill->setBrush(getHpBarColor(ratio));
-
+    const QRectF textRect = ui.hpTextWhite->boundingRect();
     const double fillWidth = backRect.width() * ratio;
-    const QPointF barPos = m_hpBack->pos();
 
-    m_hpTextMask->setPos(barPos);
-    m_hpTextMask->setRect(0, 0, fillWidth, backRect.height());
-
-    const QString text = QString::number(hp);
-    m_hpTextWhite->setPlainText(text);
-    m_hpTextBlack->setPlainText(text);
-
-    const QRectF textRect = m_hpTextWhite->boundingRect();
-    const QPointF centeredPos = barPos + QPointF(backRect.width() / 2 - textRect.width() / 2,
-                                                 backRect.height() / 2 - textRect.height() / 2);
-
-    m_hpTextWhite->setPos(centeredPos);
-    m_hpTextBlack->setPos(centeredPos - m_hpTextMask->pos());
+    ui.hpTextMask->setRect(0, 0, fillWidth, backRect.height());
+    ui.hpTextWhite->setPos(backRect.width()/2 - textRect.width()/2,
+                               backRect.height()/2 - textRect.height()/2);
+    ui.hpTextBlack->setPos(ui.hpTextWhite->pos());
 }
 
-void GameView::updateAttackIndicator() {
-    Player* player = m_game.getPlayer();
-    if (!player || !player->getWeapon() || !m_attackIndicator) return;
+void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
+    if (Player* player = dynamic_cast<Player*>(entity)) {
+        if (player->getAttackState() == Player::AttackState::Idle) {
+            ui.attackIndicator->hide();
+            return;
+        }
 
-    if (player->getAttackState() == Player::AttackState::Idle) {
-        m_attackIndicator->hide();
-        return;
+        ui.attackIndicator->setPos(player->getRadius(), player->getRadius());
+        ui.attackIndicator->setPath(player->getWeapon()->indicatorShape(*player));
+
+        const QPointF dir = m_mouseScenePos - player->getPosition();
+        const double angleDeg = qRadiansToDegrees(std::atan2(dir.y(), dir.x()));
+        ui.attackIndicator->setRotation(angleDeg);
+        ui.attackIndicator->show();
     }
+}
 
-    QPainterPath path = player->getWeapon()->indicatorShape(*player);
+void GameView::updateEntitiesUi() {
+    for (Entity* entity : m_game.getEntities()) {
+        if (!entity->isAlive()) continue;
 
-    QPointF playerPos = player->getPosition();
-    QPointF dir = m_mouseScenePos - playerPos;
+        EntityUi& ui = m_entityItems[entity];
+        const QPointF pos = entity->getPosition();
+        ui.body->setPos(pos - QPointF(entity->getRadius(), entity->getRadius()));
 
-    QTransform transform;
-    transform.rotate(qRadiansToDegrees(std::atan2(dir.y(), dir.x())));
-    path = transform.map(path);
-
-    path.translate(playerPos);
-
-    m_attackIndicator->setPath(path);
-    m_attackIndicator->show();
+        updateEntityHp(entity, ui);
+        updateEntityAtkIndicator(entity, ui);
+    }
 }
 
 void GameView::onTick() {
     m_game.update(deltaTime);
     updateCamera();
-    updateHpBar();
-    updateAttackIndicator();
-    m_game.getPlayer()->setCurrentHp(m_game.getPlayer()->getCurrentHp() - 1);
-    if (m_game.getPlayer()->getCurrentHp() <= 0) m_game.getPlayer()->setCurrentHp(m_game.getPlayer()->getMaxHp());
+    updateEntitiesUi();
 }

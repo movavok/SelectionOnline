@@ -2,31 +2,33 @@
 #define ENTITY_H
 
 #include <QPointF>
-#include <QRectF>
+#include <QPainterPath>
 
 class Entity
 {
 public:
-    Entity(const QPointF& startPos);
+    Entity(const QPointF& startPos, float radius);
     virtual ~Entity() = default;
 
     virtual void update(float) = 0;
-    virtual QRectF bounds() const = 0;
+
+    virtual float getRadius() const;
 
     void setPosition(const QPointF&);
     QPointF getPosition() const;
 
-    unsigned short getWidth() const;
-    unsigned short getHeight() const;
+    unsigned short getCurrentHp() const;
+    unsigned short getMaxHp() const;
 
     bool isAlive() const;
     void destroy();
 
 protected:
     QPointF m_position;
+    float m_radius;
 
-    unsigned short m_width;
-    unsigned short m_height;
+    unsigned short m_hp;
+    unsigned short m_maxHp;
 
     bool m_alive = true;
 };

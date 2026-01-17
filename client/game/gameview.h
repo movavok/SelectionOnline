@@ -1,7 +1,6 @@
 #ifndef GAMEVIEW_H
 #define GAMEVIEW_H
 
-#include <QObject>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
 #include <QKeyEvent>
@@ -26,6 +25,16 @@ protected:
     void mouseMoveEvent(QMouseEvent*) override;
 
 private:
+    struct EntityUi {
+        QGraphicsEllipseItem* body = nullptr;
+        QGraphicsRectItem* hpBack = nullptr;
+        QGraphicsRectItem* hpFill = nullptr;
+        QGraphicsRectItem* hpTextMask = nullptr;
+        QGraphicsTextItem* hpTextWhite = nullptr;
+        QGraphicsTextItem* hpTextBlack = nullptr;
+        QGraphicsPathItem* attackIndicator = nullptr;
+    };
+
     Game m_game;
 
     //scene
@@ -34,40 +43,25 @@ private:
 
     //camera
     QPointF m_cameraPos;
-
-    QGraphicsEllipseItem* m_playerItem = nullptr;
-
-    QGraphicsPathItem* m_attackIndicator = nullptr;
-
     QPointF m_mouseScenePos;
 
-    //hp bar
-    QGraphicsRectItem* m_hpBack = nullptr;
-    QGraphicsRectItem* m_hpFill = nullptr;
-    QGraphicsRectItem* m_hpTextMask = nullptr;
-    QGraphicsTextItem* m_hpTextWhite = nullptr;
-    QGraphicsTextItem* m_hpTextBlack = nullptr;
-
+    QHash<Entity*, EntityUi> m_entityItems;
     QMap<Qt::Key, MoveDirection> m_keyMap;
 
     float deltaTime = 0.016f;
 
-    bool m_up = false;
-    bool m_down = false;
-    bool m_left = false;
-    bool m_right = false;
-
     //helper
-    void initPlayerUi();
-    void initHpBar();
-    void initAttackIndicator();
+    void initEntitiesUi();
+    void initHpBar(Entity*, EntityUi&);
+    void initAttackIndicator(EntityUi&);
     void buildMap();
 
     void handleKeyEvent(QKeyEvent*, bool);
 
     void updateCamera();
-    void updateHpBar();
-    void updateAttackIndicator();
+    void updateEntitiesUi();
+    void updateEntityHp(Entity*, EntityUi&);
+    void updateEntityAtkIndicator(Entity*, EntityUi&);
 
 private slots:
     void onTick();

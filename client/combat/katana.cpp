@@ -22,4 +22,4 @@ QPainterPath Katana::indicatorShape(const Entity& person) const {
     return path;
 }
 
-double Katana::insideOffset(const Entity& person) const { return person.getWidth() / 2 + 6; }
+double Katana::insideOffset(const Entity& person) const { return person.getRadius() + 6; }

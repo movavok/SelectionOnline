@@ -10,19 +10,27 @@ Game::Game() {
     m_player = new Player(QPointF(0, 0));
     m_player->setWeapon(WeaponManager::create("Katana"));
     m_entities.push_back(m_player);
+
+    Enemy* enemy = new Enemy(QPointF(100, 0));
+    m_entities.push_back(enemy);
+}
+
+bool circlesIntersect(const Entity* first, const QPointF& newPos, const Entity* second) {
+    return QLineF(newPos, second->getPosition()).length() < (first->getRadius() + second->getRadius());
 }
 
 bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
-    QRectF newBounds = entity->bounds();
-    newBounds.moveCenter(newPos);
+    const float radius = entity->getRadius();
+    QRectF rectBounds = QRectF(newPos - QPointF(radius, radius), QSizeF(radius * 2, radius * 2));
 
-    if (!m_worldBounds.contains(newBounds)) return false;
-    if (m_map.intersectsSolid(newBounds, Map::CollisionActor::Person))
+    if (!m_worldBounds.contains(rectBounds))
+        return false;
+    if (m_map.intersectsSolid(rectBounds, Map::CollisionActor::Person))
         return false;
 
     for (Entity* other : m_entities) {
         if (other == entity || !other->isAlive()) continue;
-        if (newBounds.intersects(other->bounds())) return false;
+        if (circlesIntersect(entity, newPos, other)) return false;
     }
 
     return true;
@@ -34,7 +42,7 @@ void Game::update(float deltaTime) {
 
         if (Player* player = dynamic_cast<Player*>(entity)) {
             QPointF nextPos = player->getPosition() + player->moveDistance(deltaTime);
-            if (canMove(player, nextPos)) player->setPosition(nextPos); // todo rework moving resolution
+            if (canMove(player, nextPos)) player->setPosition(nextPos);
         } else entity->update(deltaTime);
     }
 }
@@ -44,6 +52,8 @@ void Game::setPlayerInput(MoveDirection key, bool pressed) {
 }
 
 Player* Game::getPlayer() const { return m_player; }
+
+const QList<Entity*>& Game::getEntities() const { return m_entities; }
 
 const Map& Game::getMap() const { return m_map; }
 

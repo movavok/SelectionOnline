@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     combat/katana.cpp \
     combat/weaponmanager.cpp \
+    entities/enemy.cpp \
     entities/entity.cpp \
     entities/player.cpp \
     game/game.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     combat/katana.h \
     combat/weapon.h \
     combat/weaponmanager.h \
+    entities/enemy.h \
     entities/entity.h \
     entities/player.h \
     game/game.h \

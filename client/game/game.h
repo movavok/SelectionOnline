@@ -4,6 +4,7 @@
 #include <QList>
 
 #include "../entities/player.h"
+#include "../entities/enemy.h"
 #include "../map/map.h"
 #include "../map/tilevisual.h"
 #include "../combat/weaponmanager.h"
@@ -18,6 +19,8 @@ public:
     void setPlayerInput(MoveDirection, bool);
 
     Player* getPlayer() const;
+    const QList<Entity*>& getEntities() const;
+
     const Map& getMap() const;
     QRectF getWorldBounds() const;
 
