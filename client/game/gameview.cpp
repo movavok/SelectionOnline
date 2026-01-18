@@ -201,7 +201,7 @@ void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
         }
 
         ui.attackIndicator->setPos(player->getRadius(), player->getRadius());
-        ui.attackIndicator->setPath(player->getWeapon()->indicatorShape(*player));
+        ui.attackIndicator->setPath(player->getInventory().getActiveWeapon()->indicatorShape(*player));
 
         const QPointF dir = m_mouseScenePos - player->getPosition();
         const double angleDeg = qRadiansToDegrees(std::atan2(dir.y(), dir.x()));

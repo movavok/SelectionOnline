@@ -26,6 +26,8 @@ public:
     const Tile& tileAt(int x, int y) const;
     Tile& tileAt(int x, int y);
 
+    static QPointF tileToWorld(const QPointF&, const QRectF&);
+
     bool intersectsSolid(const QRectF&, CollisionActor) const;
 
 private:

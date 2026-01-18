@@ -1,6 +1,6 @@
 #include "pickupitem.h"
 
-PickupItem::Pickedup(const QPointF& startPos, Tile::TileType type)
+PickupItem::PickupItem(const QPointF& startPos, Tile::TileType type)
     : m_position(startPos), m_type(type) {}
 
 QPointF PickupItem::getPosition() const { return m_position; }

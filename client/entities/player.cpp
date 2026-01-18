@@ -7,10 +7,10 @@ Player::Player(const QPointF& startPos)
 }
 
 Player::~Player() {
-    delete m_weapon;
+    delete m_inventory.getActiveWeapon();
 }
 
-bool Player::canAttack() const { return m_weapon && m_attackCooldown <= 0.f; }
+bool Player::canAttack() const { return m_inventory.getActiveWeapon() && m_attackCooldown <= 0.f; }
 
 bool Player::consumeAttackRequest(QPointF& outDir) {
     if (m_attackRequested) {
@@ -32,13 +32,18 @@ void Player::stopAiming(const QPointF& dir) {
 }
 
 void Player::onAttackPerformed() {
-    if (m_weapon) m_attackCooldown = m_weapon->getCooldown();
+    if (m_inventory.getActiveWeapon()) m_attackCooldown = m_inventory.getActiveWeapon()->getCooldown();
 }
 
 Player::AttackState Player::getAttackState() const { return m_attackState; }
 
-void Player::setWeapon(Weapon* weapon) { delete m_weapon; m_weapon = weapon; }
-const Weapon* Player::getWeapon() const { return m_weapon; }
+Inventory& Player::getInventory() { return m_inventory; }
+const Inventory& Player::getInventory() const { return m_inventory; }
+
+void Player::setActiveSlot(int index) { m_inventory.setActiveSlot(index); }
+unsigned short Player::getActiveSlot() const { return m_inventory.getActiveSlot(); }
+
+const Weapon* Player::getActiveWeapon() const { return m_inventory.getActiveWeapon(); }
 
 void Player::setInput(MoveDirection direction, bool pressed) {
     switch (direction) {

@@ -16,6 +16,8 @@ SOURCES += \
     entities/entity.cpp \
     entities/player.cpp \
     game/game.cpp \
+    game/inventory.cpp \
+    game/inventoryslot.cpp \
     map/map.cpp \
     map/pickupitem.cpp \
     map/tile.cpp \
@@ -34,6 +36,8 @@ HEADERS += \
     entities/player.h \
     game/game.h \
     game/gameview.h \
+    game/inventory.h \
+    game/inventoryslot.h \
     map/map.h \
     map/pickupitem.h \
     map/tile.h \

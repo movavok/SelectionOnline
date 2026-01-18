@@ -4,6 +4,7 @@
 #include "../combat/weapon.h"
 #include "../input/inputtypes.h"
 #include "entity.h"
+#include "../game/inventory.h"
 
 class Player : public Entity
 {
@@ -16,10 +17,15 @@ public:
     void setInput(MoveDirection, bool);
     QPointF moveDistance(float) const;
 
-    enum class AttackState { Idle, Aim };
-    void setWeapon(Weapon*);
-    const Weapon* getWeapon() const;
+    Inventory& getInventory();
+    const Inventory& getInventory() const;
 
+    const Weapon* getActiveWeapon() const;
+
+    void setActiveSlot(int);
+    unsigned short getActiveSlot() const;
+
+    enum class AttackState { Idle, Aim };
     AttackState getAttackState() const;
 
     void startAiming();
@@ -33,7 +39,7 @@ public:
 private:
     float m_speed = 100.0f;
 
-    Weapon* m_weapon = nullptr;
+    Inventory m_inventory;
 
     AttackState m_attackState = AttackState::Idle;
     bool m_attackRequested = false;

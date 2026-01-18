@@ -8,7 +8,7 @@ Game::Game() {
     m_worldBounds = QRectF(-mapWidth / 2, -mapHeight / 2, mapWidth, mapHeight);
 
     m_player = new Player(QPointF(0, 0));
-    m_player->setWeapon(WeaponManager::create("Katana"));
+    m_player->getInventory().addWeapon(WeaponManager::create("Katana"));
     m_entities.push_back(m_player);
 
     Enemy* enemy = new Enemy(QPointF(100, 0));
@@ -37,8 +37,7 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
 }
 
 void Game::spawnPickupAtTile(const QPointF& pos, Tile::TileType type) {
-    QPointF worldPos(pos * Map::TILE_SIZE + Map::TILE_SIZE / 2 - QPointF(m_worldBounds.width() / 2, m_worldBounds.height() / 2));
-    m_pickups.emplace_back(worldPos, type);
+    m_pickups.emplace_back(Map::tileToWorld(pos, m_worldBounds), type);
 }
 
 void Game::tryBreakTiles(const QPainterPath& hitShape) {
@@ -88,7 +87,7 @@ void Game::processPlayerAttack() {
     if (!m_player->consumeAttackRequest(attackDir)) return;
     if (!m_player->canAttack()) return;
 
-    const Weapon* weapon = m_player->getWeapon();
+    const Weapon* weapon = m_player->getInventory().getActiveWeapon();
     if (!weapon) return;
 
     performWeaponHit(*weapon, attackDir);
@@ -98,7 +97,7 @@ void Game::processPlayerAttack() {
 void Game::applyPickup(PickupItem& pickup) {
     switch (pickup.getType()) {
     case Tile::TileType::BrickCracked:
-    case Tile::TileType::Board: m_player->addToInventory(1, pickup.getType()); break;
+    case Tile::TileType::Board: m_player->getInventory().addResource(pickup.getType(), 1); break;
     default: break;
     }
 }
