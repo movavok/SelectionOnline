@@ -22,7 +22,9 @@ public:
     unsigned short getTileCountY() const;
 
     bool loadFromFile(const QString&);
+
     const Tile& tileAt(int x, int y) const;
+    Tile& tileAt(int x, int y);
 
     bool intersectsSolid(const QRectF&, CollisionActor) const;
 

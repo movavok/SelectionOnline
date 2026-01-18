@@ -71,7 +71,7 @@ void GameView::initEntitiesUi() {
         ui.body = new QGraphicsEllipseItem(0, 0, entity->getRadius() * 2, entity->getRadius() * 2);
         ui.body->setBrush(dynamic_cast<Player*>(entity) ? Qt::blue : Qt::red);
         ui.body->setPen(Qt::NoPen);
-        ui.body->setZValue(0);
+        ui.body->setZValue(5);
         m_scene->addItem(ui.body);
 
         ui.body->setPos(entity->getPosition() - QPointF(entity->getRadius(), entity->getRadius()));

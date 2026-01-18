@@ -36,6 +36,27 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
     return true;
 }
 
+void Game::spawnPickupAtTile(const QPointF& pos, Tile::TileType type) {
+    QPointF worldPos(pos * Map::TILE_SIZE + Map::TILE_SIZE / 2 - QPointF(m_worldBounds.width() / 2, m_worldBounds.height() / 2));
+    m_pickups.emplace_back(worldPos, type);
+}
+
+void Game::tryBreakTiles(const QPainterPath& hitShape) {
+    QRectF bounds = hitShape.boundingRect();
+
+    int minX = std::floor((bounds.left() + m_worldBounds.width() / 2) / Map::TILE_SIZE);
+    int maxX = std::floor((bounds.right() + m_worldBounds.width() / 2) / Map::TILE_SIZE);
+    int minY = std::floor((bounds.top() + m_worldBounds.height() / 2) / Map::TILE_SIZE);
+    int maxY = std::floor((bounds.bottom()+ m_worldBounds.height() / 2) / Map::TILE_SIZE);
+
+    for (int y = minY; y <= maxY; ++y) {
+        for (int x = minX; x <= maxX; ++x) {
+            Tile& tile = m_map.tileAt(x, y);
+            if (tile.applyHit()) spawnPickupAtTile(QPointF(x, y), tile.getType());
+        }
+    }
+}
+
 void Game::performWeaponHit(const Weapon& weapon, const QPointF& dir) {
     QPainterPath shape = weapon.indicatorShape(*m_player);
 
@@ -45,6 +66,8 @@ void Game::performWeaponHit(const Weapon& weapon, const QPointF& dir) {
     rot.rotate(angleDeg);
     QPainterPath worldShape = rot.map(shape);
     worldShape.translate(m_player->getPosition().x(), m_player->getPosition().y());
+
+    tryBreakTiles(worldShape);
 
     for (Entity* &entity : m_entities) {
         if (entity == m_player || !entity->isAlive()) continue;
@@ -72,6 +95,28 @@ void Game::processPlayerAttack() {
     m_player->onAttackPerformed();
 }
 
+void Game::applyPickup(PickupItem& pickup) {
+    switch (pickup.getType()) {
+    case Tile::TileType::BrickCracked:
+    case Tile::TileType::Board: m_player->addToInventory(1, pickup.getType()); break;
+    default: break;
+    }
+}
+
+void Game::checkPickupCollisions() {
+    if (!m_player) return;
+
+    for (int index = m_pickups.size() - 1; index >= 0; --index) {
+        PickupItem& pickup = m_pickups[index];
+
+        float dist = QLineF(m_player->getPosition(), pickup.getPosition()).length();
+        if (dist <= m_player->getRadius() + Map::TILE_SIZE / 2) {
+            applyPickup(pickup);
+            m_pickups.removeAt(index);
+        }
+    }
+}
+
 void Game::update(float deltaTime) {
     for (Entity* &entity : m_entities) {
         if (!entity->isAlive()) continue;
@@ -81,6 +126,7 @@ void Game::update(float deltaTime) {
             if (canMove(player, nextPos)) player->setPosition(nextPos);
             player->update(deltaTime);
             processPlayerAttack();
+            checkPickupCollisions();
         } else entity->update(deltaTime);
     }
 }

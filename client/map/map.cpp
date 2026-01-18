@@ -25,6 +25,11 @@ bool Map::generateFromText(const QStringList& lines) {
         for (const QChar& symbol : line) {
             Tile::TileType type;
             switch (symbol.toLatin1()) {
+            case 'd': type = Tile::TileType::Board; break;
+            case 'b': type = Tile::TileType::BrickCracked; break;
+            case 'B': type = Tile::TileType::BrickStrong; break;
+            case 'g': type = Tile::TileType::Grass; break;
+            case '~': type = Tile::TileType::Water; break;
             case '#': type = Tile::TileType::Wall; break;
             default: type = Tile::TileType::Empty; break;
             }
@@ -60,6 +65,10 @@ const Tile& Map::tileAt(int x, int y) const {
     static Tile emptyTile(Tile::TileType::Empty);
     if (y < 0 || y >= m_tileCountY || x < 0 || x >= m_tileCountX) return emptyTile;
     return m_tilesGrid[y][x];
+}
+
+Tile& Map::tileAt(int x, int y) {
+    return const_cast<Tile&>(static_cast<const Map&>(*this).tileAt(x, y));
 }
 
 void Map::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {

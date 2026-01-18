@@ -6,12 +6,19 @@ class Tile
 public:
     enum class TileType {
         Empty,
+        Board,
+        BrickCracked,
+        BrickStrong,
+        Grass,
+        Water,
         Wall
     };
 
     Tile(TileType type = TileType::Empty);
 
     TileType getType() const;
+
+    bool applyHit();
 
 private:
     TileType m_type;

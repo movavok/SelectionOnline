@@ -6,6 +6,7 @@
 #include "../entities/player.h"
 #include "../entities/enemy.h"
 #include "../map/map.h"
+#include "../map/pickupitem.h"
 #include "../map/tilevisual.h"
 #include "../combat/weaponmanager.h"
 
@@ -31,10 +32,16 @@ private:
     Map m_map;
     QRectF m_worldBounds;
 
+    QList<PickupItem> m_pickups;
+
     //helper
     bool canMove(const Entity*, const QPointF&) const;
+    void spawnPickupAtTile(const QPointF&, Tile::TileType);
+    void tryBreakTiles(const QPainterPath&);
     void performWeaponHit(const Weapon&, const QPointF&);
     void processPlayerAttack();
+    void applyPickup(PickupItem&);
+    void checkPickupCollisions();
 };
 
 #endif // GAME_H

@@ -17,6 +17,7 @@ SOURCES += \
     entities/player.cpp \
     game/game.cpp \
     map/map.cpp \
+    map/pickupitem.cpp \
     map/tile.cpp \
     main.cpp \
     game/gameview.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     game/game.h \
     game/gameview.h \
     map/map.h \
+    map/pickupitem.h \
     map/tile.h \
     input/inputtypes.h \
     map/tilecollision.h \
