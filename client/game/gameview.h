@@ -22,7 +22,6 @@ protected:
     void keyReleaseEvent(QKeyEvent*) override;
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
-    void mouseMoveEvent(QMouseEvent*) override;
 
 private:
     struct EntityUi {
@@ -43,7 +42,6 @@ private:
 
     //camera
     QPointF m_cameraPos;
-    QPointF m_mouseScenePos;
 
     QHash<Entity*, EntityUi> m_entityItems;
     QHash<QPoint, QGraphicsRectItem*> m_tileItems;

@@ -127,11 +127,11 @@ void GameView::mousePressEvent(QMouseEvent* event) {
 }
 
 void GameView::mouseReleaseEvent(QMouseEvent* event) {
-    if(event->button() == Qt::LeftButton)
-        m_game.getPlayer()->stopAiming(m_mouseScenePos - m_game.getPlayer()->getPosition());
+    if(event->button() == Qt::LeftButton) {
+        QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
+        m_game.getPlayer()->stopAiming(mouseScene - m_game.getPlayer()->getPosition());
+    }
 }
-
-void GameView::mouseMoveEvent(QMouseEvent* event) { m_mouseScenePos = mapToScene(event->pos()); }
 
 void GameView::useMovementScheme(MovementScheme scheme) {
     Qt::Key keyUp, keyDown, keyLeft, keyRight;
@@ -204,10 +204,12 @@ void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
             return;
         }
 
+        QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
+
         ui.attackIndicator->setPos(player->getRadius(), player->getRadius());
         ui.attackIndicator->setPath(player->getInventory().getActiveWeapon()->indicatorShape(*player));
 
-        const QPointF dir = m_mouseScenePos - player->getPosition();
+        const QPointF dir = mouseScene - player->getPosition();
         const double angleDeg = qRadiansToDegrees(std::atan2(dir.y(), dir.x()));
         ui.attackIndicator->setRotation(angleDeg);
         ui.attackIndicator->show();
@@ -233,8 +235,11 @@ void GameView::updateEntitiesUi() {
 }
 
 void GameView::updateTile(int x, int y) {
-    const TileVisual& visual = tileVisual(m_game.getMap().tileAt(x,y).getType());
-    m_tileItems[QPoint(x, y)]->setBrush(visual.color);
+    QPoint key(x, y);
+    if (m_tileItems.contains(key)) {
+        const TileVisual& visual = tileVisual(m_game.getMap().tileAt(x,y).getType());
+        m_tileItems[key]->setBrush(visual.color);
+    }
 }
 
 void GameView::onTick() {
