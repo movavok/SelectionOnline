@@ -1,6 +1,6 @@
 #include "game.h"
 
-Game::Game() {
+Game::Game(QObject* parent) : QObject(parent) {
     m_map.loadFromFile(":/maps/default.txt");
 
     int mapWidth = m_map.getTileCountX() * Map::TILE_SIZE;
@@ -51,7 +51,10 @@ void Game::tryBreakTiles(const QPainterPath& hitShape) {
     for (int y = minY; y <= maxY; ++y) {
         for (int x = minX; x <= maxX; ++x) {
             Tile& tile = m_map.tileAt(x, y);
-            if (tile.applyHit()) spawnPickupAtTile(QPointF(x, y), tile.getType());
+            if (tile.applyHit()) {
+                spawnPickupAtTile(QPointF(x, y), tile.getType());
+                emit tileChanged(x, y);
+            }
         }
     }
 }

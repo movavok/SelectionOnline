@@ -46,6 +46,7 @@ private:
     QPointF m_mouseScenePos;
 
     QHash<Entity*, EntityUi> m_entityItems;
+    QHash<QPoint, QGraphicsRectItem*> m_tileItems;
     QMap<Qt::Key, MoveDirection> m_keyMap;
 
     float deltaTime = 0.016f;
@@ -65,6 +66,7 @@ private:
 
 private slots:
     void onTick();
+    void updateTile(int x, int y);
 };
 
 #endif // GAMEVIEW_H

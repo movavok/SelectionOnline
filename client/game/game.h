@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <QObject>
 #include <QList>
 
 #include "../entities/player.h"
@@ -10,10 +11,11 @@
 #include "../map/tilevisual.h"
 #include "../combat/weaponmanager.h"
 
-class Game
+class Game : public QObject
 {
+    Q_OBJECT
 public:
-    Game();
+    explicit Game(QObject* parent = nullptr);
 
     void update(float);
 
@@ -42,6 +44,9 @@ private:
     void processPlayerAttack();
     void applyPickup(PickupItem&);
     void checkPickupCollisions();
+
+signals:
+    void tileChanged(int x, int y);
 };
 
 #endif // GAME_H

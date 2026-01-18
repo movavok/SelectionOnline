@@ -15,6 +15,8 @@ GameView::GameView(QWidget* parent)
     connect(m_timer, &QTimer::timeout, this, &GameView::onTick);
     m_timer->start(16); // ~60fps
 
+    connect(&m_game, &Game::tileChanged, this, &GameView::updateTile);
+
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -102,8 +104,10 @@ void GameView::buildMap() {
             QGraphicsRectItem* tileItem = new QGraphicsRectItem(rect);
             tileItem->setBrush(visual.color);
             tileItem->setPen(Qt::NoPen);
+            tileItem->setZValue(0);
 
             m_scene->addItem(tileItem);
+            m_tileItems[QPoint(x, y)] = tileItem;
         }
     }
 }
@@ -226,6 +230,11 @@ void GameView::updateEntitiesUi() {
         updateEntityHp(entity, ui);
         updateEntityAtkIndicator(entity, ui);
     }
+}
+
+void GameView::updateTile(int x, int y) {
+    const TileVisual& visual = tileVisual(m_game.getMap().tileAt(x,y).getType());
+    m_tileItems[QPoint(x, y)]->setBrush(visual.color);
 }
 
 void GameView::onTick() {
