@@ -1,5 +1,7 @@
 #include "katana.h"
 
+Katana::Katana() : Weapon(75, 0.5f) {}
+
 QPainterPath Katana::indicatorShape(const Entity& person) const {
     const double insideRadius = insideOffset(person);
     const double outsideRadius = 60.0;

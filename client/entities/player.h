@@ -13,8 +13,6 @@ public:
 
     void update(float) override;
 
-    void takeDamage(int);
-
     void setInput(MoveDirection, bool);
     QPointF moveDistance(float) const;
 
@@ -22,16 +20,25 @@ public:
     void setWeapon(Weapon*);
     const Weapon* getWeapon() const;
 
-    void startAiming();
-    void stopAiming();
-
     AttackState getAttackState() const;
+
+    void startAiming();
+    void stopAiming(const QPointF&);
+
+    bool consumeAttackRequest(QPointF&);
+    bool canAttack() const;
+
+    void onAttackPerformed();
 
 private:
     float m_speed = 100.0f;
 
-    AttackState m_attackState = AttackState::Idle;
     Weapon* m_weapon = nullptr;
+
+    AttackState m_attackState = AttackState::Idle;
+    bool m_attackRequested = false;
+    QPointF m_attackDir;
+    float m_attackCooldown = 0.0f;
 
     bool m_movingUp = false;
     bool m_movingDown = false;

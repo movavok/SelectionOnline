@@ -5,6 +5,8 @@
 
 class Katana : public Weapon {
 public:
+    Katana();
+
     QPainterPath indicatorShape(const Entity&) const override;
     double insideOffset(const Entity&) const override;
 };

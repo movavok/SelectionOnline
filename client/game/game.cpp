@@ -36,6 +36,42 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
     return true;
 }
 
+void Game::performWeaponHit(const Weapon& weapon, const QPointF& dir) {
+    QPainterPath shape = weapon.indicatorShape(*m_player);
+
+    const double angleDeg = std::atan2(dir.y(), dir.x()) * 180.0 / M_PI;
+
+    QTransform rot;
+    rot.rotate(angleDeg);
+    QPainterPath worldShape = rot.map(shape);
+    worldShape.translate(m_player->getPosition().x(), m_player->getPosition().y());
+
+    for (Entity* &entity : m_entities) {
+        if (entity == m_player || !entity->isAlive()) continue;
+        if (Enemy* enemy = dynamic_cast<Enemy*>(entity)) {
+            QPainterPath enemyPath;
+            enemyPath.addEllipse(enemy->getPosition(), enemy->getRadius(), enemy->getRadius());
+
+            if (worldShape.intersects(enemyPath))
+                enemy->takeDamage(weapon.getDamage());
+        }
+    }
+}
+
+void Game::processPlayerAttack() {
+    if (!m_player) return;
+
+    QPointF attackDir;
+    if (!m_player->consumeAttackRequest(attackDir)) return;
+    if (!m_player->canAttack()) return;
+
+    const Weapon* weapon = m_player->getWeapon();
+    if (!weapon) return;
+
+    performWeaponHit(*weapon, attackDir);
+    m_player->onAttackPerformed();
+}
+
 void Game::update(float deltaTime) {
     for (Entity* &entity : m_entities) {
         if (!entity->isAlive()) continue;
@@ -43,6 +79,8 @@ void Game::update(float deltaTime) {
         if (Player* player = dynamic_cast<Player*>(entity)) {
             QPointF nextPos = player->getPosition() + player->moveDistance(deltaTime);
             if (canMove(player, nextPos)) player->setPosition(nextPos);
+            player->update(deltaTime);
+            processPlayerAttack();
         } else entity->update(deltaTime);
     }
 }

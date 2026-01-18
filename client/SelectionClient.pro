@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     combat/katana.cpp \
+    combat/weapon.cpp \
     combat/weaponmanager.cpp \
     entities/enemy.cpp \
     entities/entity.cpp \

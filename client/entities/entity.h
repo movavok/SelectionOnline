@@ -20,6 +20,8 @@ public:
     unsigned short getCurrentHp() const;
     unsigned short getMaxHp() const;
 
+    void takeDamage(int);
+
     bool isAlive() const;
     void destroy();
 
@@ -29,8 +31,6 @@ protected:
 
     unsigned short m_hp;
     unsigned short m_maxHp;
-
-    bool m_alive = true;
 };
 
 #endif // ENTITY_H

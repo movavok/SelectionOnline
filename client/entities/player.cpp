@@ -10,18 +10,30 @@ Player::~Player() {
     delete m_weapon;
 }
 
-void Player::takeDamage(int damage) {
-    if (damage <= 0) { return; }
-    if (damage >= m_hp) {
-        m_hp = 0;
-        return;
-    }
+bool Player::canAttack() const { return m_weapon && m_attackCooldown <= 0.f; }
 
-    m_hp -= damage;
+bool Player::consumeAttackRequest(QPointF& outDir) {
+    if (m_attackRequested) {
+        outDir = m_attackDir;
+        m_attackRequested = false;
+        return true;
+    }
+    return false;
 }
 
 void Player::startAiming() { m_attackState = AttackState::Aim; }
-void Player::stopAiming() { m_attackState = AttackState::Idle; }
+
+void Player::stopAiming(const QPointF& dir) {
+    if (m_attackState == AttackState::Aim) {
+        m_attackRequested = true;
+        m_attackDir = dir;
+        m_attackState = AttackState::Idle;
+    }
+}
+
+void Player::onAttackPerformed() {
+    if (m_weapon) m_attackCooldown = m_weapon->getCooldown();
+}
 
 Player::AttackState Player::getAttackState() const { return m_attackState; }
 
@@ -48,4 +60,6 @@ QPointF Player::moveDistance(float dt) const {
     return delta;
 }
 
-void Player::update(float) {}
+void Player::update(float deltaTime) {
+    m_attackCooldown = std::max(0.f, m_attackCooldown - deltaTime);
+}

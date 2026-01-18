@@ -62,7 +62,6 @@ void GameView::initAttackIndicator(EntityUi& ui) {
     ui.attackIndicator = new QGraphicsPathItem(ui.body);
     ui.attackIndicator->setBrush(QColor(150, 150, 150, 120));
     ui.attackIndicator->setPen(Qt::NoPen);
-    ui.attackIndicator->setZValue(-1);
     ui.attackIndicator->hide();
 }
 
@@ -72,6 +71,7 @@ void GameView::initEntitiesUi() {
         ui.body = new QGraphicsEllipseItem(0, 0, entity->getRadius() * 2, entity->getRadius() * 2);
         ui.body->setBrush(dynamic_cast<Player*>(entity) ? Qt::blue : Qt::red);
         ui.body->setPen(Qt::NoPen);
+        ui.body->setZValue(0);
         m_scene->addItem(ui.body);
 
         ui.body->setPos(entity->getPosition() - QPointF(entity->getRadius(), entity->getRadius()));
@@ -123,7 +123,8 @@ void GameView::mousePressEvent(QMouseEvent* event) {
 }
 
 void GameView::mouseReleaseEvent(QMouseEvent* event) {
-    if(event->button() == Qt::LeftButton) m_game.getPlayer()->stopAiming();
+    if(event->button() == Qt::LeftButton)
+        m_game.getPlayer()->stopAiming(m_mouseScenePos - m_game.getPlayer()->getPosition());
 }
 
 void GameView::mouseMoveEvent(QMouseEvent* event) { m_mouseScenePos = mapToScene(event->pos()); }
@@ -211,9 +212,14 @@ void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
 
 void GameView::updateEntitiesUi() {
     for (Entity* entity : m_game.getEntities()) {
-        if (!entity->isAlive()) continue;
-
         EntityUi& ui = m_entityItems[entity];
+
+        if (!entity->isAlive()) {
+            ui.body->hide();
+            continue;
+        }
+
+        ui.body->show();
         const QPointF pos = entity->getPosition();
         ui.body->setPos(pos - QPointF(entity->getRadius(), entity->getRadius()));
 

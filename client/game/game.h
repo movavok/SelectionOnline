@@ -33,6 +33,8 @@ private:
 
     //helper
     bool canMove(const Entity*, const QPointF&) const;
+    void performWeaponHit(const Weapon&, const QPointF&);
+    void processPlayerAttack();
 };
 
 #endif // GAME_H

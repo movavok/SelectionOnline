@@ -10,8 +10,6 @@ public:
 
     void update(float) override {};
 
-    void takeDamage(int);
-
 private:
     float m_speed = 100.0f;
 };

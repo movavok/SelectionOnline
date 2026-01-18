@@ -11,5 +11,11 @@ QPointF Entity::getPosition() const { return m_position; }
 unsigned short Entity::getCurrentHp() const { return m_hp; }
 unsigned short Entity::getMaxHp() const { return m_maxHp; }
 
-bool Entity::isAlive() const { return m_alive; }
-void Entity::destroy() { m_alive = false; }
+void Entity::takeDamage(int damage) {
+    if (damage <= 0) { return; }
+    if (damage >= m_hp) { m_hp = 0; return; }
+
+    m_hp -= damage;
+}
+
+bool Entity::isAlive() const { return m_hp > 0; }
