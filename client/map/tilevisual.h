@@ -1,11 +1,11 @@
 #ifndef TILEVISUAL_H
 #define TILEVISUAL_H
 
-#include <QColor>
+#include <QPixmap>
 
 #include "tile.h"
 
-struct TileVisual { QColor color; };
+struct TileVisual { QPixmap sprite; };
 
 const TileVisual& tileVisual(Tile::TileType);
 

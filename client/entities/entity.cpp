@@ -7,6 +7,8 @@ float Entity::getRadius() const { return m_radius; }
 
 void Entity::setPosition(const QPointF& pos) { m_position = pos; }
 QPointF Entity::getPosition() const { return m_position; }
+void Entity::setPrevPosition(const QPointF& pos) { m_prevPosition = pos; }
+QPointF Entity::getPrevPosition() const { return m_prevPosition; }
 
 unsigned short Entity::getCurrentHp() const { return m_hp; }
 unsigned short Entity::getMaxHp() const { return m_maxHp; }

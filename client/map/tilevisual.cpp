@@ -1,13 +1,13 @@
 #include "tilevisual.h"
 
 const TileVisual& tileVisual(Tile::TileType type) {
-    static const TileVisual empty { Qt::transparent };
-    static const TileVisual board { QColor(181, 131, 90) };
-    static const TileVisual brickStrong { QColor(141, 47, 47) };
-    static const TileVisual brickCracked { QColor(192, 75, 75) };
-    static const TileVisual grass { QColor(80, 160, 80) };
-    static const TileVisual water { QColor(60, 120, 200) };
-    static const TileVisual wall { Qt::darkGray };
+    static const TileVisual empty { QPixmap() };
+    static const TileVisual board { QPixmap(":/tiles/board.png") };
+    static const TileVisual brickStrong { QPixmap(":/tiles/brick_strong.png") };
+    static const TileVisual brickCracked { QPixmap(":/tiles/brick_cracked.png") };
+    static const TileVisual grass { QPixmap(":/tiles/grass.png") };
+    static const TileVisual water { QPixmap(":/tiles/water.png") };
+    static const TileVisual wall { QPixmap(":/tiles/wall.png") };
 
     switch (type) {
     case Tile::TileType::Board: return board;

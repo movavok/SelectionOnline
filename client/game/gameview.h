@@ -28,6 +28,7 @@ protected:
 private:
     struct EntityUi {
         QGraphicsEllipseItem* body = nullptr;
+        QGraphicsPixmapItem* sprite = nullptr;
         QGraphicsRectItem* hpBack = nullptr;
         QGraphicsRectItem* hpFill = nullptr;
         QGraphicsRectItem* hpTextMask = nullptr;
@@ -46,15 +47,17 @@ private:
     QPointF m_cameraPos;
 
     QHash<Entity*, EntityUi> m_entityItems;
-    QHash<QPoint, QGraphicsRectItem*> m_tileItems;
-    QHash<const PickupItem*, QGraphicsRectItem*> m_pickupItems;
+    QHash<QPoint, QGraphicsPixmapItem*> m_tileItems;
+    QHash<const PickupItem*, QGraphicsPixmapItem*> m_pickupItems;
     QMap<Qt::Key, MoveDirection> m_keyMap;
 
-    float deltaTime = 0.016f;
+    float m_deltaTime = 0.016f;
+
+    double m_scaleSize = 1.25;
 
     //helper
     void initEntitiesUi();
-    void initHpBar(Entity*, EntityUi&);
+    void initHpBar(EntityUi&);
     void initAttackIndicator(EntityUi&);
     void buildMap();
     void createPickupUi(const PickupItem*);

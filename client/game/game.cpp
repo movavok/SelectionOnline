@@ -52,7 +52,12 @@ void Game::tryBreakTiles(const QPainterPath& hitShape) {
         for (int x = minX; x <= maxX; ++x) {
             Tile& tile = m_map.tileAt(x, y);
             Tile::TileType oldType = tile.getType();
-            if (tile.applyHit()) {
+
+            QRectF tileRect = QRectF(Map::tileToWorld(QPointF(x, y), m_worldBounds) -
+                                     QPointF(Map::TILE_SIZE / 2, Map::TILE_SIZE / 2),
+                                     QSizeF(Map::TILE_SIZE, Map::TILE_SIZE));
+
+            if (hitShape.intersects(tileRect) && tile.applyHit()) {
                 if (oldType != Tile::TileType::BrickStrong)
                     spawnPickupAtTile(QPointF(x, y), oldType);
                 emit tileChanged(x, y);
@@ -127,12 +132,24 @@ void Game::update(float deltaTime) {
         if (!entity->isAlive()) continue;
 
         if (Player* player = dynamic_cast<Player*>(entity)) {
-            QPointF nextPos = player->getPosition() + player->moveDistance(deltaTime);
-            if (canMove(player, nextPos)) player->setPosition(nextPos);
+            QPointF delta = player->moveDistance(deltaTime);
+            if (!delta.isNull()) {
+                QPointF currPos = player->getPosition();
+                QPointF nextPos = currPos + delta;
+
+                if (canMove(player, nextPos)) {
+                    player->setPrevPosition(currPos);
+                    player->setPosition(nextPos);
+                }
+            }
+
             player->update(deltaTime);
+
             processPlayerAttack();
             checkPickupCollisions();
-        } else entity->update(deltaTime);
+        } else {
+            entity->update(deltaTime);
+        }
     }
 }
 

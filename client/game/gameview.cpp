@@ -23,6 +23,7 @@ GameView::GameView(QWidget* parent)
     setMouseTracking(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scale(m_scaleSize, m_scaleSize);
 }
 
 QGraphicsRectItem* createRectItem(QGraphicsItem* parent, const QRectF& rect, const QColor& color, int zValue) {
@@ -43,8 +44,8 @@ QGraphicsTextItem* createTextItem(QGraphicsItem* parent, const QColor& color, in
     return item;
 }
 
-void GameView::initHpBar(Entity* entity, EntityUi& ui) {
-    double width = entity->getRadius() * 2;
+void GameView::initHpBar(EntityUi& ui) {
+    double width = ui.body->boundingRect().width() * m_scaleSize;
     double height = 10;
     QPointF pos(0, -height - 6);
 
@@ -72,15 +73,24 @@ void GameView::initAttackIndicator(EntityUi& ui) {
 void GameView::initEntitiesUi() {
     for (Entity* entity : m_game.getEntities()) {
         EntityUi ui;
+
+        const float radius = entity->getRadius();
         ui.body = new QGraphicsEllipseItem(0, 0, entity->getRadius() * 2, entity->getRadius() * 2);
-        ui.body->setBrush(dynamic_cast<Player*>(entity) ? Qt::blue : Qt::red);
+        ui.body->setBrush(dynamic_cast<Player*>(entity) ? QColor(0, 200, 255, 150) : QColor(255, 50, 50, 150));
         ui.body->setPen(Qt::NoPen);
         ui.body->setZValue(5);
         m_scene->addItem(ui.body);
 
-        ui.body->setPos(entity->getPosition() - QPointF(entity->getRadius(), entity->getRadius()));
+        QPixmap sprite;
+        sprite.load(":/entities/tank.png");
 
-        initHpBar(entity, ui);
+        ui.sprite = new QGraphicsPixmapItem(sprite.scaled(radius * 2, radius * 2), ui.body);
+        ui.sprite->setZValue(5);
+        ui.sprite->setTransformOriginPoint(ui.sprite->boundingRect().center());
+
+        ui.body->setPos(entity->getPosition());
+
+        initHpBar(ui);
         initAttackIndicator(ui);
 
         m_entityItems.insert(entity, ui);
@@ -98,14 +108,11 @@ void GameView::buildMap() {
     for (int y = 0; y < map.getTileCountY(); ++y) {
         for (int x = 0; x < map.getTileCountX(); ++x) {
             const TileVisual& visual = tileVisual(map.tileAt(x, y).getType());
-            if (visual.color == Qt::transparent) continue;
+            if (visual.sprite.isNull()) continue;
 
-            QRectF rect(x * Map::TILE_SIZE + offsetX, y * Map::TILE_SIZE + offsetY,
-                        Map::TILE_SIZE, Map::TILE_SIZE);
-
-            QGraphicsRectItem* tileItem = new QGraphicsRectItem(rect);
-            tileItem->setBrush(visual.color);
-            tileItem->setPen(Qt::NoPen);
+            QGraphicsPixmapItem* tileItem = new QGraphicsPixmapItem(visual.sprite.scaled(Map::TILE_SIZE, Map::TILE_SIZE,
+                                                                                         Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            tileItem->setPos(x * Map::TILE_SIZE + offsetX, y * Map::TILE_SIZE + offsetY);
             tileItem->setZValue(0);
 
             m_scene->addItem(tileItem);
@@ -123,20 +130,21 @@ Tile::TileType displayPickupType(const PickupItem* pickup) {
 
 void GameView::createPickupUi(const PickupItem* pickup) {
     const TileVisual& visual = tileVisual(displayPickupType(pickup));
-    if (visual.color == Qt::transparent) return;
+    if (visual.sprite.isNull()) return;
 
-    const double size = Map::TILE_SIZE * 0.5;
-    QRectF rect(-size / 2, -size / 2, size, size);
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(visual.sprite);
 
-    QGraphicsRectItem* item = new QGraphicsRectItem(rect);
-    item->setBrush(visual.color);
-    item->setPen(Qt::NoPen);
-    item->setZValue(2);
+    const double targetSize = Map::TILE_SIZE * 0.5;
+    double scale = targetSize / visual.sprite.width();
+    item->setScale(scale);
+
+    item->setOffset(-visual.sprite.width() / 2.0, -visual.sprite.height() / 2.0);
 
     item->setPos(pickup->getPosition());
+    item->setZValue(2);
 
     item->setRotation(rand() % 41 - 20);
-    item->setScale(0.9 + (rand() % 21) / 100.0);
+    item->setScale(item->scale() * (0.9 + (rand() % 21) / 100.0));
 
     m_scene->addItem(item);
     m_pickupItems.insert(pickup, item);
@@ -240,8 +248,7 @@ void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
         ui.attackIndicator->setPath(player->getInventory().getActiveWeapon()->indicatorShape(*player));
 
         const QPointF dir = mouseScene - player->getPosition();
-        const double angleDeg = qRadiansToDegrees(std::atan2(dir.y(), dir.x()));
-        ui.attackIndicator->setRotation(angleDeg);
+        ui.attackIndicator->setRotation(qRadiansToDegrees(std::atan2(dir.y(), dir.x())));
         ui.attackIndicator->show();
     }
 }
@@ -259,6 +266,10 @@ void GameView::updateEntitiesUi() {
         const QPointF pos = entity->getPosition();
         ui.body->setPos(pos - QPointF(entity->getRadius(), entity->getRadius()));
 
+        QPointF dir = entity->getPosition() - entity->getPrevPosition();
+        if (!dir.isNull())
+            m_entityItems[entity].sprite->setRotation(qRadiansToDegrees(std::atan2(dir.y(), dir.x())) - 90);
+
         updateEntityHp(entity, ui);
         updateEntityAtkIndicator(entity, ui);
     }
@@ -266,9 +277,16 @@ void GameView::updateEntitiesUi() {
 
 void GameView::updateTile(int x, int y) {
     QPoint key(x, y);
-    if (m_tileItems.contains(key)) {
-        const TileVisual& visual = tileVisual(m_game.getMap().tileAt(x,y).getType());
-        m_tileItems[key]->setBrush(visual.color);
+    if (m_tileItems.contains(key)){
+        const TileVisual& visual = tileVisual(m_game.getMap().tileAt(x, y).getType());
+
+        if (visual.sprite.isNull()) {
+            m_tileItems[key]->setPixmap(QPixmap());
+            return;
+        }
+
+        m_tileItems[key]->setPixmap(visual.sprite.scaled(Map::TILE_SIZE, Map::TILE_SIZE,
+                                                         Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     }
 }
 
@@ -285,7 +303,7 @@ void GameView::updatePickupsUi() {
 }
 
 void GameView::onTick() {
-    m_game.update(deltaTime);
+    m_game.update(m_deltaTime);
     updateCamera();
     updateEntitiesUi();
     updatePickupsUi();

@@ -16,6 +16,8 @@ public:
 
     void setPosition(const QPointF&);
     QPointF getPosition() const;
+    void setPrevPosition(const QPointF&);
+    QPointF getPrevPosition() const;
 
     unsigned short getCurrentHp() const;
     unsigned short getMaxHp() const;
@@ -27,6 +29,8 @@ public:
 
 protected:
     QPointF m_position;
+    QPointF m_prevPosition;
+
     float m_radius;
 
     unsigned short m_hp;
