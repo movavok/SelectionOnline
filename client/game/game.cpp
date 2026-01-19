@@ -8,6 +8,7 @@ Game::Game(QObject* parent) : QObject(parent) {
     m_worldBounds = QRectF(-mapWidth / 2, -mapHeight / 2, mapWidth, mapHeight);
 
     m_player = new Player(QPointF(0, 0));
+    m_player->getInventory().setActiveSlot(0);
     m_player->getInventory().addWeapon(WeaponManager::create("Katana"));
     m_entities.push_back(m_player);
 

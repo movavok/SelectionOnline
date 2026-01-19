@@ -6,6 +6,8 @@
 class Inventory
 {
 public:
+    static constexpr int MAX_SLOTS = 5;
+
     void addResource(Tile::TileType type, int amount);
     bool spendResource(Tile::TileType type, int amount);
 
@@ -16,7 +18,7 @@ public:
     int getActiveSlot() const;
 
 private:
-    QVector<InventorySlot> m_slots;
+    QVector<InventorySlot> m_slots = QVector<InventorySlot>(MAX_SLOTS);
     unsigned short m_activeSlot = 0;
 };
 

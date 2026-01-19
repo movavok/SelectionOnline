@@ -153,8 +153,10 @@ void GameView::createPickupUi(const PickupItem* pickup) {
 void GameView::handleKeyEvent(QKeyEvent* event, bool pressed) {
     if (event->isAutoRepeat()) return;
     unsigned short scanCode = static_cast<unsigned short>(event->nativeScanCode());
-    if (m_keyMap.contains(scanCode))
-        m_game.setPlayerInput(m_keyMap[scanCode], pressed);
+    if (m_moveKeyMap.contains(scanCode))
+        m_game.setPlayerInput(m_moveKeyMap[scanCode], pressed);
+    if (pressed && m_slotKeyMap.contains(scanCode))
+        m_game.getPlayer()->setActiveSlot(m_slotKeyMap[scanCode]);
 }
 
 void GameView::keyPressEvent(QKeyEvent* event) { handleKeyEvent(event, true); }
@@ -169,6 +171,14 @@ void GameView::mouseReleaseEvent(QMouseEvent* event) {
         QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
         m_game.getPlayer()->stopAiming(mouseScene - m_game.getPlayer()->getPosition());
     }
+}
+
+void GameView::setupSlotKeys() {
+    m_slotKeyMap[2] = 0;
+    m_slotKeyMap[3] = 1;
+    m_slotKeyMap[4] = 2;
+    m_slotKeyMap[5] = 3;
+    m_slotKeyMap[6] = 4;
 }
 
 void GameView::useMovementScheme(MovementScheme scheme) {
@@ -187,11 +197,11 @@ void GameView::useMovementScheme(MovementScheme scheme) {
         scanRight = 77; // Right
     }
 
-    m_keyMap.clear();
-    m_keyMap[scanUp] = MoveDirection::MoveUp;
-    m_keyMap[scanDown] = MoveDirection::MoveDown;
-    m_keyMap[scanLeft] = MoveDirection::MoveLeft;
-    m_keyMap[scanRight] = MoveDirection::MoveRight;
+    m_moveKeyMap.clear();
+    m_moveKeyMap[scanUp] = MoveDirection::MoveUp;
+    m_moveKeyMap[scanDown] = MoveDirection::MoveDown;
+    m_moveKeyMap[scanLeft] = MoveDirection::MoveLeft;
+    m_moveKeyMap[scanRight] = MoveDirection::MoveRight;
 }
 
 void GameView::updateCamera() {
@@ -247,7 +257,9 @@ void GameView::updateEntityHp(Entity* entity, EntityUi& ui) {
 
 void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
     if (Player* player = dynamic_cast<Player*>(entity)) {
-        if (player->getAttackState() == Player::AttackState::Idle) {
+        const Weapon* weapon = player->getInventory().getActiveWeapon();
+
+        if (player->getAttackState() == Player::AttackState::Idle || !weapon) {
             ui.attackIndicator->hide();
             return;
         }
@@ -255,7 +267,7 @@ void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
         QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
 
         ui.attackIndicator->setPos(player->getRadius(), player->getRadius());
-        ui.attackIndicator->setPath(player->getInventory().getActiveWeapon()->indicatorShape(*player));
+        ui.attackIndicator->setPath(weapon->indicatorShape(*player));
 
         const QPointF dir = mouseScene - player->getPosition();
         ui.attackIndicator->setRotation(qRadiansToDegrees(std::atan2(dir.y(), dir.x())));

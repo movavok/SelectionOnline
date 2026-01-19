@@ -18,6 +18,7 @@ public:
     explicit GameView(QWidget* parent = nullptr);
 
     void useMovementScheme(MovementScheme);
+    void setupSlotKeys();
 
 protected:
     void keyPressEvent(QKeyEvent*) override;
@@ -49,7 +50,9 @@ private:
     QHash<Entity*, EntityUi> m_entityItems;
     QHash<QPoint, QGraphicsPixmapItem*> m_tileItems;
     QHash<const PickupItem*, QGraphicsPixmapItem*> m_pickupItems;
-    QMap<unsigned short, MoveDirection> m_keyMap;
+
+    QMap<unsigned short, MoveDirection> m_moveKeyMap;
+    QMap<unsigned short, unsigned short> m_slotKeyMap;
 
     float m_deltaTime = 0.016f;
 
