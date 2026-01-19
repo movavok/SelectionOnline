@@ -152,9 +152,9 @@ void GameView::createPickupUi(const PickupItem* pickup) {
 
 void GameView::handleKeyEvent(QKeyEvent* event, bool pressed) {
     if (event->isAutoRepeat()) return;
-    Qt::Key key = static_cast<Qt::Key>(event->key());
-    if (m_keyMap.contains(key))
-        m_game.setPlayerInput(m_keyMap[key], pressed);
+    unsigned short scanCode = static_cast<unsigned short>(event->nativeScanCode());
+    if (m_keyMap.contains(scanCode))
+        m_game.setPlayerInput(m_keyMap[scanCode], pressed);
 }
 
 void GameView::keyPressEvent(QKeyEvent* event) { handleKeyEvent(event, true); }
@@ -172,16 +172,26 @@ void GameView::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void GameView::useMovementScheme(MovementScheme scheme) {
-    Qt::Key keyUp, keyDown, keyLeft, keyRight;
+    unsigned short scanUp, scanDown, scanLeft, scanRight;
 
-    if (scheme == MovementScheme::WASD) { keyUp = Qt::Key_W; keyDown = Qt::Key_S; keyLeft = Qt::Key_A; keyRight = Qt::Key_D; }
-    else if (scheme == MovementScheme::Arrows) { keyUp = Qt::Key_Up; keyDown = Qt::Key_Down; keyLeft = Qt::Key_Left; keyRight = Qt::Key_Right; }
+    if (scheme == MovementScheme::WASD) {
+        scanUp = 17; // W
+        scanDown = 31; // S
+        scanLeft = 30; // A
+        scanRight = 32; // D
+    }
+    else if (scheme == MovementScheme::Arrows) {
+        scanUp = 72; // Up
+        scanDown = 80; // Down
+        scanLeft = 75; // Left
+        scanRight = 77; // Right
+    }
 
     m_keyMap.clear();
-    m_keyMap[keyUp] = MoveDirection::MoveUp;
-    m_keyMap[keyDown] = MoveDirection::MoveDown;
-    m_keyMap[keyLeft] = MoveDirection::MoveLeft;
-    m_keyMap[keyRight] = MoveDirection::MoveRight;
+    m_keyMap[scanUp] = MoveDirection::MoveUp;
+    m_keyMap[scanDown] = MoveDirection::MoveDown;
+    m_keyMap[scanLeft] = MoveDirection::MoveLeft;
+    m_keyMap[scanRight] = MoveDirection::MoveRight;
 }
 
 void GameView::updateCamera() {

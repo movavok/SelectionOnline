@@ -49,7 +49,7 @@ private:
     QHash<Entity*, EntityUi> m_entityItems;
     QHash<QPoint, QGraphicsPixmapItem*> m_tileItems;
     QHash<const PickupItem*, QGraphicsPixmapItem*> m_pickupItems;
-    QMap<Qt::Key, MoveDirection> m_keyMap;
+    QMap<unsigned short, MoveDirection> m_keyMap;
 
     float m_deltaTime = 0.016f;
 
