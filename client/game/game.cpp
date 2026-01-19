@@ -37,7 +37,7 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
 }
 
 void Game::spawnPickupAtTile(const QPointF& pos, Tile::TileType type) {
-    m_pickups.emplace_back(Map::tileToWorld(pos, m_worldBounds), type);
+    m_pickups.push_back(new PickupItem(Map::tileToWorld(pos, m_worldBounds), type));
 }
 
 void Game::tryBreakTiles(const QPainterPath& hitShape) {
@@ -51,8 +51,10 @@ void Game::tryBreakTiles(const QPainterPath& hitShape) {
     for (int y = minY; y <= maxY; ++y) {
         for (int x = minX; x <= maxX; ++x) {
             Tile& tile = m_map.tileAt(x, y);
+            Tile::TileType oldType = tile.getType();
             if (tile.applyHit()) {
-                spawnPickupAtTile(QPointF(x, y), tile.getType());
+                if (oldType != Tile::TileType::BrickStrong)
+                    spawnPickupAtTile(QPointF(x, y), oldType);
                 emit tileChanged(x, y);
             }
         }
@@ -97,10 +99,10 @@ void Game::processPlayerAttack() {
     m_player->onAttackPerformed();
 }
 
-void Game::applyPickup(PickupItem& pickup) {
-    switch (pickup.getType()) {
+void Game::applyPickup(PickupItem* pickup) {
+    switch (pickup->getType()) {
     case Tile::TileType::BrickCracked:
-    case Tile::TileType::Board: m_player->getInventory().addResource(pickup.getType(), 1); break;
+    case Tile::TileType::Board: m_player->getInventory().addResource(pickup->getType(), 1); break;
     default: break;
     }
 }
@@ -109,11 +111,12 @@ void Game::checkPickupCollisions() {
     if (!m_player) return;
 
     for (int index = m_pickups.size() - 1; index >= 0; --index) {
-        PickupItem& pickup = m_pickups[index];
+        PickupItem* pickup = m_pickups[index];
 
-        float dist = QLineF(m_player->getPosition(), pickup.getPosition()).length();
+        float dist = QLineF(m_player->getPosition(), pickup->getPosition()).length();
         if (dist <= m_player->getRadius() + Map::TILE_SIZE / 2) {
             applyPickup(pickup);
+            delete m_pickups[index];
             m_pickups.removeAt(index);
         }
     }
@@ -144,3 +147,5 @@ const QList<Entity*>& Game::getEntities() const { return m_entities; }
 const Map& Game::getMap() const { return m_map; }
 
 QRectF Game::getWorldBounds() const { return m_worldBounds; }
+
+const QList<PickupItem*>& Game::getPickups() const { return m_pickups; }

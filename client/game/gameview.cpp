@@ -5,6 +5,8 @@ GameView::GameView(QWidget* parent)
     , m_scene(new QGraphicsScene(this))
     , m_timer(new QTimer(this))
 {
+    srand(static_cast<unsigned>(time(nullptr)));
+
     setScene(m_scene);
 
     initEntitiesUi();
@@ -110,6 +112,34 @@ void GameView::buildMap() {
             m_tileItems[QPoint(x, y)] = tileItem;
         }
     }
+}
+
+Tile::TileType displayPickupType(const PickupItem* pickup) {
+    switch (pickup->getType()) {
+    case Tile::TileType::BrickCracked: return Tile::TileType::BrickStrong;
+    default: return pickup->getType();
+    }
+}
+
+void GameView::createPickupUi(const PickupItem* pickup) {
+    const TileVisual& visual = tileVisual(displayPickupType(pickup));
+    if (visual.color == Qt::transparent) return;
+
+    const double size = Map::TILE_SIZE * 0.5;
+    QRectF rect(-size / 2, -size / 2, size, size);
+
+    QGraphicsRectItem* item = new QGraphicsRectItem(rect);
+    item->setBrush(visual.color);
+    item->setPen(Qt::NoPen);
+    item->setZValue(2);
+
+    item->setPos(pickup->getPosition());
+
+    item->setRotation(rand() % 41 - 20);
+    item->setScale(0.9 + (rand() % 21) / 100.0);
+
+    m_scene->addItem(item);
+    m_pickupItems.insert(pickup, item);
 }
 
 void GameView::handleKeyEvent(QKeyEvent* event, bool pressed) {
@@ -242,8 +272,21 @@ void GameView::updateTile(int x, int y) {
     }
 }
 
+void GameView::updatePickupsUi() {
+    for (const PickupItem* pickup : m_game.getPickups())
+        if (!m_pickupItems.contains(pickup)) createPickupUi(pickup);
+
+    for (auto iter = m_pickupItems.begin(); iter != m_pickupItems.end(); ) {
+        if (!m_game.getPickups().contains(iter.key())) {
+            delete iter.value();
+            iter = m_pickupItems.erase(iter);
+        } else ++iter;
+    }
+}
+
 void GameView::onTick() {
     m_game.update(deltaTime);
     updateCamera();
     updateEntitiesUi();
+    updatePickupsUi();
 }

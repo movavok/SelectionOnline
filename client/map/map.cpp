@@ -72,8 +72,9 @@ Tile& Map::tileAt(int x, int y) {
 }
 
 QPointF Map::tileToWorld(const QPointF& tilePos, const QRectF& worldBounds) {
-    return QPointF(tilePos.x() * TILE_SIZE, tilePos.y() * TILE_SIZE) +
-           QPointF(TILE_SIZE / 2.0, TILE_SIZE / 2.0) - worldBounds.center();
+    return worldBounds.topLeft() +
+           QPointF(tilePos.x() * TILE_SIZE, tilePos.y() * TILE_SIZE) +
+           QPointF(TILE_SIZE / 2.0, TILE_SIZE / 2.0);
 }
 
 void Map::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {

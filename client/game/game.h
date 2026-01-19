@@ -27,6 +27,8 @@ public:
     const Map& getMap() const;
     QRectF getWorldBounds() const;
 
+    const QList<PickupItem*>& getPickups() const;
+
 private:
     Player* m_player = nullptr;
     QList<Entity*> m_entities;
@@ -34,7 +36,7 @@ private:
     Map m_map;
     QRectF m_worldBounds;
 
-    QList<PickupItem> m_pickups;
+    QList<PickupItem*> m_pickups;
 
     //helper
     bool canMove(const Entity*, const QPointF&) const;
@@ -42,7 +44,7 @@ private:
     void tryBreakTiles(const QPainterPath&);
     void performWeaponHit(const Weapon&, const QPointF&);
     void processPlayerAttack();
-    void applyPickup(PickupItem&);
+    void applyPickup(PickupItem*);
     void checkPickupCollisions();
 
 signals:

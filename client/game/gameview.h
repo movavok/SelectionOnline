@@ -5,6 +5,8 @@
 #include <QGraphicsRectItem>
 #include <QKeyEvent>
 #include <QTimer>
+#include <cstdlib>
+#include <ctime>
 
 #include "../input/inputtypes.h"
 #include "game.h"
@@ -45,6 +47,7 @@ private:
 
     QHash<Entity*, EntityUi> m_entityItems;
     QHash<QPoint, QGraphicsRectItem*> m_tileItems;
+    QHash<const PickupItem*, QGraphicsRectItem*> m_pickupItems;
     QMap<Qt::Key, MoveDirection> m_keyMap;
 
     float deltaTime = 0.016f;
@@ -54,6 +57,7 @@ private:
     void initHpBar(Entity*, EntityUi&);
     void initAttackIndicator(EntityUi&);
     void buildMap();
+    void createPickupUi(const PickupItem*);
 
     void handleKeyEvent(QKeyEvent*, bool);
 
@@ -61,6 +65,7 @@ private:
     void updateEntitiesUi();
     void updateEntityHp(Entity*, EntityUi&);
     void updateEntityAtkIndicator(Entity*, EntityUi&);
+    void updatePickupsUi();
 
 private slots:
     void onTick();
