@@ -29,6 +29,12 @@ public:
 
     const QList<PickupItem*>& getPickups() const;
 
+    QPointF tileToWorld(const QPoint&) const;
+    QPoint worldToTile(const QPointF&) const;
+
+    bool canPlaceTile(const QPoint&, Tile::TileType) const;
+    bool tryPlaceTile(const QPoint&);
+
 private:
     Player* m_player = nullptr;
     QList<Entity*> m_entities;
@@ -40,10 +46,12 @@ private:
 
     //helper
     bool canMove(const Entity*, const QPointF&) const;
-    void spawnPickupAtTile(const QPointF&, Tile::TileType);
+
     void tryBreakTiles(const QPainterPath&);
     void performWeaponHit(const Weapon&, const QPointF&);
     void processPlayerAttack();
+
+    void spawnPickupAtTile(const QPoint&, Tile::TileType);
     void applyPickup(PickupItem*);
     void checkPickupCollisions();
 

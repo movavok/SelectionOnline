@@ -26,7 +26,8 @@ public:
     const Tile& tileAt(int x, int y) const;
     Tile& tileAt(int x, int y);
 
-    static QPointF tileToWorld(const QPointF&, const QRectF&);
+    static QPoint worldToTile(const QPointF&, const QRectF&);
+    static QPointF tileToWorld(const QPoint&, const QRectF&);
 
     bool intersectsSolid(const QRectF&, CollisionActor) const;
     bool intersectsGrass(const QRectF&) const;

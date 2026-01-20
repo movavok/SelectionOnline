@@ -12,5 +12,6 @@
         <file alias="grass.png">assets/tiles/grass.png</file>
         <file alias="water.png">assets/tiles/water.png</file>
         <file alias="wall.png">assets/tiles/wall.png</file>
+        <file alias="background.png">assets/tiles/background.png</file>
     </qresource>
 </RCC>

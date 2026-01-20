@@ -20,6 +20,59 @@ bool circlesIntersect(const Entity* first, const QPointF& newPos, const Entity* 
     return QLineF(newPos, second->getPosition()).length() < (first->getRadius() + second->getRadius());
 }
 
+QPointF Game::tileToWorld(const QPoint& tile) const {
+    return Map::tileToWorld(tile, m_worldBounds);
+}
+
+QPoint Game::worldToTile(const QPointF& worldPos) const {
+    return Map::worldToTile(worldPos, m_worldBounds);
+}
+
+bool rectCircleIntersect(const QRectF& rect, const QPointF& circleCenter, float radius) {
+    float closestX = std::clamp(circleCenter.x(), rect.left(), rect.right());
+    float closestY = std::clamp(circleCenter.y(), rect.top(), rect.bottom());
+
+    float deltaX = circleCenter.x() - closestX;
+    float deltaY = circleCenter.y() - closestY;
+
+    return (deltaX * deltaX + deltaY * deltaY) <= (radius * radius);
+}
+
+bool Game::canPlaceTile(const QPoint& tilePos, Tile::TileType type) const {
+    const Tile& tile = m_map.tileAt(tilePos.x(), tilePos.y());
+
+    if (tile.getType() != Tile::TileType::Empty) return false;
+
+    QPointF center = tileToWorld(tilePos);
+    float dist = QLineF(center, m_player->getPosition()).length();
+    if (dist > Map::TILE_SIZE * 5) return false;
+
+    QRectF tileRect(center - QPointF(Map::TILE_SIZE / 2, Map::TILE_SIZE / 2),
+                    QSizeF(Map::TILE_SIZE, Map::TILE_SIZE));
+
+    for (Entity* entity : m_entities) {
+        if (!entity->isAlive()) continue;
+        if (rectCircleIntersect(tileRect, entity->getPosition(), entity->getRadius()))
+            return false;
+    }
+
+    return true;
+}
+
+bool Game::tryPlaceTile(const QPoint& tilePos) {
+    Inventory& inventory = m_player->getInventory();
+    if (!inventory.isActiveResource()) return false;
+
+    Tile::TileType type = inventory.getActiveResourceType();
+
+    if (!canPlaceTile(tilePos, type)) return false;
+    if (!inventory.spendResource(type, 1)) return false;
+
+    m_map.tileAt(tilePos.x(), tilePos.y()).setType(type);
+    emit tileChanged(tilePos.x(), tilePos.y());
+    return true;
+}
+
 bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
     const float radius = entity->getRadius();
     QRectF rectBounds = QRectF(newPos - QPointF(radius, radius), QSizeF(radius * 2, radius * 2));
@@ -37,30 +90,41 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
     return true;
 }
 
-void Game::spawnPickupAtTile(const QPointF& pos, Tile::TileType type) {
-    m_pickups.push_back(new PickupItem(Map::tileToWorld(pos, m_worldBounds), type));
+void Game::spawnPickupAtTile(const QPoint& pos, Tile::TileType type) {
+    m_pickups.push_back(new PickupItem(tileToWorld(pos), type));
 }
 
 void Game::tryBreakTiles(const QPainterPath& hitShape) {
     QRectF bounds = hitShape.boundingRect();
 
-    int minX = std::floor((bounds.left() + m_worldBounds.width() / 2) / Map::TILE_SIZE);
-    int maxX = std::floor((bounds.right() + m_worldBounds.width() / 2) / Map::TILE_SIZE);
-    int minY = std::floor((bounds.top() + m_worldBounds.height() / 2) / Map::TILE_SIZE);
-    int maxY = std::floor((bounds.bottom()+ m_worldBounds.height() / 2) / Map::TILE_SIZE);
+    QPoint minTile = worldToTile(bounds.topLeft());
+    QPoint maxTile = worldToTile(bounds.bottomRight());
 
-    for (int y = minY; y <= maxY; ++y) {
-        for (int x = minX; x <= maxX; ++x) {
+    for (int y = minTile.y(); y <= maxTile.y(); ++y) {
+        for (int x = minTile.x(); x <= maxTile.x(); ++x) {
+
+            QPoint tilePos(x, y);
             Tile& tile = m_map.tileAt(x, y);
             Tile::TileType oldType = tile.getType();
 
-            QRectF tileRect = QRectF(Map::tileToWorld(QPointF(x, y), m_worldBounds) -
-                                     QPointF(Map::TILE_SIZE / 2, Map::TILE_SIZE / 2),
-                                     QSizeF(Map::TILE_SIZE, Map::TILE_SIZE));
+            QPointF center = tileToWorld(tilePos);
+
+            QRectF tileRect(center - QPointF(Map::TILE_SIZE / 2, Map::TILE_SIZE / 2),
+                            QSizeF(Map::TILE_SIZE, Map::TILE_SIZE));
 
             if (hitShape.intersects(tileRect) && tile.applyHit()) {
-                if (oldType != Tile::TileType::BrickStrong)
-                    spawnPickupAtTile(QPointF(x, y), oldType);
+                Tile::TileType dropType = Tile::TileType::Empty;
+
+                switch (oldType) {
+                case Tile::TileType::BrickCracked: dropType = Tile::TileType::BrickStrong; break;
+                case Tile::TileType::Board: dropType = Tile::TileType::Board; break;
+                default:
+                    break;
+                }
+
+                if (dropType != Tile::TileType::Empty)
+                    spawnPickupAtTile(QPoint(x, y), dropType);
+
                 emit tileChanged(x, y);
             }
         }
@@ -107,8 +171,10 @@ void Game::processPlayerAttack() {
 
 void Game::applyPickup(PickupItem* pickup) {
     switch (pickup->getType()) {
+    case Tile::TileType::BrickStrong:
     case Tile::TileType::BrickCracked:
-    case Tile::TileType::Board: m_player->getInventory().addResource(pickup->getType(), 1); break;
+    case Tile::TileType::Board:
+        m_player->getInventory().addResource(pickup->getType(), 1); break;
     default: break;
     }
 }

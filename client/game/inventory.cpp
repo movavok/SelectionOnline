@@ -50,6 +50,16 @@ Weapon* Inventory::getActiveWeapon() const {
     return (slot.m_type == InventorySlot::SlotType::Weapon) ? slot.m_weapon : nullptr;
 }
 
+bool Inventory::isActiveResource() const {
+    const InventorySlot& slot = m_slots[m_activeSlot];
+    return slot.m_type == InventorySlot::SlotType::Resource;
+}
+
+Tile::TileType Inventory::getActiveResourceType() const {
+    const InventorySlot& slot = m_slots[m_activeSlot];
+    return slot.m_resourceType;
+}
+
 void Inventory::setActiveSlot(int index) {
     if (index >= 0 && index < MAX_SLOTS) m_activeSlot = index;
 }

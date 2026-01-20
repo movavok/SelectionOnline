@@ -2,6 +2,8 @@
 
 Tile::Tile(TileType type) : m_type(type) {}
 
+void Tile::setType(TileType type) { m_type = type; }
+
 Tile::TileType Tile::getType() const { return m_type; }
 
 bool Tile::applyHit() {

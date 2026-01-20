@@ -97,6 +97,24 @@ void GameView::initEntitiesUi() {
     }
 }
 
+QGraphicsPixmapItem* initBackground(int width, int height, double offsetX, double offsetY) {
+    QPixmap background(":/tiles/background.png");
+    background = background.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    QGraphicsPixmapItem* bgItem = new QGraphicsPixmapItem(background);
+    bgItem->setZValue(-1);
+    bgItem->setPos(offsetX, offsetY);
+    return bgItem;
+}
+
+void GameView::initBuildPreview() {
+    m_buildPreview = new QGraphicsPixmapItem();
+    m_buildPreview->setOpacity(0.5);
+    m_buildPreview->setZValue(3);
+    m_buildPreview->hide();
+    m_scene->addItem(m_buildPreview);
+}
+
 void GameView::buildMap() {
     const Map& map = m_game.getMap();
 
@@ -105,15 +123,20 @@ void GameView::buildMap() {
     double offsetX = -mapWidth / 2.0;
     double offsetY = -mapHeight / 2.0;
 
+    m_scene->addItem(initBackground(mapWidth, mapHeight, offsetX, offsetY));
+    initBuildPreview();
+
     for (int y = 0; y < map.getTileCountY(); ++y) {
         for (int x = 0; x < map.getTileCountX(); ++x) {
-            const TileVisual& visual = tileVisual(map.tileAt(x, y).getType());
-            if (visual.sprite.isNull()) continue;
 
-            QGraphicsPixmapItem* tileItem = new QGraphicsPixmapItem(visual.sprite.scaled(Map::TILE_SIZE, Map::TILE_SIZE,
-                                                                                         Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            QGraphicsPixmapItem* tileItem = new QGraphicsPixmapItem();
             tileItem->setPos(x * Map::TILE_SIZE + offsetX, y * Map::TILE_SIZE + offsetY);
             tileItem->setZValue(0);
+
+            const TileVisual& visual = tileVisual(map.tileAt(x, y).getType());
+            if (!visual.sprite.isNull())
+                tileItem->setPixmap(visual.sprite.scaled(Map::TILE_SIZE, Map::TILE_SIZE,
+                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
             m_scene->addItem(tileItem);
             m_tileItems[QPoint(x, y)] = tileItem;
@@ -167,10 +190,17 @@ void GameView::mousePressEvent(QMouseEvent* event) {
 }
 
 void GameView::mouseReleaseEvent(QMouseEvent* event) {
-    if(event->button() == Qt::LeftButton) {
-        QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
-        m_game.getPlayer()->stopAiming(mouseScene - m_game.getPlayer()->getPosition());
-    }
+    if (event->button() != Qt::LeftButton) return;
+
+    Player* player = m_game.getPlayer();
+    if (!player) return;
+
+    QPointF mouseScene = mapToScene(event->pos());
+
+    if (player->getInventory().isActiveResource())
+        m_game.tryPlaceTile(m_game.worldToTile(mouseScene));
+    else
+        player->stopAiming(mouseScene - player->getPosition());
 }
 
 void GameView::setupSlotKeys() {
@@ -341,9 +371,46 @@ void GameView::updatePickupsUi() {
     }
 }
 
+void GameView::updateBuildPreview() {
+    Player* player = m_game.getPlayer();
+    if (!player || !player->getInventory().isActiveResource()) {
+        m_buildPreview->hide();
+        return;
+    }
+
+    QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
+    QPoint tile = m_game.worldToTile(mouseScene);
+    Tile::TileType type = player->getInventory().getActiveResourceType();
+
+    if (tile == m_previewTile && type == m_previewType)
+
+    m_previewTile = tile;
+    m_previewType = type;
+
+    if (!m_game.canPlaceTile(tile, type)) {
+        m_buildPreview->hide();
+        return;
+    }
+
+    const TileVisual& visual = tileVisual(type);
+    if (visual.sprite.isNull()) {
+        m_buildPreview->hide();
+        return;
+    }
+
+    m_buildPreview->setPixmap(visual.sprite.scaled(Map::TILE_SIZE, Map::TILE_SIZE,
+                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+
+    QPointF world = m_game.tileToWorld(tile);
+    m_buildPreview->setPos(world - QPointF(Map::TILE_SIZE / 2, Map::TILE_SIZE / 2));
+
+    m_buildPreview->show();
+}
+
 void GameView::onTick() {
     m_game.update(m_deltaTime);
     updateCamera();
     updateEntitiesUi();
     updatePickupsUi();
+    updateBuildPreview();
 }

@@ -14,6 +14,9 @@ public:
     void addWeapon(Weapon*);
     Weapon* getActiveWeapon() const;
 
+    bool isActiveResource() const;
+    Tile::TileType getActiveResourceType() const;
+
     void setActiveSlot(int index);
     int getActiveSlot() const;
 

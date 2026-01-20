@@ -16,6 +16,7 @@ public:
 
     Tile(TileType type = TileType::Empty);
 
+    void setType(TileType);
     TileType getType() const;
 
     bool applyHit();

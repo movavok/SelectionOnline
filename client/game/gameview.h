@@ -47,6 +47,10 @@ private:
     //camera
     QPointF m_cameraPos;
 
+    QGraphicsPixmapItem* m_buildPreview = nullptr;
+    Tile::TileType m_previewType = Tile::TileType::Empty;
+    QPoint m_previewTile{-1, -1};
+
     QHash<Entity*, EntityUi> m_entityItems;
     QHash<QPoint, QGraphicsPixmapItem*> m_tileItems;
     QHash<const PickupItem*, QGraphicsPixmapItem*> m_pickupItems;
@@ -62,6 +66,7 @@ private:
     void initEntitiesUi();
     void initHpBar(EntityUi&);
     void initAttackIndicator(EntityUi&);
+    void initBuildPreview();
     void buildMap();
     void createPickupUi(const PickupItem*);
 
@@ -73,6 +78,7 @@ private:
     void updateEntityAtkIndicator(Entity*, EntityUi&);
     void updateEntitiesVisibility(Entity*, EntityUi&);
     void updatePickupsUi();
+    void updateBuildPreview();
 
 private slots:
     void onTick();

@@ -71,7 +71,16 @@ Tile& Map::tileAt(int x, int y) {
     return const_cast<Tile&>(static_cast<const Map&>(*this).tileAt(x, y));
 }
 
-QPointF Map::tileToWorld(const QPointF& tilePos, const QRectF& worldBounds) {
+QPoint Map::worldToTile(const QPointF& worldPos, const QRectF& worldBounds) {
+    QPointF local = worldPos - worldBounds.topLeft();
+
+    int x = int(local.x()) / TILE_SIZE;
+    int y = int(local.y()) / TILE_SIZE;
+
+    return QPoint(x, y);
+}
+
+QPointF Map::tileToWorld(const QPoint& tilePos, const QRectF& worldBounds) {
     return worldBounds.topLeft() +
            QPointF(tilePos.x() * TILE_SIZE, tilePos.y() * TILE_SIZE) +
            QPointF(TILE_SIZE / 2.0, TILE_SIZE / 2.0);
