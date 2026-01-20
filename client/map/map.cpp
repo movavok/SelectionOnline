@@ -94,14 +94,25 @@ void Map::tilesInRect(const QRectF& rect, QVector<QPoint>& out) const {
 }
 
 bool Map::intersectsSolid(const QRectF& rect, CollisionActor actor) const {
-    QVector<QPoint> coords;
-    tilesInRect(rect, coords);
+    QVector<QPoint> tiles;
+    tilesInRect(rect, tiles);
 
-    for (QPoint& point : coords) {
+    for (QPoint& point : tiles) {
         const TileCollision& collision = tileCollision(tileAt(point.x(), point.y()).getType());
 
         if (actor == CollisionActor::Person && collision.personSolid) return true;
         if (actor == CollisionActor::Projectile && collision.projectileSolid) return true;
+    }
+    return false;
+}
+
+bool Map::intersectsGrass(const QRectF& rect) const {
+    QVector<QPoint> tiles;
+    tilesInRect(rect, tiles);
+
+    for (const QPoint& point : tiles) {
+        if (tileAt(point.x(), point.y()).getType() == Tile::TileType::Grass)
+            return true;
     }
     return false;
 }

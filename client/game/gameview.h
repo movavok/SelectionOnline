@@ -71,6 +71,7 @@ private:
     void updateEntitiesUi();
     void updateEntityHp(Entity*, EntityUi&);
     void updateEntityAtkIndicator(Entity*, EntityUi&);
+    void updateEntitiesVisibility(Entity*, EntityUi&);
     void updatePickupsUi();
 
 private slots:

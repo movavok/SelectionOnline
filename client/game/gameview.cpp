@@ -275,6 +275,22 @@ void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
     }
 }
 
+void GameView::updateEntitiesVisibility(Entity* entity, EntityUi& ui) {
+    const float radius = entity->getRadius();
+
+    QRectF entityRect(entity->getPosition() - QPointF(radius, radius), QSizeF(radius * 2, radius * 2));
+
+    bool inGrass = m_game.getMap().intersectsGrass(entityRect);
+
+    if (entity == m_game.getPlayer()) {
+        ui.body->setVisible(true);
+        ui.body->setOpacity(inGrass ? 0.5 : 1.0);
+    } else {
+        ui.body->setOpacity(1.0);
+        ui.body->setVisible(!inGrass);
+    }
+}
+
 void GameView::updateEntitiesUi() {
     for (Entity* entity : m_game.getEntities()) {
         EntityUi& ui = m_entityItems[entity];
@@ -283,8 +299,8 @@ void GameView::updateEntitiesUi() {
             ui.body->hide();
             continue;
         }
-
         ui.body->show();
+
         const QPointF pos = entity->getPosition();
         ui.body->setPos(pos - QPointF(entity->getRadius(), entity->getRadius()));
 
@@ -292,6 +308,7 @@ void GameView::updateEntitiesUi() {
         if (!dir.isNull())
             m_entityItems[entity].sprite->setRotation(qRadiansToDegrees(std::atan2(dir.y(), dir.x())) - 90);
 
+        updateEntitiesVisibility(entity, ui);
         updateEntityHp(entity, ui);
         updateEntityAtkIndicator(entity, ui);
     }

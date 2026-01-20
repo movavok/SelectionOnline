@@ -29,6 +29,7 @@ public:
     static QPointF tileToWorld(const QPointF&, const QRectF&);
 
     bool intersectsSolid(const QRectF&, CollisionActor) const;
+    bool intersectsGrass(const QRectF&) const;
 
 private:
     unsigned short m_tileCountX = 0;
