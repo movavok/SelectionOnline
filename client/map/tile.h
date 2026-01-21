@@ -19,10 +19,14 @@ public:
     void setType(TileType);
     TileType getType() const;
 
+    void setVariation(unsigned short);
+    unsigned short getVariation() const;
+
     bool applyHit();
 
 private:
     TileType m_type;
+    unsigned char m_variation = 0;
 };
 
 #endif // TILE_H

@@ -32,7 +32,7 @@ public:
     QPointF tileToWorld(const QPoint&) const;
     QPoint worldToTile(const QPointF&) const;
 
-    bool canPlaceTile(const QPoint&, Tile::TileType) const;
+    bool canPlaceTile(const QPoint&) const;
     bool tryPlaceTile(const QPoint&);
 
 private:

@@ -38,7 +38,7 @@ bool rectCircleIntersect(const QRectF& rect, const QPointF& circleCenter, float 
     return (deltaX * deltaX + deltaY * deltaY) <= (radius * radius);
 }
 
-bool Game::canPlaceTile(const QPoint& tilePos, Tile::TileType type) const {
+bool Game::canPlaceTile(const QPoint& tilePos) const {
     const Tile& tile = m_map.tileAt(tilePos.x(), tilePos.y());
 
     if (tile.getType() != Tile::TileType::Empty) return false;
@@ -65,7 +65,7 @@ bool Game::tryPlaceTile(const QPoint& tilePos) {
 
     Tile::TileType type = inventory.getActiveResourceType();
 
-    if (!canPlaceTile(tilePos, type)) return false;
+    if (!canPlaceTile(tilePos)) return false;
     if (!inventory.spendResource(type, 1)) return false;
 
     m_map.tileAt(tilePos.x(), tilePos.y()).setType(type);

@@ -33,7 +33,15 @@ bool Map::generateFromText(const QStringList& lines) {
             case '#': type = Tile::TileType::Wall; break;
             default: type = Tile::TileType::Empty; break;
             }
-            row.append(Tile(type));
+            Tile tile(type);
+            if (type == Tile::TileType::Empty) {
+                int random = rand() % 100;
+                if (random < 60) tile.setVariation(0);
+                else if (random < 90) tile.setVariation(1);
+                else tile.setVariation(2);
+            }
+
+            row.append(tile);
         }
         m_tilesGrid.append(row);
 

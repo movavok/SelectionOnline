@@ -5,8 +5,6 @@ GameView::GameView(QWidget* parent)
     , m_scene(new QGraphicsScene(this))
     , m_timer(new QTimer(this))
 {
-    srand(static_cast<unsigned>(time(nullptr)));
-
     setScene(m_scene);
 
     initEntitiesUi();
@@ -97,16 +95,6 @@ void GameView::initEntitiesUi() {
     }
 }
 
-QGraphicsPixmapItem* initBackground(int width, int height, double offsetX, double offsetY) {
-    QPixmap background(":/tiles/background.png");
-    background = background.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
-    QGraphicsPixmapItem* bgItem = new QGraphicsPixmapItem(background);
-    bgItem->setZValue(-1);
-    bgItem->setPos(offsetX, offsetY);
-    return bgItem;
-}
-
 void GameView::initBuildPreview() {
     m_buildPreview = new QGraphicsPixmapItem();
     m_buildPreview->setOpacity(0.5);
@@ -123,7 +111,6 @@ void GameView::buildMap() {
     double offsetX = -mapWidth / 2.0;
     double offsetY = -mapHeight / 2.0;
 
-    m_scene->addItem(initBackground(mapWidth, mapHeight, offsetX, offsetY));
     initBuildPreview();
 
     for (int y = 0; y < map.getTileCountY(); ++y) {
@@ -133,7 +120,9 @@ void GameView::buildMap() {
             tileItem->setPos(x * Map::TILE_SIZE + offsetX, y * Map::TILE_SIZE + offsetY);
             tileItem->setZValue(0);
 
-            const TileVisual& visual = tileVisual(map.tileAt(x, y).getType());
+            const Tile& tile = map.tileAt(x, y);
+            const TileVisual& visual = tile.getType() == Tile::TileType::Empty ? emptyVisual(tile.getVariation())
+                                                                               : tileVisual(tile.getType());
             if (!visual.sprite.isNull())
                 tileItem->setPixmap(visual.sprite.scaled(Map::TILE_SIZE, Map::TILE_SIZE,
                                     Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
@@ -294,6 +283,11 @@ void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
             return;
         }
 
+        QColor color;
+        if (player->canAttack()) color = QColor(255, 220, 100, 120);
+        else color = QColor(150, 150, 150, 120);
+        ui.attackIndicator->setBrush(color);
+
         QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
 
         ui.attackIndicator->setPos(player->getRadius(), player->getRadius());
@@ -347,7 +341,9 @@ void GameView::updateEntitiesUi() {
 void GameView::updateTile(int x, int y) {
     QPoint key(x, y);
     if (m_tileItems.contains(key)){
-        const TileVisual& visual = tileVisual(m_game.getMap().tileAt(x, y).getType());
+        const Tile& tile = m_game.getMap().tileAt(x, y);
+        const TileVisual& visual = tile.getType() == Tile::TileType::Empty ? emptyVisual(tile.getVariation())
+                                                                           : tileVisual(tile.getType());
 
         if (visual.sprite.isNull()) {
             m_tileItems[key]->setPixmap(QPixmap());
@@ -382,12 +378,12 @@ void GameView::updateBuildPreview() {
     QPoint tile = m_game.worldToTile(mouseScene);
     Tile::TileType type = player->getInventory().getActiveResourceType();
 
-    if (tile == m_previewTile && type == m_previewType)
+    if (tile == m_previewTile && type == m_previewType) return;
 
     m_previewTile = tile;
     m_previewType = type;
 
-    if (!m_game.canPlaceTile(tile, type)) {
+    if (!m_game.canPlaceTile(tile)) {
         m_buildPreview->hide();
         return;
     }

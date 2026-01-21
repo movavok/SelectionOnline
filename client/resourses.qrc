@@ -6,12 +6,16 @@
         <file alias="tank.png">assets/entities/tank.png</file>
     </qresource>
     <qresource prefix="/tiles">
+        <file alias="empty_1.png">assets/tiles/empty_1.png</file>
+        <file alias="empty_2.png">assets/tiles/empty_2.png</file>
+        <file alias="empty_3.png">assets/tiles/empty_3.png</file>
+
         <file alias="board.png">assets/tiles/board.png</file>
         <file alias="brick_cracked.png">assets/tiles/brick_cracked.png</file>
         <file alias="brick_strong.png">assets/tiles/brick_strong.png</file>
         <file alias="grass.png">assets/tiles/grass.png</file>
         <file alias="water.png">assets/tiles/water.png</file>
         <file alias="wall.png">assets/tiles/wall.png</file>
-        <file alias="background.png">assets/tiles/background.png</file>
+        <file alias="background.jpg">assets/tiles/background.jpg</file>
     </qresource>
 </RCC>
