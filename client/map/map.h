@@ -29,6 +29,7 @@ public:
     static QPoint worldToTile(const QPointF&, const QRectF&);
     static QPointF tileToWorld(const QPoint&, const QRectF&);
 
+    void tilesInRect(const QRectF&, QVector<QPoint>& out) const;
     bool intersectsSolid(const QRectF&, CollisionActor) const;
     bool intersectsGrass(const QRectF&) const;
 
@@ -39,7 +40,6 @@ private:
     QVector<QVector<Tile>> m_tilesGrid;
 
     bool generateFromText(const QStringList&);
-    void tilesInRect(const QRectF&, QVector<QPoint>& out) const;
 };
 
 #endif // MAP_H

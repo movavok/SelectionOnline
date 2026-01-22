@@ -284,24 +284,24 @@ void GameView::updateEntityHp(Entity* entity, EntityUi& ui) {
 void GameView::updateEntityAtkIndicator(Entity* entity, EntityUi& ui) {
     if (Player* player = dynamic_cast<Player*>(entity)) {
         const Weapon* weapon = player->getInventory().getActiveWeapon();
-
-        if (player->getAttackState() == Player::AttackState::Idle || !weapon) {
+        if (!weapon || player->getAttackState() == Player::AttackState::Idle) {
             ui.attackIndicator->hide();
             return;
         }
 
-        QColor color;
-        if (player->canAttack()) color = QColor(255, 220, 100, 120);
-        else color = QColor(150, 150, 150, 120);
-        ui.attackIndicator->setBrush(color);
+        ui.attackIndicator->setBrush(player->canAttack() ? QColor(255, 220, 100, 120)
+                                                         : QColor(150, 150, 150, 120));
 
         QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
+        QPainterPath cuttedShape = m_game.getPlayerAttackShape(mouseScene);
 
-        ui.attackIndicator->setPos(player->getRadius(), player->getRadius());
-        ui.attackIndicator->setPath(weapon->indicatorShape(*player));
+        QPointF center(player->getRadius() / 2, player->getRadius() / 2);
+        QTransform toLocal;
+        toLocal.translate(-player->getPosition().x() + center.x(),
+                          -player->getPosition().y() + center.y());
 
-        const QPointF dir = mouseScene - player->getPosition();
-        ui.attackIndicator->setRotation(qRadiansToDegrees(std::atan2(dir.y(), dir.x())));
+        ui.attackIndicator->setPath(toLocal.map(cuttedShape));
+        ui.attackIndicator->setPos(center);
         ui.attackIndicator->show();
     }
 }
@@ -358,8 +358,6 @@ void GameView::updateEntitySlotIndicator(Entity* entity, EntityUi& ui) {
 
     ui.slotIndicator->setRotation(qRadiansToDegrees(angle));
 }
-
-
 
 void GameView::updateEntitiesUi() {
     for (Entity* entity : m_game.getEntities()) {

@@ -13,6 +13,7 @@ public:
     QPointF getGripPoint() const override;
 
     QPainterPath indicatorShape(const Entity&) const override;
+    double getWeaponRange() const override;
     double insideOffset(const Entity&) const override;
 };
 

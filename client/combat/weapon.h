@@ -16,6 +16,7 @@ public:
     virtual QPointF getGripPoint() const = 0;
 
     virtual QPainterPath indicatorShape(const Entity&) const = 0;
+    virtual double getWeaponRange() const = 0;
     virtual double insideOffset(const Entity&) const = 0;
 
     unsigned short getDamage() const;
@@ -24,6 +25,7 @@ public:
 protected:
     unsigned short m_damage;
     float m_cooldown;
+    double m_weaponRange;
 
     QPixmap m_iconSprite;
 

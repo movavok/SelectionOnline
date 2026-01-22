@@ -94,6 +94,45 @@ void Game::spawnPickupAtTile(const QPoint& pos, Tile::TileType type) {
     m_pickups.push_back(new PickupItem(tileToWorld(pos), type));
 }
 
+QPainterPath Game::cutSolidTiles(const QPainterPath& worldShape) const {
+    QPainterPath result = worldShape;
+
+    QVector<QPoint> tiles;
+    m_map.tilesInRect(worldShape.boundingRect(), tiles);
+
+    for (const QPoint& tilePos : tiles) {
+        const Tile& tile = m_map.tileAt(tilePos.x(), tilePos.y());
+        const TileCollision& collision = tileCollision(tile.getType());
+        if (collision.projectileSolid) {
+            QRectF tileRect(tileToWorld(tilePos) - QPointF(Map::TILE_SIZE / 2, Map::TILE_SIZE / 2),
+                            QSizeF(Map::TILE_SIZE, Map::TILE_SIZE));
+
+            QPainterPath solidPath;
+            solidPath.addRect(tileRect);
+            result = result.subtracted(solidPath);
+        }
+    }
+    return result;
+}
+
+QPainterPath Game::getPlayerAttackShape(const QPointF& mouseScene) const {
+    if (!m_player) return QPainterPath();
+
+    const Weapon* weapon = m_player->getInventory().getActiveWeapon();
+    if (!weapon) return QPainterPath();
+
+    QPointF dir = mouseScene - m_player->getPosition();
+    QPainterPath shape = weapon->indicatorShape(*m_player);
+
+    double angleDeg = std::atan2(dir.y(), dir.x()) * 180.0 / M_PI;
+    QTransform rot;
+    rot.rotate(angleDeg);
+    QPainterPath worldShape = rot.map(shape);
+    worldShape.translate(m_player->getPosition().x(), m_player->getPosition().y());
+
+    return cutSolidTiles(worldShape);
+}
+
 void Game::tryBreakTiles(const QPainterPath& hitShape) {
     QRectF bounds = hitShape.boundingRect();
 
@@ -135,13 +174,13 @@ void Game::performWeaponHit(const Weapon& weapon, const QPointF& dir) {
     QPainterPath shape = weapon.indicatorShape(*m_player);
 
     const double angleDeg = std::atan2(dir.y(), dir.x()) * 180.0 / M_PI;
-
     QTransform rot;
     rot.rotate(angleDeg);
     QPainterPath worldShape = rot.map(shape);
     worldShape.translate(m_player->getPosition().x(), m_player->getPosition().y());
 
-    tryBreakTiles(worldShape);
+    QPainterPath cuttedShape = cutSolidTiles(worldShape);
+    tryBreakTiles(cuttedShape);
 
     for (Entity* &entity : m_entities) {
         if (entity == m_player || !entity->isAlive()) continue;
@@ -149,7 +188,7 @@ void Game::performWeaponHit(const Weapon& weapon, const QPointF& dir) {
             QPainterPath enemyPath;
             enemyPath.addEllipse(enemy->getPosition(), enemy->getRadius(), enemy->getRadius());
 
-            if (worldShape.intersects(enemyPath))
+            if (cuttedShape.intersects(enemyPath))
                 enemy->takeDamage(weapon.getDamage());
         }
     }

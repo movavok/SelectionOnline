@@ -35,6 +35,8 @@ public:
     bool canPlaceTile(const QPoint&) const;
     bool tryPlaceTile(const QPoint&);
 
+    QPainterPath getPlayerAttackShape(const QPointF&) const;
+
 private:
     Player* m_player = nullptr;
     QList<Entity*> m_entities;
@@ -47,6 +49,7 @@ private:
     //helper
     bool canMove(const Entity*, const QPointF&) const;
 
+    QPainterPath cutSolidTiles(const QPainterPath&) const;
     void tryBreakTiles(const QPainterPath&);
     void performWeaponHit(const Weapon&, const QPointF&);
     void processPlayerAttack();
