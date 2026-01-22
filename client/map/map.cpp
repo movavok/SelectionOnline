@@ -36,8 +36,8 @@ bool Map::generateFromText(const QStringList& lines) {
             Tile tile(type);
             if (type == Tile::TileType::Empty) {
                 int random = rand() % 100;
-                if (random < 60) tile.setVariation(0);
-                else if (random < 90) tile.setVariation(1);
+                if (random < 85) tile.setVariation(0);
+                else if (random < 95) tile.setVariation(1);
                 else tile.setVariation(2);
             }
 

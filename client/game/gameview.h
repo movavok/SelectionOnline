@@ -36,6 +36,7 @@ private:
         QGraphicsTextItem* hpTextWhite = nullptr;
         QGraphicsTextItem* hpTextBlack = nullptr;
         QGraphicsPathItem* attackIndicator = nullptr;
+        QGraphicsPixmapItem* slotIndicator = nullptr;
     };
 
     Game m_game;
@@ -66,6 +67,7 @@ private:
     void initEntitiesUi();
     void initHpBar(EntityUi&);
     void initAttackIndicator(EntityUi&);
+    void initSlotIndicator(EntityUi&);
     void initBuildPreview();
     void buildMap();
     void createPickupUi(const PickupItem*);
@@ -76,6 +78,7 @@ private:
     void updateEntitiesUi();
     void updateEntityHp(Entity*, EntityUi&);
     void updateEntityAtkIndicator(Entity*, EntityUi&);
+    void updateEntitySlotIndicator(Entity*, EntityUi&);
     void updateEntitiesVisibility(Entity*, EntityUi&);
     void updatePickupsUi();
     void updateBuildPreview();

@@ -68,6 +68,12 @@ void GameView::initAttackIndicator(EntityUi& ui) {
     ui.attackIndicator->hide();
 }
 
+void GameView::initSlotIndicator(EntityUi& ui) {
+    ui.slotIndicator = new QGraphicsPixmapItem(ui.body);
+    ui.slotIndicator->setZValue(6);
+    ui.slotIndicator->hide();
+}
+
 void GameView::initEntitiesUi() {
     for (Entity* entity : m_game.getEntities()) {
         EntityUi ui;
@@ -90,6 +96,7 @@ void GameView::initEntitiesUi() {
 
         initHpBar(ui);
         initAttackIndicator(ui);
+        initSlotIndicator(ui);
 
         m_entityItems.insert(entity, ui);
     }
@@ -315,6 +322,45 @@ void GameView::updateEntitiesVisibility(Entity* entity, EntityUi& ui) {
     }
 }
 
+void GameView::updateEntitySlotIndicator(Entity* entity, EntityUi& ui) {
+    Player* player = dynamic_cast<Player*>(entity);
+    if (!player) return;
+
+    QPixmap pixmap;
+
+    if (player->getInventory().isActiveResource()) {
+        Tile::TileType type = player->getInventory().getActiveResourceType();
+        const TileVisual& visual = tileVisual(type);
+        if (!visual.sprite.isNull())
+            pixmap = visual.sprite.scaled(10, 10, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+    else if (Weapon* weapon = player->getInventory().getActiveWeapon())
+        pixmap = weapon->getIcon().scaled(weapon->getIconSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    if (pixmap.isNull()) { ui.slotIndicator->hide(); return; }
+
+    ui.slotIndicator->setPixmap(pixmap);
+    ui.slotIndicator->setOffset(-pixmap.width() / 2.0, -pixmap.height() / 2.0);
+    ui.slotIndicator->setTransformOriginPoint(0, 0);
+    ui.slotIndicator->show();
+
+    QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
+    QPointF playerCenterScene = ui.body->sceneBoundingRect().center();
+
+    QPointF dir = mouseScene - playerCenterScene;
+    double angle = std::atan2(dir.y(), dir.x());
+
+    double orbitRadius = player->getRadius() + 2.0;
+
+    QPointF localPos(std::cos(angle) * orbitRadius, std::sin(angle) * orbitRadius);
+    QPointF bodyCenter(player->getRadius(), player->getRadius());
+    ui.slotIndicator->setPos(bodyCenter + localPos);
+
+    ui.slotIndicator->setRotation(qRadiansToDegrees(angle));
+}
+
+
+
 void GameView::updateEntitiesUi() {
     for (Entity* entity : m_game.getEntities()) {
         EntityUi& ui = m_entityItems[entity];
@@ -335,6 +381,7 @@ void GameView::updateEntitiesUi() {
         updateEntitiesVisibility(entity, ui);
         updateEntityHp(entity, ui);
         updateEntityAtkIndicator(entity, ui);
+        updateEntitySlotIndicator(entity, ui);
     }
 }
 

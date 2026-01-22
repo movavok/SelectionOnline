@@ -5,6 +5,9 @@
     <qresource prefix="/entities">
         <file alias="tank.png">assets/entities/tank.png</file>
     </qresource>
+    <qresource prefix="/weapons">
+        <file alias="katana.png">assets/weapons/katana.png</file>
+    </qresource>
     <qresource prefix="/tiles">
         <file alias="empty_1.png">assets/tiles/empty_1.png</file>
         <file alias="empty_2.png">assets/tiles/empty_2.png</file>
@@ -16,6 +19,5 @@
         <file alias="grass.png">assets/tiles/grass.png</file>
         <file alias="water.png">assets/tiles/water.png</file>
         <file alias="wall.png">assets/tiles/wall.png</file>
-        <file alias="background.jpg">assets/tiles/background.jpg</file>
     </qresource>
 </RCC>
