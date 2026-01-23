@@ -3,6 +3,9 @@
 unsigned short Map::getTileCountX() const { return m_tileCountX; }
 unsigned short Map::getTileCountY() const { return m_tileCountY; }
 
+void Map::setWorldBounds(int width, int height) { m_worldBounds = QRectF(-width / 2, -height / 2, width, height); }
+QRectF Map::getWorldBounds() const { return m_worldBounds; }
+
 bool Map::generateFromText(const QStringList& lines) {
     if (lines.isEmpty()) return false;
 
@@ -79,17 +82,17 @@ Tile& Map::tileAt(int x, int y) {
     return const_cast<Tile&>(static_cast<const Map&>(*this).tileAt(x, y));
 }
 
-QPoint Map::worldToTile(const QPointF& worldPos, const QRectF& worldBounds) {
-    QPointF local = worldPos - worldBounds.topLeft();
+QPoint Map::worldToTile(const QPointF& worldPos) const {
+    QPointF local = worldPos - m_worldBounds.topLeft();
 
-    int x = int(local.x()) / TILE_SIZE;
-    int y = int(local.y()) / TILE_SIZE;
+    int x = std::floor(local.x() / TILE_SIZE);
+    int y = std::floor(local.y() / TILE_SIZE);
 
     return QPoint(x, y);
 }
 
-QPointF Map::tileToWorld(const QPoint& tilePos, const QRectF& worldBounds) {
-    return worldBounds.topLeft() +
+QPointF Map::tileToWorld(const QPoint& tilePos) const {
+    return m_worldBounds.topLeft() +
            QPointF(tilePos.x() * TILE_SIZE, tilePos.y() * TILE_SIZE) +
            QPointF(TILE_SIZE / 2.0, TILE_SIZE / 2.0);
 }
@@ -132,4 +135,9 @@ bool Map::intersectsGrass(const QRectF& rect) const {
             return true;
     }
     return false;
+}
+
+bool Map::isInsideMap(const QPoint& tilePos) const {
+    return tilePos.x() >= 0 && tilePos.y() >= 0 &&
+           tilePos.x() < m_tileCountX && tilePos.y() < m_tileCountY;
 }

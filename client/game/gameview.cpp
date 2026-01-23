@@ -194,7 +194,7 @@ void GameView::mouseReleaseEvent(QMouseEvent* event) {
     QPointF mouseScene = mapToScene(event->pos());
 
     if (player->getInventory().isActiveResource())
-        m_game.tryPlaceTile(m_game.worldToTile(mouseScene));
+        m_game.tryPlaceTile(m_game.getMap().worldToTile(mouseScene));
     else
         player->stopAiming(mouseScene - player->getPosition());
 }
@@ -420,7 +420,7 @@ void GameView::updateBuildPreview() {
     }
 
     QPointF mouseScene = mapToScene(mapFromGlobal(QCursor::pos()));
-    QPoint tile = m_game.worldToTile(mouseScene);
+    QPoint tile = m_game.getMap().worldToTile(mouseScene);
     Tile::TileType type = player->getInventory().getActiveResourceType();
 
     if (tile == m_previewTile && type == m_previewType) return;
@@ -442,7 +442,7 @@ void GameView::updateBuildPreview() {
     m_buildPreview->setPixmap(visual.sprite.scaled(Map::TILE_SIZE, Map::TILE_SIZE,
                                                    Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
-    QPointF world = m_game.tileToWorld(tile);
+    QPointF world = m_game.getMap().tileToWorld(tile);
     m_buildPreview->setPos(world - QPointF(Map::TILE_SIZE / 2, Map::TILE_SIZE / 2));
 
     m_buildPreview->show();

@@ -10,6 +10,7 @@
 #include "../map/pickupitem.h"
 #include "../map/tilevisual.h"
 #include "../combat/weaponmanager.h"
+#include "attackraycast.h"
 
 class Game : public QObject
 {
@@ -57,6 +58,8 @@ private:
     void spawnPickupAtTile(const QPoint&, Tile::TileType);
     void applyPickup(PickupItem*);
     void checkPickupCollisions();
+
+    QVector<QPointF> samplePath(const QPainterPath&, double) const;
 
 signals:
     void tileChanged(int x, int y);

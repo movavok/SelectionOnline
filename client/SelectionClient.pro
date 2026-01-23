@@ -15,6 +15,7 @@ SOURCES += \
     entities/enemy.cpp \
     entities/entity.cpp \
     entities/player.cpp \
+    game/attackraycast.cpp \
     game/game.cpp \
     game/inventory.cpp \
     game/inventoryslot.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     entities/enemy.h \
     entities/entity.h \
     entities/player.h \
+    game/attackraycast.h \
     game/game.h \
     game/gameview.h \
     game/inventory.h \

@@ -21,19 +21,25 @@ public:
     unsigned short getTileCountX() const;
     unsigned short getTileCountY() const;
 
+    void setWorldBounds(int, int);
+    QRectF getWorldBounds() const;
+
     bool loadFromFile(const QString&);
 
     const Tile& tileAt(int x, int y) const;
     Tile& tileAt(int x, int y);
 
-    static QPoint worldToTile(const QPointF&, const QRectF&);
-    static QPointF tileToWorld(const QPoint&, const QRectF&);
+    QPoint worldToTile(const QPointF&) const;
+    QPointF tileToWorld(const QPoint&) const;
 
     void tilesInRect(const QRectF&, QVector<QPoint>& out) const;
     bool intersectsSolid(const QRectF&, CollisionActor) const;
     bool intersectsGrass(const QRectF&) const;
+    bool isInsideMap(const QPoint&) const;
 
 private:
+    QRectF m_worldBounds;
+
     unsigned short m_tileCountX = 0;
     unsigned short m_tileCountY = 0;
 
