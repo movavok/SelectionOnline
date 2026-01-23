@@ -69,8 +69,19 @@ bool Game::canMove(const Entity* entity, const QPointF& newPos) const {
 
     if (!m_worldBounds.contains(rectBounds))
         return false;
-    if (m_map.intersectsSolid(rectBounds, Map::CollisionActor::Person))
-        return false;
+
+    QVector<QPoint> tiles;
+    m_map.tilesInRect(rectBounds, tiles);
+    for (const QPoint& tilePos : tiles) {
+        const TileCollision& collision = tileCollision(m_map.tileAt(tilePos.x(), tilePos.y()).getType());
+        if (!collision.personSolid) continue;
+
+        const QPointF center = m_map.tileToWorld(tilePos);
+        const QRectF tileRect(center - QPointF(Map::TILE_SIZE / 2.0, Map::TILE_SIZE / 2.0),
+                              QSizeF(Map::TILE_SIZE, Map::TILE_SIZE));
+
+        if (rectCircleIntersect(tileRect, newPos, radius)) return false;
+    }
 
     for (Entity* other : m_entities) {
         if (other == entity || !other->isAlive()) continue;
@@ -115,34 +126,44 @@ QVector<QPointF> Game::samplePath(const QPainterPath& path, double step) const {
 
 QPainterPath Game::getPlayerAttackShape(const QPointF& mouseScene) const {
     const Weapon* weapon = m_player->getInventory().getActiveWeapon();
-    if (!weapon) return {};
+    if (!weapon)
+        return {};
 
     const QPointF playerPos = m_player->getPosition();
     const QPointF direction = mouseScene - playerPos;
 
-    const double angleDeg = std::atan2(direction.y(), direction.x()) * 180.0 / M_PI;
+    const double angleDeg =
+        std::atan2(direction.y(), direction.x()) * 180.0 / M_PI;
 
     QTransform rotation;
     rotation.rotate(angleDeg);
 
-    QPainterPath attackPath = rotation.map(weapon->indicatorShape(*m_player));
+    QPainterPath attackPath =
+        rotation.map(weapon->indicatorShape(*m_player));
+
     attackPath.translate(playerPos);
 
     QPainterPath result;
 
     for (const QPolygonF& polygon : attackPath.toSubpathPolygons()) {
-        if (polygon.size() < 3) continue;
+        if (polygon.size() < 3)
+            continue;
 
         QPolygonF clippedPolygon;
         clippedPolygon.reserve(polygon.size());
 
-        for (const QPointF& point : polygon)
-            clippedPolygon << AttackRaycast::clampToObstacle(playerPos, point, m_map);
+        for (const QPointF& point : polygon) {
+            clippedPolygon << AttackRaycast::clampToObstacle(
+                playerPos, point, m_map
+                );
+        }
 
-        if (clippedPolygon.size() < 3) continue;
+        if (clippedPolygon.size() < 3)
+            continue;
 
         const QRectF bounds = clippedPolygon.boundingRect();
-        if (bounds.width() < 0.5 && bounds.height() < 0.5) continue;
+        if (bounds.width() < 0.5 && bounds.height() < 0.5)
+            continue;
 
         result.addPolygon(clippedPolygon);
     }
