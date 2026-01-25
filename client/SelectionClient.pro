@@ -26,7 +26,8 @@ SOURCES += \
     game/gameview.cpp \
     map/tilecollision.cpp \
     map/tilevisual.cpp \
-    ui/mainwindow.cpp
+    ui/mainwindow.cpp \
+    ui/playerpreviewwidget.cpp
 
 HEADERS += \
     combat/katana.h \
@@ -46,7 +47,8 @@ HEADERS += \
     input/inputtypes.h \
     map/tilecollision.h \
     map/tilevisual.h \
-    ui/mainwindow.h
+    ui/mainwindow.h \
+    ui/playerpreviewwidget.h
 
 FORMS += \
     ui/mainwindow.ui

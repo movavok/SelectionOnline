@@ -2,6 +2,9 @@
     <qresource prefix="/maps">
         <file alias="default.txt">assets/maps/default.txt</file>
     </qresource>
+    <qresource prefix="/ui">
+        <file alias="player_preview_bg.png">assets/ui/player_preview_bg.png</file>
+    </qresource>
     <qresource prefix="/entities">
         <file alias="tank.png">assets/entities/tank.png</file>
     </qresource>
