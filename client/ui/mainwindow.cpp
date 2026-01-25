@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->table_playersList->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     m_gameView = ui->gameViewHolder;
     m_gameView->useMovementScheme(MovementScheme::WASD);
     m_gameView->setupSlotKeys();
