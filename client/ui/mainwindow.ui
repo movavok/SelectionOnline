@@ -25,6 +25,368 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">
+/* Pixel UI theme (Fixedsys-like) */
+
+/* Global */
+QMainWindow,
+QWidget#centralwidget {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+
+/* Pages */
+#page_startScreen,
+#page_lobbyScreen,
+#page_settingsScreen {
+    background-color: #1f1f1f;
+}
+
+/* Tooltips */
+QToolTip {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 0;
+    padding: 4px 6px;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+
+/* QMessageBox / dialogs */
+QMessageBox,
+QDialog {
+    background-color: #3e3e3e;
+    color: #f0f0f0;
+    border: 2px solid #dcdcdc;
+    border-radius: 0;
+    padding: 8px 10px;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+
+QMessageBox QLabel#qt_msgbox_label {
+    color: #f0f0f0;
+    background: transparent;
+    margin: 6px 0 0 0;
+    qproperty-alignment: AlignCenter;
+}
+
+QMessageBox QLabel#qt_msgboxex_icon_label {
+    min-width: 0px;
+    max-width: 0px;
+    width: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+QMessageBox QDialogButtonBox {
+    qproperty-centerButtons: true;
+    padding-top: 10px;
+}
+
+QMessageBox QPushButton,
+QDialog QPushButton {
+    background-color: #5a5a5a;
+    border: 2px solid #1e1e1e;
+    border-radius: 0;
+    padding: 6px 12px;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+QMessageBox QPushButton:hover,
+QDialog QPushButton:hover {
+    background-color: #6a6a6a;
+}
+QMessageBox QPushButton:pressed,
+QDialog QPushButton:pressed {
+    background-color: #4a4a4a;
+    border-left-color: #2a2a2a;
+    border-top-color: #2a2a2a;
+    border-right-color: #777777;
+    border-bottom-color: #777777;
+}
+
+/* Typography for main pages */
+#page_startScreen QLabel,
+#page_startScreen QPushButton,
+#page_startScreen QGroupBox,
+#page_startScreen QComboBox,
+#page_startScreen QSpinBox,
+#page_startScreen QAbstractSpinBox,
+#page_lobbyScreen QLabel,
+#page_lobbyScreen QPushButton,
+#page_lobbyScreen QGroupBox,
+#page_lobbyScreen QComboBox,
+#page_lobbyScreen QSpinBox,
+#page_lobbyScreen QAbstractSpinBox,
+#page_settingsScreen QLabel,
+#page_settingsScreen QPushButton,
+#page_settingsScreen QGroupBox,
+#page_settingsScreen QComboBox,
+#page_settingsScreen QSpinBox,
+#page_settingsScreen QAbstractSpinBox {
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    color: #ffffff;
+}
+
+/* GroupBox pixel border */
+QGroupBox {
+    border: 2px solid #000000;
+    border-radius: 0;
+    margin-top: 10px;
+    background-color: rgba(0,0,0,0.35);
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 2px 6px;
+    background-color: rgba(0,0,0,0.6);
+    color: #ffffff;
+}
+
+/* Labels */
+QLabel {
+    background-color: transparent;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #3a3a3a;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 6px 10px;
+    color: #ffffff;
+}
+QPushButton:hover { background-color: #4a4a4a; }
+QPushButton:pressed {
+    background-color: #2a2a2a;
+    border-left-color: #111111;
+    border-top-color:  #111111;
+    border-right-color:#555555;
+    border-bottom-color:#555555;
+}
+QPushButton:disabled {
+    background-color: #1f1f1f;
+    border: 2px solid #444444;
+    color: #888888;
+}
+
+/* Inputs */
+QLineEdit,
+QComboBox,
+QSpinBox,
+QAbstractSpinBox {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 2px 6px;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    selection-background-color: #5a5a5a;
+    selection-color: #ffffff;
+}
+QLineEdit:focus,
+QComboBox:focus,
+QSpinBox:focus,
+QAbstractSpinBox:focus {
+    border-color: #ffffff;
+}
+
+QComboBox::drop-down {
+    width: 18px;
+    border-left: 2px solid #000000;
+    background-color: #3a3a3a;
+}
+QComboBox::down-arrow { image: none; }
+
+QAbstractSpinBox {
+    padding-right: 14px; /* room for up/down */
+}
+QAbstractSpinBox QLineEdit {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    qproperty-alignment: AlignVCenter | AlignRight;
+}
+QAbstractSpinBox::up-button,
+QAbstractSpinBox::down-button {
+    width: 12px;
+    background-color: #3a3a3a;
+    border-left: 2px solid #000000;
+}
+QAbstractSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    height: 50%;
+    border-bottom: 1px solid #000000;
+}
+QAbstractSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    height: 50%;
+    border-top: 1px solid #000000;
+}
+QAbstractSpinBox::up-button:hover,
+QAbstractSpinBox::down-button:hover {
+    background-color: #4a4a4a;
+}
+QAbstractSpinBox::up-button:pressed,
+QAbstractSpinBox::down-button:pressed {
+    background-color: #2a2a2a;
+}
+QAbstractSpinBox::up-arrow,
+QAbstractSpinBox::down-arrow {
+    image: none;
+}
+
+/* Tables */
+QTableWidget,
+QTableView {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    gridline-color: #000000;
+    selection-background-color: #5a5a5a;
+}
+QTableWidget::item,
+QTableView::item {
+    padding: 2px 6px;
+}
+QTableWidget::item:selected,
+QTableView::item:selected {
+    background-color: #5a5a5a;
+    color: #ffffff;
+}
+QTableCornerButton::section {
+    background-color: #3a3a3a;
+    border: 2px solid #000000;
+}
+QHeaderView::section {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 2px solid #000000;
+    padding: 4px 6px;
+}
+
+QScrollBar:vertical {
+    background: #2f2f2f;
+    width: 14px;
+    margin: 0;
+    border-left: 2px solid #000000;
+}
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-height: 24px;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar:horizontal {
+    background: #2f2f2f;
+    height: 14px;
+    margin: 0;
+    border-top: 2px solid #000000;
+}
+QScrollBar::handle:horizontal {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-width: 24px;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
+/* Menu */
+QMenuBar {
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+QMenuBar::item {
+    background: transparent;
+    padding: 4px 10px;
+}
+QMenuBar::item:selected {
+    background-color: #3a3a3a;
+}
+QMenu {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 2px solid #000000;
+}
+QMenu::item:selected {
+    background-color: #4a4a4a;
+}
+
+/* Player preview frame */
+QWidget#playerPreviewWidget {
+    background: transparent;
+    border: 2px solid #000000;
+    border-radius: 0;
+}
+
+/* Color swatches */
+QPushButton#b_red, QPushButton#b_blue, QPushButton#b_yellow, QPushButton#b_green,
+QPushButton#b_gray, QPushButton#b_white, QPushButton#b_black, QPushButton#b_purple,
+QPushButton#b_pink, QPushButton#b_orange {
+    padding: 0;
+    border-radius: 0;
+    border: 2px solid #000000;
+    color: transparent;
+}
+QPushButton#b_red { background-color: rgb(255, 0, 0); }
+QPushButton#b_blue { background-color: rgb(0, 0, 255); }
+QPushButton#b_yellow { background-color: rgb(255, 255, 0); }
+QPushButton#b_green { background-color: rgb(0, 255, 0); }
+QPushButton#b_gray { background-color: rgb(128, 128, 128); }
+QPushButton#b_white { background-color: rgb(255, 255, 255); }
+QPushButton#b_black { background-color: rgb(0, 0, 0); }
+QPushButton#b_purple { background-color: rgb(128, 0, 128); }
+QPushButton#b_pink { background-color: rgb(255, 105, 180); }
+QPushButton#b_orange { background-color: rgb(255, 165, 0); }
+
+QPushButton#b_red:hover, QPushButton#b_blue:hover, QPushButton#b_yellow:hover, QPushButton#b_green:hover,
+QPushButton#b_gray:hover, QPushButton#b_white:hover, QPushButton#b_black:hover, QPushButton#b_purple:hover,
+QPushButton#b_pink:hover, QPushButton#b_orange:hover {
+    border-color: #ffffff;
+}
+
+QPushButton#b_red:hover { background-color: rgb(255, 0, 0); }
+QPushButton#b_blue:hover { background-color: rgb(0, 0, 255); }
+QPushButton#b_yellow:hover { background-color: rgb(255, 255, 0); }
+QPushButton#b_green:hover { background-color: rgb(0, 255, 0); }
+QPushButton#b_gray:hover { background-color: rgb(128, 128, 128); }
+QPushButton#b_white:hover { background-color: rgb(255, 255, 255); }
+QPushButton#b_black:hover { background-color: rgb(0, 0, 0); }
+QPushButton#b_purple:hover { background-color: rgb(128, 0, 128); }
+QPushButton#b_pink:hover { background-color: rgb(255, 105, 180); }
+QPushButton#b_orange:hover { background-color: rgb(255, 165, 0); }
+
+QPushButton#b_red:pressed { background-color: rgb(255, 0, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_blue:pressed { background-color: rgb(0, 0, 255); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_yellow:pressed { background-color: rgb(255, 255, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_green:pressed { background-color: rgb(0, 255, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_gray:pressed { background-color: rgb(128, 128, 128); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_white:pressed { background-color: rgb(255, 255, 255); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_black:pressed { background-color: rgb(0, 0, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_purple:pressed { background-color: rgb(128, 0, 128); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_pink:pressed { background-color: rgb(255, 105, 180); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_orange:pressed { background-color: rgb(255, 165, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="spacing">
@@ -45,7 +407,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_startScreen">
        <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -110,6 +472,8 @@
                  <widget class="QLineEdit" name="le_nickname">
                   <property name="font">
                    <font>
+                    <family>Fixedsys</family>
+                    <pointsize>10</pointsize>
                     <italic>false</italic>
                    </font>
                   </property>
@@ -278,6 +642,18 @@
                          <height>30</height>
                         </size>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_red {
+    background-color: rgb(255, 0, 0);
+    border-radius: 5px;
+}
+QPushButton#b_red:hover {
+    background-color: rgb(255, 80, 80);
+}
+QPushButton#b_red:pressed {
+    background-color: rgb(180, 0, 0);
+}</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -296,6 +672,18 @@
                          <width>30</width>
                          <height>30</height>
                         </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_yellow {
+    background-color: rgb(255, 255, 0);
+    border-radius: 5px;
+}
+QPushButton#b_yellow:hover {
+    background-color: rgb(255, 255, 120);
+}
+QPushButton#b_yellow:pressed {
+    background-color: rgb(200, 200, 0);
+}</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -316,6 +704,18 @@
                          <height>30</height>
                         </size>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_pink {
+    background-color: rgb(255, 105, 180);
+    border-radius: 5px;
+}
+QPushButton#b_pink:hover {
+    background-color: rgb(255, 150, 205);
+}
+QPushButton#b_pink:pressed {
+    background-color: rgb(200, 80, 140);
+}</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -334,6 +734,18 @@
                          <width>30</width>
                          <height>30</height>
                         </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_orange {
+    background-color: rgb(255, 165, 0);
+    border-radius: 5px;
+}
+QPushButton#b_orange:hover {
+    background-color: rgb(255, 190, 80);
+}
+QPushButton#b_orange:pressed {
+    background-color: rgb(200, 130, 0);
+}</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -354,6 +766,18 @@
                          <height>30</height>
                         </size>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_white {
+    background-color: rgb(240, 240, 240);
+    border-radius: 5px;
+}
+QPushButton#b_white:hover {
+    background-color: rgb(255, 255, 255);
+}
+QPushButton#b_white:pressed {
+    background-color: rgb(200, 200, 200);
+}</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -372,6 +796,18 @@
                          <width>30</width>
                          <height>30</height>
                         </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_blue {
+    background-color: rgb(0, 0, 255);
+    border-radius: 5px;
+}
+QPushButton#b_blue:hover {
+    background-color: rgb(80, 80, 255);
+}
+QPushButton#b_blue:pressed {
+    background-color: rgb(0, 0, 180);
+}</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -392,6 +828,18 @@
                          <height>30</height>
                         </size>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_purple {
+    background-color: rgb(128, 0, 128);
+    border-radius: 5px;
+}
+QPushButton#b_purple:hover {
+    background-color: rgb(170, 80, 170);
+}
+QPushButton#b_purple:pressed {
+    background-color: rgb(90, 0, 90);
+}</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -410,6 +858,18 @@
                          <width>30</width>
                          <height>30</height>
                         </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_cyan {
+    background-color: rgb(0, 255, 255);
+    border-radius: 5px;
+}
+QPushButton#b_cyan:hover {
+    background-color: rgb(120, 255, 255);
+}
+QPushButton#b_cyan:pressed {
+    background-color: rgb(0, 180, 180);
+}</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -430,6 +890,18 @@
                          <height>30</height>
                         </size>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_black {
+    background-color: rgb(30, 30, 30);
+    border-radius: 5px;
+}
+QPushButton#b_black:hover {
+    background-color: rgb(70, 70, 70);
+}
+QPushButton#b_black:pressed {
+    background-color: rgb(0, 0, 0);
+}</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -448,6 +920,18 @@
                          <width>30</width>
                          <height>30</height>
                         </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_green {
+    background-color: rgb(0, 180, 0);
+    border-radius: 5px;
+}
+QPushButton#b_green:hover {
+    background-color: rgb(80, 220, 80);
+}
+QPushButton#b_green:pressed {
+    background-color: rgb(0, 130, 0);
+}</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -528,6 +1012,13 @@
                        <width>50</width>
                        <height>50</height>
                       </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QPushButton#b_katana {
+    background-image: url(:/ui/icons/katana.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
                      </property>
                      <property name="text">
                       <string/>
@@ -781,8 +1272,64 @@
              <item>
               <widget class="QTableWidget" name="table_playersList">
                <property name="styleSheet">
-                <string notr="true">font: 8pt &quot;Segoe UI&quot;;
-</string>
+                <string notr="true">QTableWidget,
+QTableView {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    gridline-color: #000000;
+    selection-background-color: #5a5a5a;
+}
+QTableWidget::item,
+QTableView::item {
+    padding: 2px 6px;
+}
+QTableWidget::item:selected,
+QTableView::item:selected {
+    background-color: #5a5a5a;
+    color: #ffffff;
+}
+QTableCornerButton::section {
+    background-color: #3a3a3a;
+    border: 2px solid #000000;
+}
+QHeaderView::section {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 0px solid #000000;
+    padding: 4px 6px;
+}
+
+QScrollBar:vertical {
+    background: #2f2f2f;
+    width: 14px;
+    margin: 0;
+    border-left: 2px solid #000000;
+}
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-height: 24px;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar:horizontal {
+    background: #2f2f2f;
+    height: 14px;
+    margin: 0;
+    border-top: 2px solid #000000;
+}
+QScrollBar::handle:horizontal {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-width: 24px;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
+}</string>
                </property>
                <property name="sizeAdjustPolicy">
                 <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
