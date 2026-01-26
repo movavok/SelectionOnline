@@ -11,6 +11,7 @@ GameView::GameView(QWidget* parent)
 
     m_scene->setSceneRect(m_game.getWorldBounds());
     buildMap();
+    initSlotWidget();
 
     connect(m_timer, &QTimer::timeout, this, &GameView::onTick);
     m_timer->start(16); // ~60fps
@@ -22,6 +23,23 @@ GameView::GameView(QWidget* parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scale(m_scaleSize, m_scaleSize);
+}
+
+void GameView::resizeEvent(QResizeEvent* event) {
+    QGraphicsView::resizeEvent(event);
+    if (m_slotWidget)
+        m_slotWidget->move((viewport()->width() - m_slotWidget->width()) / 2,
+                           viewport()->height() - m_slotWidget->height() * 1.5);
+}
+
+void GameView::initSlotWidget() {
+    m_slotWidget = new PlayerSlotWidget(this);
+    m_slotWidget->setFixedSize(300, 70);
+    m_slotWidget->raise();
+    m_slotWidget->show();
+
+    if (Player* player = m_game.getPlayer())
+        m_slotWidget->setPlayer(player);
 }
 
 QGraphicsRectItem* createRectItem(QGraphicsItem* parent, const QRectF& rect, const QColor& color, int zValue) {
@@ -241,6 +259,11 @@ void GameView::updateCamera() {
     }
 }
 
+void GameView::updateSlotWidget() {
+    if (m_slotWidget && m_game.getPlayer())
+        m_slotWidget->update();
+}
+
 QColor getHpBarColor(double ratio) {
     unsigned short red, green;
     double progress;
@@ -451,6 +474,7 @@ void GameView::updateBuildPreview() {
 void GameView::onTick() {
     m_game.update(m_deltaTime);
     updateCamera();
+    updateSlotWidget();
     updateEntitiesUi();
     updatePickupsUi();
     updateBuildPreview();

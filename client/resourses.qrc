@@ -5,6 +5,9 @@
     <qresource prefix="/ui">
         <file alias="player_preview_bg.png">assets/ui/player_preview_bg.png</file>
     </qresource>
+    <qresource prefix="/ui/icons">
+        <file alias="katana.png">assets/ui/icons/katana.png</file>
+    </qresource>
     <qresource prefix="/entities">
         <file alias="tank.png">assets/entities/tank.png</file>
     </qresource>

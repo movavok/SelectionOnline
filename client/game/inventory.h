@@ -18,7 +18,8 @@ public:
     Tile::TileType getActiveResourceType() const;
 
     void setActiveSlot(int index);
-    int getActiveSlot() const;
+    int getActiveSlotIndex() const;
+    const InventorySlot& getSlot(int) const;
 
 private:
     QVector<InventorySlot> m_slots = QVector<InventorySlot>(MAX_SLOTS);

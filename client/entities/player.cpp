@@ -41,7 +41,7 @@ Inventory& Player::getInventory() { return m_inventory; }
 const Inventory& Player::getInventory() const { return m_inventory; }
 
 void Player::setActiveSlot(int index) { m_inventory.setActiveSlot(index); }
-unsigned short Player::getActiveSlot() const { return m_inventory.getActiveSlot(); }
+unsigned short Player::getActiveSlot() const { return m_inventory.getActiveSlotIndex(); }
 
 const Weapon* Player::getActiveWeapon() const { return m_inventory.getActiveWeapon(); }
 

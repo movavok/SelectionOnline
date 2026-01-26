@@ -64,5 +64,11 @@ void Inventory::setActiveSlot(int index) {
     if (index >= 0 && index < MAX_SLOTS) m_activeSlot = index;
 }
 
-int Inventory::getActiveSlot() const { return m_activeSlot; }
+int Inventory::getActiveSlotIndex() const { return m_activeSlot; }
+
+const InventorySlot& Inventory::getSlot(int index) const {
+    static InventorySlot empty;
+    if (index < 0 || index >= MAX_SLOTS) return empty;
+    return m_slots[index];
+}
 

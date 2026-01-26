@@ -9,6 +9,7 @@
 #include <ctime>
 
 #include "../input/inputtypes.h"
+#include "../ui/playerslotwidget.h"
 #include "game.h"
 
 class GameView : public QGraphicsView
@@ -23,8 +24,11 @@ public:
 protected:
     void keyPressEvent(QKeyEvent*) override;
     void keyReleaseEvent(QKeyEvent*) override;
+
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
+
+    void resizeEvent(QResizeEvent*) override;
 
 private:
     struct EntityUi {
@@ -45,6 +49,9 @@ private:
     QGraphicsScene* m_scene = nullptr;
     QTimer* m_timer = nullptr;
 
+    //ui
+    PlayerSlotWidget* m_slotWidget = nullptr;
+
     //camera
     QPointF m_cameraPos;
 
@@ -64,10 +71,13 @@ private:
     double m_scaleSize = 1.25;
 
     //helper
+    void initSlotWidget();
+
     void initEntitiesUi();
     void initHpBar(EntityUi&);
     void initAttackIndicator(EntityUi&);
     void initSlotIndicator(EntityUi&);
+
     void initBuildPreview();
     void buildMap();
     void createPickupUi(const PickupItem*);
@@ -75,13 +85,18 @@ private:
     void handleKeyEvent(QKeyEvent*, bool);
 
     void updateCamera();
+
+    void updateSlotWidget();
+
     void updateEntitiesUi();
     void updateEntityHp(Entity*, EntityUi&);
     void updateEntityAtkIndicator(Entity*, EntityUi&);
     void updateEntitySlotIndicator(Entity*, EntityUi&);
+
     void updateEntitiesVisibility(Entity*, EntityUi&);
     void updatePickupsUi();
     void updateBuildPreview();
+
 
 private slots:
     void onTick();
