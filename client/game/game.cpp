@@ -281,6 +281,13 @@ void Game::update(float deltaTime) {
             QPointF delta = player->moveDistance(deltaTime);
             if (!delta.isNull()) {
                 QPointF currPos = player->getPosition();
+
+                QPoint tilePos = m_map.worldToTile(currPos);
+                Tile::TileType tileType = m_map.tileAt(tilePos.x(), tilePos.y()).getType();
+
+                float moveMul = tileCollision(tileType).moveViscosity;
+                delta *= moveMul;
+
                 QPointF nextPos = currPos + delta;
 
                 if (canMove(player, nextPos)) {

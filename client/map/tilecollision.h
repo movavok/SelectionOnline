@@ -6,6 +6,7 @@
 struct TileCollision {
     bool personSolid;
     bool projectileSolid;
+    float moveViscosity = 1.0f;
 };
 
 const TileCollision& tileCollision(Tile::TileType type);
