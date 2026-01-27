@@ -22,6 +22,7 @@ GameView::GameView(QWidget* parent)
     m_timer->start(16); // ~60fps
 
     connect(&m_game, &Game::tileChanged, this, &GameView::updateTile);
+    connect(&m_game, &Game::enemyHit, this, &GameView::onEnemyHit);
 
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
@@ -172,6 +173,13 @@ void GameView::initSlotIndicator(EntityUi& ui) {
     ui.slotIndicator->hide();
 }
 
+void GameView::initDamageEffect(EntityUi& ui) {
+    ui.damageEffect = new QGraphicsColorizeEffect();
+    ui.damageEffect->setColor(QColor(255, 0, 0));
+    ui.damageEffect->setStrength(0.0);
+    ui.sprite->setGraphicsEffect(ui.damageEffect);
+}
+
 void GameView::initEntitiesUi() {
     for (Entity* entity : m_game.getEntities()) {
         EntityUi ui;
@@ -195,9 +203,29 @@ void GameView::initEntitiesUi() {
         initHpBar(ui);
         initAttackIndicator(ui);
         initSlotIndicator(ui);
+        initDamageEffect(ui);
 
         m_entityItems.insert(entity, ui);
     }
+}
+
+void GameView::onEnemyHit(const HitInfo& hit) {
+    Entity* target = hit.target;
+    if (!target || !m_entityItems.contains(target)) return;
+
+    if (hit.damage <= 0) return;
+
+    EntityUi& ui = m_entityItems[target];
+    if (!ui.damageEffect) return;
+
+    const float baseDuration = 0.06f;
+    const float extraPerDamage = 0.002f;
+    const float maxDuration = 0.25f;
+
+    const float duration = std::clamp(baseDuration + hit.damage * extraPerDamage, baseDuration, maxDuration);
+    ui.damageFlashRemaining = duration;
+    ui.damageFlashTotal = duration;
+    ui.damageEffect->setStrength(1.0);
 }
 
 void GameView::initBuildPreview() {
@@ -513,6 +541,15 @@ void GameView::updateEntitiesUi() {
         updateEntityHp(entity, ui);
         updateEntityAtkIndicator(entity, ui);
         updateEntitySlotIndicator(entity, ui);
+
+        if (ui.damageEffect && ui.damageFlashRemaining > 0.0f) {
+            ui.damageFlashRemaining = std::max(0.0f, ui.damageFlashRemaining - m_deltaTime);
+            const float denom = (ui.damageFlashTotal > 0.0001f) ? ui.damageFlashTotal : 1.0f;
+            const float strength = ui.damageFlashRemaining / denom;
+            ui.damageEffect->setStrength(strength);
+        } else if (ui.damageEffect) {
+            ui.damageEffect->setStrength(0.0);
+        }
     }
 }
 

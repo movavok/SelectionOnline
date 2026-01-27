@@ -5,8 +5,8 @@ const TileCollision &tileCollision(Tile::TileType type) {
     static const TileCollision board { true, true };
     static const TileCollision brickStrong { true, true };
     static const TileCollision brickCracked { true, true };
-    static const TileCollision grass { false, false, 0.8f };
-    static const TileCollision water { false, false, 0.4f };
+    static const TileCollision grass { false, false, 0.85f };
+    static const TileCollision water { false, false, 0.6f };
     static const TileCollision wall { true, true };
 
     switch (type) {

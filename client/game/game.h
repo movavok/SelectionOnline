@@ -11,6 +11,7 @@
 #include "../map/tilevisual.h"
 #include "../combat/weaponmanager.h"
 #include "attackraycast.h"
+#include "hitinfo.h"
 
 class Game : public QObject
 {
@@ -63,6 +64,7 @@ private:
 
 signals:
     void tileChanged(int x, int y);
+    void enemyHit(const HitInfo& hit);
 };
 
 #endif // GAME_H

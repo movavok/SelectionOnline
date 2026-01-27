@@ -40,6 +40,7 @@ HEADERS += \
     entities/player.h \
     game/attackraycast.h \
     game/game.h \
+    game/hitinfo.h \
     game/gametimer.h \
     game/gameview.h \
     game/inventory.h \

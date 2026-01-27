@@ -14,6 +14,7 @@
 #include "../ui/playerslotwidget.h"
 #include "game.h"
 #include "gametimer.h"
+#include "hitinfo.h"
 
 class GameView : public QGraphicsView
 {
@@ -41,6 +42,9 @@ private:
     struct EntityUi {
         QGraphicsEllipseItem* body = nullptr;
         QGraphicsPixmapItem* sprite = nullptr;
+        QGraphicsColorizeEffect* damageEffect = nullptr;
+        float damageFlashRemaining = 0.0f;
+        float damageFlashTotal = 0.0f;
         QGraphicsRectItem* hpBack = nullptr;
         QGraphicsRectItem* hpFill = nullptr;
         QGraphicsRectItem* hpTextMask = nullptr;
@@ -101,6 +105,7 @@ private:
     void initHpBar(EntityUi&);
     void initAttackIndicator(EntityUi&);
     void initSlotIndicator(EntityUi&);
+    void initDamageEffect(EntityUi&);
 
     void initBuildPreview();
     void buildMap();
@@ -132,6 +137,7 @@ private slots:
     void onGameStarted();
     void onGameTimerTick(int);
     void onGameEnded();
+    void onEnemyHit(const HitInfo& hit);
 };
 
 #endif // GAMEVIEW_H

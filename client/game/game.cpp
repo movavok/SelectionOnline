@@ -101,7 +101,6 @@ QPainterPath Game::makeCirclePath(const QPointF& center, float radius) const {
     return circle;
 }
 
-
 QPainterPath Game::getPlayerAttackShape(const QPointF& mouseScene) const {
     const Weapon* weapon = m_player->getInventory().getActiveWeapon();
     if (!weapon)
@@ -197,15 +196,27 @@ void Game::performWeaponHit(const Weapon& weapon, const QPointF& dir, const QPai
         if (!attackShape.intersects(enemyCircle))
             continue;
 
-        const int damage = weapon.getDamage();
-        enemy->takeDamage(damage);
+        const int baseDamage = weapon.getDamage();
+        const unsigned short hpBefore = enemy->getCurrentHp();
+        enemy->takeDamage(baseDamage);
+        const unsigned short hpAfter = enemy->getCurrentHp();
+        const int appliedDamage = int(hpBefore) - int(hpAfter);
 
-        QPointF knockbackDir = enemy->getPosition() - m_player->getPosition();
-        const double len = std::hypot(knockbackDir.x(), knockbackDir.y());
-        if (len > 0.0)
-            knockbackDir /= len;
+        QPointF hitDir = enemy->getPosition() - m_player->getPosition();
+        const double hitLen = std::hypot(hitDir.x(), hitDir.y());
+        if (hitLen > 0.0)
+            hitDir /= hitLen;
 
-        const double knockbackStrength = std::clamp(damage * 2.0, 0.0, 500.0);
+        HitInfo hit;
+        hit.attacker = m_player;
+        hit.target = enemy;
+        hit.damage = appliedDamage;
+        hit.direction = hitDir;
+        emit enemyHit(hit);
+
+        QPointF knockbackDir = hitDir;
+
+        const double knockbackStrength = std::clamp(appliedDamage * 2.0, 0.0, 500.0);
         enemy->addImpulse(knockbackDir * knockbackStrength);
     }
 }
