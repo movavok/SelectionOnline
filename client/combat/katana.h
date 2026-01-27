@@ -8,8 +8,9 @@ public:
     Katana();
 
     QPixmap getIcon() const override;
-    QSize getIconSize() const override;
 
+    QPixmap getSprite() const override;
+    QSize getSpriteSize() const override;
     QPointF getGripPoint() const override;
 
     QPainterPath indicatorShape(const Entity&) const override;

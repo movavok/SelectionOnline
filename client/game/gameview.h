@@ -3,6 +3,7 @@
 
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
+#include <QGraphicsColorizeEffect>
 #include <QKeyEvent>
 #include <QTimer>
 #include <cstdlib>
@@ -11,6 +12,7 @@
 #include "../input/inputtypes.h"
 #include "../ui/playerslotwidget.h"
 #include "game.h"
+#include "gametimer.h"
 
 class GameView : public QGraphicsView
 {
@@ -20,6 +22,8 @@ public:
 
     void useMovementScheme(MovementScheme);
     void setupSlotKeys();
+
+    void startGameWithCountdown();
 
 protected:
     void keyPressEvent(QKeyEvent*) override;
@@ -47,7 +51,15 @@ private:
 
     //scene
     QGraphicsScene* m_scene = nullptr;
+
+    QGraphicsRectItem* m_grayOverlay = nullptr;
+    float m_grayAmount = 1.0f;
+
     QTimer* m_timer = nullptr;
+
+    QGraphicsTextItem* m_timerText = nullptr;
+    GameTimer* m_gameTimer = nullptr;
+    bool m_gamePaused = true;
 
     //ui
     PlayerSlotWidget* m_slotWidget = nullptr;
@@ -71,6 +83,11 @@ private:
     double m_scaleSize = 1.25;
 
     //helper
+    void initGrayOverlay();
+
+    void initGameTimer();
+    void initTimerUi();
+
     void initSlotWidget();
 
     void initEntitiesUi();
@@ -86,6 +103,11 @@ private:
 
     void updateCamera();
 
+    void updateGrayOverlayRect();
+    void updateGrayOverlay();
+
+    void updateTimerPosition();
+
     void updateSlotWidget();
 
     void updateEntitiesUi();
@@ -97,10 +119,14 @@ private:
     void updatePickupsUi();
     void updateBuildPreview();
 
-
 private slots:
     void onTick();
     void updateTile(int x, int y);
+
+    void onCountdownTick(int);
+    void onGameStarted();
+    void onGameTimerTick(int);
+    void onGameEnded();
 };
 
 #endif // GAMEVIEW_H

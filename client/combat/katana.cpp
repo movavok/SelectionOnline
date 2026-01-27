@@ -2,16 +2,20 @@
 
 Katana::Katana() : Weapon(75, 0.5f)
 {
-    m_iconSprite = QPixmap(":/weapons/katana.png");
-    m_iconWidth = 6;
-    m_iconHeight = 36;
+    m_iconImage = QPixmap(":/ui/icons/katana.png");
+
+    m_weaponSprite = QPixmap(":/weapons/katana.png");
+    m_spriteWidth = 6;
+    m_spriteHeight = 36;
 
     m_weaponRange = 60;
 }
 
-QPixmap Katana::getIcon() const { return m_iconSprite; }
+QPixmap Katana::getIcon() const { return m_iconImage; }
 
-QSize Katana::getIconSize() const { return QSize(m_iconWidth, m_iconHeight); }
+QPixmap Katana::getSprite() const { return m_weaponSprite;  }
+
+QSize Katana::getSpriteSize() const { return QSize(m_spriteWidth, m_spriteHeight); }
 
 QPainterPath Katana::indicatorShape(const Entity& person) const {
     const double insideRadius = insideOffset(person);
@@ -39,4 +43,4 @@ double Katana::insideOffset(const Entity& person) const { return person.getRadiu
 
 double Katana::getWeaponRange() const { return m_weaponRange; }
 
-QPointF Katana::getGripPoint() const { return QPointF(2, m_iconHeight / 2); }
+QPointF Katana::getGripPoint() const { return QPointF(2, m_spriteHeight / 2); }

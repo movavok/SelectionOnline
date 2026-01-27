@@ -17,6 +17,7 @@ SOURCES += \
     entities/player.cpp \
     game/attackraycast.cpp \
     game/game.cpp \
+    game/gametimer.cpp \
     game/inventory.cpp \
     game/inventoryslot.cpp \
     map/map.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     entities/player.h \
     game/attackraycast.h \
     game/game.h \
+    game/gametimer.h \
     game/gameview.h \
     game/inventory.h \
     game/inventoryslot.h \

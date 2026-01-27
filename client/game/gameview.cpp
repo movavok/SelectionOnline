@@ -4,14 +4,19 @@ GameView::GameView(QWidget* parent)
     : QGraphicsView(parent)
     , m_scene(new QGraphicsScene(this))
     , m_timer(new QTimer(this))
+    , m_gameTimer(new GameTimer(this))
 {
     setScene(m_scene);
-
-    initEntitiesUi();
-
     m_scene->setSceneRect(m_game.getWorldBounds());
     buildMap();
+
+    initGrayOverlay();
     initSlotWidget();
+
+    initGameTimer();
+    initTimerUi();
+
+    initEntitiesUi();
 
     connect(m_timer, &QTimer::timeout, this, &GameView::onTick);
     m_timer->start(16); // ~60fps
@@ -25,8 +30,69 @@ GameView::GameView(QWidget* parent)
     scale(m_scaleSize, m_scaleSize);
 }
 
+void GameView::updateGrayOverlayRect() {
+    QPointF topLeft = mapToScene(QPoint(0,0));
+    QPointF bottomRight = mapToScene(QPoint(viewport()->width(), viewport()->height()));
+
+    QRectF rect(topLeft, bottomRight);
+    m_grayOverlay->setRect(rect.normalized());
+}
+
+void GameView::initGrayOverlay() {
+    m_grayOverlay = new QGraphicsRectItem();
+    m_grayOverlay->setBrush(QColor(0, 0, 0));
+    m_grayOverlay->setPen(Qt::NoPen);
+    m_grayOverlay->setZValue(500);
+
+    m_grayOverlay->setFlag(QGraphicsItem::ItemIgnoresTransformations, false);
+
+    m_scene->addItem(m_grayOverlay);
+}
+
+void GameView::onCountdownTick(int sec) {
+    m_timerText->setPlainText(QString::number(sec));
+    m_timerText->setDefaultTextColor(QColor(255, 200, 50, 180));
+    m_timerText->setVisible(true);
+}
+
+void GameView::onGameStarted() {
+    m_gamePaused = false;
+
+    m_timerText->setDefaultTextColor(Qt::white);
+    m_gameTimer->startGameTimer(180);
+}
+
+void GameView::onGameTimerTick(int sec) {
+    int minute = sec / 60;
+    int second = sec % 60;
+
+    m_timerText->setPlainText(QString("%1:%2").arg(minute, 2, 10, QChar('0'))
+                                              .arg(second, 2, 10, QChar('0')));
+}
+
+void GameView::onGameEnded() {
+    m_gamePaused = true;
+    m_timerText->setDefaultTextColor(Qt::red);
+}
+
+void GameView::initGameTimer() {
+    connect(m_gameTimer, &GameTimer::countdownTick, this, &GameView::onCountdownTick);
+    connect(m_gameTimer, &GameTimer::gameStarted, this, &GameView::onGameStarted);
+    connect(m_gameTimer, &GameTimer::gameTick, this, &GameView::onGameTimerTick);
+    connect(m_gameTimer, &GameTimer::gameEnded, this, &GameView::onGameEnded);
+}
+
+void GameView::initTimerUi() {
+    m_timerText = new QGraphicsTextItem();
+    m_timerText->setFont(QFont("Fixedsys", 8, QFont::Bold));
+    m_timerText->setZValue(1000);
+    m_timerText->setVisible(false);
+    m_scene->addItem(m_timerText);
+}
+
 void GameView::resizeEvent(QResizeEvent* event) {
     QGraphicsView::resizeEvent(event);
+
     if (m_slotWidget)
         m_slotWidget->move((viewport()->width() - m_slotWidget->width()) / 2,
                            viewport()->height() - m_slotWidget->height() * 1.5);
@@ -35,6 +101,7 @@ void GameView::resizeEvent(QResizeEvent* event) {
 void GameView::initSlotWidget() {
     m_slotWidget = new PlayerSlotWidget(this);
     m_slotWidget->setFixedSize(300, 70);
+
     m_slotWidget->raise();
     m_slotWidget->show();
 
@@ -217,6 +284,10 @@ void GameView::mouseReleaseEvent(QMouseEvent* event) {
         player->stopAiming(mouseScene - player->getPosition());
 }
 
+void GameView::startGameWithCountdown() {
+    m_gameTimer->startCountdown(5);
+}
+
 void GameView::setupSlotKeys() {
     m_slotKeyMap[2] = 0;
     m_slotKeyMap[3] = 1;
@@ -246,6 +317,26 @@ void GameView::useMovementScheme(MovementScheme scheme) {
     m_moveKeyMap[scanDown] = MoveDirection::MoveDown;
     m_moveKeyMap[scanLeft] = MoveDirection::MoveLeft;
     m_moveKeyMap[scanRight] = MoveDirection::MoveRight;
+}
+
+void GameView::updateGrayOverlay() {
+    if (m_gameTimer->isCountdown()) {
+        m_grayAmount -= m_deltaTime * 0.25;
+        m_grayAmount = std::clamp(m_grayAmount, 0.0f, 1.0f);
+
+        m_grayOverlay->setOpacity(m_grayAmount);
+        updateGrayOverlayRect();
+    }
+}
+
+void GameView::updateTimerPosition() {
+    if (!m_timerText || !m_timerText->isVisible()) return;
+
+    QRectF viewRect = mapToScene(viewport()->rect()).boundingRect();
+    QRectF textRect = m_timerText->boundingRect();
+
+    m_timerText->setPos(viewRect.center().x() - textRect.width() / 2,
+                        viewRect.top() + 20);
 }
 
 void GameView::updateCamera() {
@@ -358,7 +449,7 @@ void GameView::updateEntitySlotIndicator(Entity* entity, EntityUi& ui) {
             pixmap = visual.sprite.scaled(10, 10, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
     else if (Weapon* weapon = player->getInventory().getActiveWeapon())
-        pixmap = weapon->getIcon().scaled(weapon->getIconSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        pixmap = weapon->getSprite().scaled(weapon->getSpriteSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     if (pixmap.isNull()) { ui.slotIndicator->hide(); return; }
 
@@ -472,8 +563,15 @@ void GameView::updateBuildPreview() {
 }
 
 void GameView::onTick() {
-    m_game.update(m_deltaTime);
+    m_gameTimer->update(m_deltaTime);
+
+    if (!m_gamePaused) m_game.update(m_deltaTime);
+
+    updateGrayOverlay();
+    updateTimerPosition();
+
     updateCamera();
+
     updateSlotWidget();
     updateEntitiesUi();
     updatePickupsUi();

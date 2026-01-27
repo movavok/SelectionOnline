@@ -12,7 +12,9 @@ public:
     virtual ~Weapon() = default;
 
     virtual QPixmap getIcon() const = 0;
-    virtual QSize getIconSize() const = 0;
+
+    virtual QPixmap getSprite() const = 0;
+    virtual QSize getSpriteSize() const = 0;
     virtual QPointF getGripPoint() const = 0;
 
     virtual QPainterPath indicatorShape(const Entity&) const = 0;
@@ -27,10 +29,11 @@ protected:
     float m_cooldown;
     double m_weaponRange;
 
-    QPixmap m_iconSprite;
+    QPixmap m_iconImage;
+    QPixmap m_weaponSprite;
 
-    unsigned short m_iconWidth;
-    unsigned short m_iconHeight;
+    unsigned short m_spriteWidth;
+    unsigned short m_spriteHeight;
 };
 
 #endif // WEAPON_H

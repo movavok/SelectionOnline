@@ -407,7 +407,7 @@ QPushButton#b_orange:pressed { background-color: rgb(255, 165, 0); border-left-c
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_startScreen">
        <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -959,6 +959,9 @@ QPushButton#b_green:pressed {
                     <layout class="QVBoxLayout" name="verticalLayout_16">
                      <item>
                       <widget class="QPushButton" name="b_playerReady">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="text">
                         <string>Готово</string>
                        </property>
@@ -966,6 +969,9 @@ QPushButton#b_green:pressed {
                      </item>
                      <item>
                       <widget class="QPushButton" name="b_openGameView">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="text">
                         <string>Почати гру</string>
                        </property>
@@ -1298,6 +1304,8 @@ QHeaderView::section {
     color: #ffffff;
     border: 0px solid #000000;
     padding: 4px 6px;
+	font-family: &quot;Fixedsys&quot;;
+    font-size: 12px;
 }
 
 QScrollBar:vertical {
@@ -1406,6 +1414,42 @@ QScrollBar::sub-line:horizontal {
        <layout class="QVBoxLayout" name="verticalLayout_26">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_25">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <item>
+             <widget class="QPushButton" name="b_back">
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Назад</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
           <item>
            <spacer name="verticalSpacer_4">
             <property name="orientation">
@@ -1710,7 +1754,17 @@ QScrollBar::sub-line:horizontal {
                       </widget>
                      </item>
                      <item>
-                      <widget class="QSpinBox" name="sb_maxFps"/>
+                      <widget class="QSpinBox" name="sb_maxFps">
+                       <property name="minimum">
+                        <number>15</number>
+                       </property>
+                       <property name="maximum">
+                        <number>400</number>
+                       </property>
+                       <property name="value">
+                        <number>60</number>
+                       </property>
+                      </widget>
                      </item>
                     </layout>
                    </item>

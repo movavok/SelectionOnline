@@ -13,28 +13,30 @@ void PlayerSlotWidget::setPlayer(const Player* player) {
 }
 
 void PlayerSlotWidget::drawSlotIcon(QPainter& painter, const QRect& slotRect, const InventorySlot& slot) {
-    int margin = slotRect.width() * 0.15;
-    QRect iconRect = slotRect.adjusted(margin, margin, -margin, -margin);
+    short margin;
     QPixmap icon;
     double opacity = 1.0;
 
     if (slot.m_type == InventorySlot::SlotType::Weapon && slot.m_weapon) {
         icon = slot.m_weapon->getIcon();
-        opacity = 0.6;
+        margin = 0;
     }
     else if (slot.m_type == InventorySlot::SlotType::Resource) {
         icon = tileVisual(slot.m_resourceType).sprite;
         opacity = 0.7;
+        margin = slotRect.width() * 0.2;
     }
+
+    QRect iconRect = slotRect.adjusted(margin, margin, -margin, -margin);
 
     if (!icon.isNull()) {
         painter.setOpacity(opacity);
-        QPixmap scaled = icon.scaled(iconRect.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        QPixmap scaled = icon.scaled(iconRect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
         painter.drawPixmap(iconRect, scaled);
         painter.setOpacity(1.0);
     }
 
-    if (slot.m_type == InventorySlot::SlotType::Resource) {
+    if (slot.m_type == InventorySlot::SlotType::Resource && slot.m_resourceAmount > 1) {
         painter.setFont(QFont("Fixedsys", 14));
         painter.setPen(Qt::white);
         painter.drawText(slotRect, Qt::AlignCenter, QString::number(slot.m_resourceAmount));

@@ -8,9 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->table_playersList->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    initColorButtons();
-    initWeaponButtons();
-    initAbilityButtons();
+    initButtons();
 
     m_playerPreview = ui->playerPreviewWidget;
 
@@ -22,6 +20,64 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::initButtons() {
+    //start screen
+    connect(ui->b_hostServer, &QPushButton::clicked, this, &MainWindow::onHostServer);
+    connect(ui->b_joinServer, &QPushButton::clicked, this, &MainWindow::onJoinServer);
+
+    //settings
+    connect(ui->b_back, &QPushButton::clicked, this, &MainWindow::goToPrevPage);
+
+    //lobby
+    connect(ui->b_playerReady, &QPushButton::clicked, this, &MainWindow::onPlayerReady);
+    connect(ui->b_settings, &QPushButton::clicked, this, &MainWindow::goToSettings);
+    connect(ui->b_openGameView, &QPushButton::clicked, this, &MainWindow::startGame);
+
+    initColorButtons();
+    initWeaponButtons();
+    initAbilityButtons();
+    //actions
+    connect(ui->act_settingsScreen, &QAction::triggered, this, &MainWindow::goToSettings);
+}
+
+void MainWindow::goToPage(Page page) {
+    Page current = static_cast<Page>(ui->stackedWidget->currentIndex());
+
+    if (page == PageSettings && current != PageSettings) m_prevPage = current;
+    if (page == current) return;
+
+    ui->stackedWidget->setCurrentIndex(page);
+
+    if (page == PageGame) statusBar()->hide();
+    else statusBar()->show();
+}
+
+void MainWindow::onHostServer() {
+    goToPage(PageLobby);
+}
+
+void MainWindow::onJoinServer() {
+    goToPage(PageLobby);
+}
+
+void MainWindow::onPlayerReady() {
+    m_playerReady = true;
+    ui->b_openGameView->setEnabled(m_playerReady);
+}
+
+void MainWindow::goToSettings() {
+    goToPage(PageSettings);
+}
+
+void MainWindow::startGame() {
+    goToPage(PageGame);
+    m_gameView->startGameWithCountdown();
+}
+
+void MainWindow::goToPrevPage() {
+    goToPage(m_prevPage);
 }
 
 void MainWindow::initColorButtons() {
@@ -57,6 +113,9 @@ void MainWindow::initColorButtons() {
 void MainWindow::onColorClicked() {
     QColor color = sender()->property("color").value<QColor>();
     ui->playerPreviewWidget->setColor(color);
+
+    m_colorSelected = true;
+    checkPlayerConfigured();
 }
 
 void MainWindow::initWeaponButtons() {
@@ -68,10 +127,13 @@ void MainWindow::initWeaponButtons() {
 void MainWindow::onWeaponClicked() {
     int weapon = sender()->property("weapon").toInt();
     m_playerPreview->setWeapon(static_cast<PlayerPreviewWidget::WeaponType>(weapon));
+
+    m_weaponSelected = true;
+    checkPlayerConfigured();
 }
 
 void MainWindow::initAbilityButtons() {
-    ui->b_mirrorShield->setProperty("ability", static_cast<int>(PlayerPreviewWidget::WeaponType::Katana));
+    ui->b_mirrorShield->setProperty("ability", static_cast<int>(PlayerPreviewWidget::AbilityType::MirrorShield));
 
     connect(ui->b_mirrorShield, &QPushButton::clicked, this, &MainWindow::onAbilityClicked);
 }
@@ -79,4 +141,12 @@ void MainWindow::initAbilityButtons() {
 void MainWindow::onAbilityClicked() {
     int ability = sender()->property("ability").toInt();
     m_playerPreview->setAbility(static_cast<PlayerPreviewWidget::AbilityType>(ability));
+
+    m_abilitySelected = true;
+    checkPlayerConfigured();
+}
+
+void MainWindow::checkPlayerConfigured() {
+    m_playerConfigured = m_colorSelected && m_weaponSelected && m_abilitySelected;
+    ui->b_playerReady->setEnabled(m_playerConfigured);
 }
