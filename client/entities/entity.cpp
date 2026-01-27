@@ -10,6 +10,10 @@ QPointF Entity::getPosition() const { return m_position; }
 void Entity::setPrevPosition(const QPointF& pos) { m_prevPosition = pos; }
 QPointF Entity::getPrevPosition() const { return m_prevPosition; }
 
+void Entity::setImpulse(const QPointF& impulse) { m_impulse = impulse; }
+void Entity::addImpulse(const QPointF& impulse) { m_impulse += impulse; }
+const QPointF& Entity::getImpulse() const { return m_impulse; }
+
 unsigned short Entity::getCurrentHp() const { return m_hp; }
 unsigned short Entity::getMaxHp() const { return m_maxHp; }
 

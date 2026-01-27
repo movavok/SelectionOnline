@@ -52,14 +52,14 @@ private:
 
     QPainterPath cutSolidTiles(const QPainterPath&) const;
     void tryBreakTiles(const QPainterPath&);
-    void performWeaponHit(const Weapon&, const QPointF&);
+    void performWeaponHit(const Weapon&, const QPointF&, const QPainterPath&);
     void processPlayerAttack();
 
     void spawnPickupAtTile(const QPoint&, Tile::TileType);
     void applyPickup(PickupItem*);
     void checkPickupCollisions();
 
-    QVector<QPointF> samplePath(const QPainterPath&, double) const;
+    QPainterPath makeCirclePath(const QPointF& center, float radius) const;
 
 signals:
     void tileChanged(int x, int y);

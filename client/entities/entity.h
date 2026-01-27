@@ -19,6 +19,10 @@ public:
     void setPrevPosition(const QPointF&);
     QPointF getPrevPosition() const;
 
+    void setImpulse(const QPointF&);
+    void addImpulse(const QPointF&);
+    const QPointF& getImpulse() const;
+
     unsigned short getCurrentHp() const;
     unsigned short getMaxHp() const;
 
@@ -30,6 +34,8 @@ public:
 protected:
     QPointF m_position;
     QPointF m_prevPosition;
+
+    QPointF m_impulse = QPointF(0, 0);
 
     float m_radius;
 
