@@ -50,15 +50,15 @@ void GameView::initGrayOverlay() {
 }
 
 void GameView::onCountdownTick(int sec) {
-    m_timerText->setPlainText(QString::number(sec));
-    m_timerText->setDefaultTextColor(QColor(255, 200, 50, 180));
-    m_timerText->setVisible(true);
+    m_timerLabel->setText(QString::number(sec));
+    m_timerLabel->setStyleSheet(m_timerBaseStyle + "color: rgb(255, 200, 50);");
+    m_timerLabel->setVisible(true);
 }
 
 void GameView::onGameStarted() {
     m_gamePaused = false;
 
-    m_timerText->setDefaultTextColor(Qt::white);
+    m_timerLabel->setStyleSheet(m_timerBaseStyle + "color: rgb(255, 255, 255);");
     m_gameTimer->startGameTimer(180);
 }
 
@@ -66,13 +66,13 @@ void GameView::onGameTimerTick(int sec) {
     int minute = sec / 60;
     int second = sec % 60;
 
-    m_timerText->setPlainText(QString("%1:%2").arg(minute, 2, 10, QChar('0'))
-                                              .arg(second, 2, 10, QChar('0')));
+    m_timerLabel->setText(QString("%1:%2").arg(minute, 2, 10, QChar('0'))
+                                          .arg(second, 2, 10, QChar('0')));
 }
 
 void GameView::onGameEnded() {
     m_gamePaused = true;
-    m_timerText->setDefaultTextColor(Qt::red);
+    m_timerLabel->setStyleSheet(m_timerBaseStyle + "color: rgb(255, 20, 0);");
 }
 
 void GameView::initGameTimer() {
@@ -83,11 +83,18 @@ void GameView::initGameTimer() {
 }
 
 void GameView::initTimerUi() {
-    m_timerText = new QGraphicsTextItem();
-    m_timerText->setFont(QFont("Fixedsys", 8, QFont::Bold));
-    m_timerText->setZValue(1000);
-    m_timerText->setVisible(false);
-    m_scene->addItem(m_timerText);
+    m_timerLabel = new QLabel(this);
+
+    m_timerBaseStyle = "background-color: rgba(0,0,0,150);"
+                       "border: 2px solid rgb(200,200,200);"
+                       "font: bold 14px 'Fixedsys';";
+
+    m_timerLabel->setStyleSheet(m_timerBaseStyle + "color: rgb(255,220,50);");
+
+    m_timerLabel->setAlignment(Qt::AlignCenter);
+    m_timerLabel->setFixedSize(80, 30);
+    m_timerLabel->move((viewport()->width() - m_timerLabel->width()) / 2, 20);
+    m_timerLabel->show();
 }
 
 void GameView::resizeEvent(QResizeEvent* event) {
@@ -96,6 +103,9 @@ void GameView::resizeEvent(QResizeEvent* event) {
     if (m_slotWidget)
         m_slotWidget->move((viewport()->width() - m_slotWidget->width()) / 2,
                            viewport()->height() - m_slotWidget->height() * 1.5);
+
+    if (m_timerLabel)
+        m_timerLabel->move((viewport()->width() - m_timerLabel->width()) / 2, 20);
 }
 
 void GameView::initSlotWidget() {
@@ -329,16 +339,6 @@ void GameView::updateGrayOverlay() {
     }
 }
 
-void GameView::updateTimerPosition() {
-    if (!m_timerText || !m_timerText->isVisible()) return;
-
-    QRectF viewRect = mapToScene(viewport()->rect()).boundingRect();
-    QRectF textRect = m_timerText->boundingRect();
-
-    m_timerText->setPos(viewRect.center().x() - textRect.width() / 2,
-                        viewRect.top() + 20);
-}
-
 void GameView::updateCamera() {
     if (Player* player = m_game.getPlayer()) {
         const QPointF pos = player->getPosition();
@@ -568,7 +568,6 @@ void GameView::onTick() {
     if (!m_gamePaused) m_game.update(m_deltaTime);
 
     updateGrayOverlay();
-    updateTimerPosition();
 
     updateCamera();
 

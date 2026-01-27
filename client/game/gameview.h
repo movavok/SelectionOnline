@@ -5,6 +5,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsColorizeEffect>
 #include <QKeyEvent>
+#include <QLabel>
 #include <QTimer>
 #include <cstdlib>
 #include <ctime>
@@ -57,7 +58,9 @@ private:
 
     QTimer* m_timer = nullptr;
 
-    QGraphicsTextItem* m_timerText = nullptr;
+    QLabel* m_timerLabel;
+    QString m_timerBaseStyle;
+
     GameTimer* m_gameTimer = nullptr;
     bool m_gamePaused = true;
 
@@ -69,7 +72,7 @@ private:
 
     QGraphicsPixmapItem* m_buildPreview = nullptr;
     Tile::TileType m_previewType = Tile::TileType::Empty;
-    QPoint m_previewTile{-1, -1};
+    QPoint m_previewTile {-1, -1};
 
     QHash<Entity*, EntityUi> m_entityItems;
     QHash<QPoint, QGraphicsPixmapItem*> m_tileItems;
@@ -105,8 +108,6 @@ private:
 
     void updateGrayOverlayRect();
     void updateGrayOverlay();
-
-    void updateTimerPosition();
 
     void updateSlotWidget();
 
