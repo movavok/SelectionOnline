@@ -30,6 +30,11 @@ void GameTimer::update(float deltaTime) {
     if (m_time <= 0.0f) {
         m_time = 0.0f;
 
+        if (m_lastWholeSecond != 0 && m_state == State::Countdown) emit countdownTick(0);
+        if (m_lastWholeSecond != 0 && m_state == State::Game) emit gameTick(0);
+
+        m_lastWholeSecond = 0;
+
         if (m_state == State::Countdown) {
             m_state = State::Idle;
             emit gameStarted();
@@ -38,13 +43,13 @@ void GameTimer::update(float deltaTime) {
             m_state = State::Idle;
             emit gameEnded();
         }
-    } else {
-        int whole = int(std::ceil(m_time));
-        if (whole != m_lastWholeSecond) {
-            m_lastWholeSecond = whole;
-            if (m_state == State::Countdown) emit countdownTick(whole);
-            if (m_state == State::Game) emit gameTick(whole);
-        }
+    }
+
+    int whole = int(std::ceil(m_time));
+    if (whole != m_lastWholeSecond) {
+        m_lastWholeSecond = whole;
+        if (m_state == State::Countdown) emit countdownTick(whole);
+        if (m_state == State::Game) emit gameTick(whole);
     }
 }
 

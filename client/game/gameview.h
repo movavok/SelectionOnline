@@ -33,6 +33,8 @@ protected:
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
 
+    void wheelEvent(QWheelEvent*) override;
+
     void resizeEvent(QResizeEvent*) override;
 
 private:
@@ -53,8 +55,10 @@ private:
     //scene
     QGraphicsScene* m_scene = nullptr;
 
-    QGraphicsRectItem* m_grayOverlay = nullptr;
-    float m_grayAmount = 1.0f;
+    enum class DarkOverlayMode { None, FadeOut, FadeIn };
+    DarkOverlayMode m_darkMode = DarkOverlayMode::None;
+    QGraphicsRectItem* m_darkOverlay = nullptr;
+    float m_darkAmount = 1.0f;
 
     QTimer* m_timer = nullptr;
 
@@ -86,7 +90,7 @@ private:
     double m_scaleSize = 1.25;
 
     //helper
-    void initGrayOverlay();
+    void initDarkOverlay();
 
     void initGameTimer();
     void initTimerUi();
@@ -106,8 +110,8 @@ private:
 
     void updateCamera();
 
-    void updateGrayOverlayRect();
-    void updateGrayOverlay();
+    void updateDarkOverlayRect();
+    void updateDarkOverlay();
 
     void updateSlotWidget();
 

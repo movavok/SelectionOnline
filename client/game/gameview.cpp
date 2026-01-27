@@ -10,7 +10,7 @@ GameView::GameView(QWidget* parent)
     m_scene->setSceneRect(m_game.getWorldBounds());
     buildMap();
 
-    initGrayOverlay();
+    initDarkOverlay();
     initSlotWidget();
 
     initGameTimer();
@@ -30,26 +30,27 @@ GameView::GameView(QWidget* parent)
     scale(m_scaleSize, m_scaleSize);
 }
 
-void GameView::updateGrayOverlayRect() {
-    QPointF topLeft = mapToScene(QPoint(0,0));
-    QPointF bottomRight = mapToScene(QPoint(viewport()->width(), viewport()->height()));
+void GameView::initDarkOverlay() {
+    m_darkOverlay = new QGraphicsRectItem();
+    m_darkOverlay->setBrush(QColor(0, 0, 0));
+    m_darkOverlay->setPen(Qt::NoPen);
+    m_darkOverlay->setZValue(500);
 
-    QRectF rect(topLeft, bottomRight);
-    m_grayOverlay->setRect(rect.normalized());
+    m_darkOverlay->setFlag(QGraphicsItem::ItemIgnoresTransformations, false);
+
+    m_scene->addItem(m_darkOverlay);
 }
 
-void GameView::initGrayOverlay() {
-    m_grayOverlay = new QGraphicsRectItem();
-    m_grayOverlay->setBrush(QColor(0, 0, 0));
-    m_grayOverlay->setPen(Qt::NoPen);
-    m_grayOverlay->setZValue(500);
+void GameView::startGameWithCountdown() {
+    m_darkAmount = 1.0f;
+    m_darkOverlay->setOpacity(m_darkAmount);
+    m_darkMode = DarkOverlayMode::FadeOut;
 
-    m_grayOverlay->setFlag(QGraphicsItem::ItemIgnoresTransformations, false);
-
-    m_scene->addItem(m_grayOverlay);
+    m_gameTimer->startCountdown(5);
 }
 
 void GameView::onCountdownTick(int sec) {
+    sec = std::max(0, sec);
     m_timerLabel->setText(QString::number(sec));
     m_timerLabel->setStyleSheet(m_timerBaseStyle + "color: rgb(255, 200, 50);");
     m_timerLabel->setVisible(true);
@@ -63,6 +64,7 @@ void GameView::onGameStarted() {
 }
 
 void GameView::onGameTimerTick(int sec) {
+    sec = std::max(0, sec);
     int minute = sec / 60;
     int second = sec % 60;
 
@@ -72,6 +74,7 @@ void GameView::onGameTimerTick(int sec) {
 
 void GameView::onGameEnded() {
     m_gamePaused = true;
+    m_darkMode = DarkOverlayMode::FadeIn;
     m_timerLabel->setStyleSheet(m_timerBaseStyle + "color: rgb(255, 20, 0);");
 }
 
@@ -294,9 +297,7 @@ void GameView::mouseReleaseEvent(QMouseEvent* event) {
         player->stopAiming(mouseScene - player->getPosition());
 }
 
-void GameView::startGameWithCountdown() {
-    m_gameTimer->startCountdown(5);
-}
+void GameView::wheelEvent(QWheelEvent* event) { event->ignore(); }
 
 void GameView::setupSlotKeys() {
     m_slotKeyMap[2] = 0;
@@ -329,14 +330,32 @@ void GameView::useMovementScheme(MovementScheme scheme) {
     m_moveKeyMap[scanRight] = MoveDirection::MoveRight;
 }
 
-void GameView::updateGrayOverlay() {
-    if (m_gameTimer->isCountdown()) {
-        m_grayAmount -= m_deltaTime * 0.25;
-        m_grayAmount = std::clamp(m_grayAmount, 0.0f, 1.0f);
+void GameView::updateDarkOverlayRect() {
+    QPointF topLeft = mapToScene(QPoint(0,0));
+    QPointF bottomRight = mapToScene(QPoint(viewport()->width(), viewport()->height()));
 
-        m_grayOverlay->setOpacity(m_grayAmount);
-        updateGrayOverlayRect();
+    QRectF rect(topLeft, bottomRight);
+    m_darkOverlay->setRect(rect.normalized());
+}
+
+void GameView::updateDarkOverlay() {
+    if (m_darkMode == DarkOverlayMode::FadeOut) {
+        m_darkAmount -= m_deltaTime * 0.25f;
+        if (m_darkAmount <= 0.0f) {
+            m_darkAmount = 0.0f;
+            m_darkMode = DarkOverlayMode::None;
+        }
     }
+    else if (m_darkMode == DarkOverlayMode::FadeIn) {
+        m_darkAmount += m_deltaTime * 0.25f;
+        if (m_darkAmount >= 1.0f) {
+            m_darkAmount = 1.0f;
+            m_darkMode = DarkOverlayMode::None;
+        }
+    }
+
+    m_darkOverlay->setOpacity(m_darkAmount);
+    updateDarkOverlayRect();
 }
 
 void GameView::updateCamera() {
@@ -567,7 +586,7 @@ void GameView::onTick() {
 
     if (!m_gamePaused) m_game.update(m_deltaTime);
 
-    updateGrayOverlay();
+    updateDarkOverlay();
 
     updateCamera();
 
