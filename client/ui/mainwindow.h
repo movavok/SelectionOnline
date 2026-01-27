@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QList>
+
+class QPushButton;
 
 #include "../game/gameview.h"
 #include "playerpreviewwidget.h"
@@ -32,6 +35,14 @@ private:
     GameView* m_gameView;
     PlayerPreviewWidget* m_playerPreview;
 
+    QList<QPushButton*> m_colorButtons;
+    QList<QPushButton*> m_weaponButtons;
+    QList<QPushButton*> m_abilityButtons;
+
+    QPushButton* m_selectedColorButton = nullptr;
+    QPushButton* m_selectedWeaponButton = nullptr;
+    QPushButton* m_selectedAbilityButton = nullptr;
+
     Page m_prevPage = PageStart;
     void goToPage(Page);
 
@@ -48,6 +59,9 @@ private:
     void initColorButtons();
     void initWeaponButtons();
     void initAbilityButtons();
+
+    void resetLobbySelectionState();
+    void updateLobbySelectionButtons();
 
     void checkPlayerConfigured();
 

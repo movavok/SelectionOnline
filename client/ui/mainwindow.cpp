@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QPushButton>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -15,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_gameView = ui->gameViewHolder;
     m_gameView->useMovementScheme(MovementScheme::WASD);
     m_gameView->setupSlotKeys();
+
+    updateLobbySelectionButtons();
 }
 
 MainWindow::~MainWindow()
@@ -52,14 +56,57 @@ void MainWindow::goToPage(Page page) {
 
     if (page == PageGame) statusBar()->hide();
     else statusBar()->show();
+
+    if (page == PageLobby)
+        updateLobbySelectionButtons();
 }
 
 void MainWindow::onHostServer() {
+    resetLobbySelectionState();
     goToPage(PageLobby);
+    updateLobbySelectionButtons();
 }
 
 void MainWindow::onJoinServer() {
+    resetLobbySelectionState();
     goToPage(PageLobby);
+    updateLobbySelectionButtons();
+}
+
+void MainWindow::resetLobbySelectionState() {
+    m_colorSelected = false;
+    m_weaponSelected = false;
+    m_abilitySelected = false;
+    m_playerConfigured = false;
+    m_playerReady = false;
+
+    m_selectedColorButton = nullptr;
+    m_selectedWeaponButton = nullptr;
+    m_selectedAbilityButton = nullptr;
+
+    ui->b_playerReady->setEnabled(false);
+    ui->b_openGameView->setEnabled(false);
+}
+
+void MainWindow::updateLobbySelectionButtons() {
+    for (QPushButton* button : m_colorButtons) {
+        if (!button) continue;
+        const bool reserved = button->property("reserved").toBool();
+        const bool selected = (button == m_selectedColorButton);
+        button->setEnabled(!reserved && !selected);
+    }
+
+    for (QPushButton* button : m_weaponButtons) {
+        if (!button) continue;
+        const bool selected = (button == m_selectedWeaponButton);
+        button->setEnabled(!selected);
+    }
+
+    for (QPushButton* button : m_abilityButtons) {
+        if (!button) continue;
+        const bool selected = (button == m_selectedAbilityButton);
+        button->setEnabled(!selected);
+    }
 }
 
 void MainWindow::onPlayerReady() {
@@ -93,7 +140,7 @@ void MainWindow::initColorButtons() {
     ui->b_pink->setProperty("color", QColor(255, 105, 180));
     ui->b_orange->setProperty("color", QColor(255, 165, 0));
 
-    QList<QPushButton*> buttons = {
+    m_colorButtons = {
         ui->b_red,
         ui->b_blue,
         ui->b_yellow,
@@ -106,12 +153,26 @@ void MainWindow::initColorButtons() {
         ui->b_orange
     };
 
-    for (QPushButton* button : buttons)
+    for (QPushButton* button : m_colorButtons) {
         connect(button, &QPushButton::clicked, this, &MainWindow::onColorClicked);
+        button->setProperty("reserved", false);
+        button->setEnabled(false);
+    }
 }
 
 void MainWindow::onColorClicked() {
-    QColor color = sender()->property("color").value<QColor>();
+    QPushButton* button = qobject_cast<QPushButton*>(sender());
+    if (!button) return;
+
+    if (m_selectedColorButton && m_selectedColorButton != button) {
+        if (!m_selectedColorButton->property("reserved").toBool())
+            m_selectedColorButton->setEnabled(true);
+    }
+
+    m_selectedColorButton = button;
+    button->setEnabled(false);
+
+    QColor color = button->property("color").value<QColor>();
     ui->playerPreviewWidget->setColor(color);
 
     m_colorSelected = true;
@@ -122,10 +183,23 @@ void MainWindow::initWeaponButtons() {
     ui->b_katana->setProperty("weapon", static_cast<int>(PlayerPreviewWidget::WeaponType::Katana));
 
     connect(ui->b_katana, &QPushButton::clicked, this, &MainWindow::onWeaponClicked);
+
+    m_weaponButtons = { ui->b_katana };
+    for (QPushButton* b : m_weaponButtons)
+        if (b) b->setEnabled(false);
 }
 
 void MainWindow::onWeaponClicked() {
-    int weapon = sender()->property("weapon").toInt();
+    QPushButton* button = qobject_cast<QPushButton*>(sender());
+    if (!button) return;
+
+    if (m_selectedWeaponButton && m_selectedWeaponButton != button)
+        m_selectedWeaponButton->setEnabled(true);
+
+    m_selectedWeaponButton = button;
+    button->setEnabled(false);
+
+    int weapon = button->property("weapon").toInt();
     m_playerPreview->setWeapon(static_cast<PlayerPreviewWidget::WeaponType>(weapon));
 
     m_weaponSelected = true;
@@ -136,10 +210,23 @@ void MainWindow::initAbilityButtons() {
     ui->b_mirrorShield->setProperty("ability", static_cast<int>(PlayerPreviewWidget::AbilityType::MirrorShield));
 
     connect(ui->b_mirrorShield, &QPushButton::clicked, this, &MainWindow::onAbilityClicked);
+
+    m_abilityButtons = { ui->b_mirrorShield };
+    for (QPushButton* button : m_abilityButtons)
+        if (button) button->setEnabled(false);
 }
 
 void MainWindow::onAbilityClicked() {
-    int ability = sender()->property("ability").toInt();
+    QPushButton* button = qobject_cast<QPushButton*>(sender());
+    if (!button) return;
+
+    if (m_selectedAbilityButton && m_selectedAbilityButton != button)
+        m_selectedAbilityButton->setEnabled(true);
+
+    m_selectedAbilityButton = button;
+    button->setEnabled(false);
+
+    int ability = button->property("ability").toInt();
     m_playerPreview->setAbility(static_cast<PlayerPreviewWidget::AbilityType>(ability));
 
     m_abilitySelected = true;
