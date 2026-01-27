@@ -10,6 +10,8 @@
 *.dll
 *.dylib
 
+*.TMP
+
 # Qt-es
 object_script.*.Release
 object_script.*.Debug
