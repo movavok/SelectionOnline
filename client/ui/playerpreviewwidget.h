@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QSizePolicy>
+#include <QString>
 
 class PlayerPreviewWidget : public QWidget
 {
@@ -22,6 +23,7 @@ public:
 
     explicit PlayerPreviewWidget(QWidget* parent = nullptr);
 
+    void setNickname(const QString&);
     void setColor(const QColor&);
     void setWeapon(WeaponType);
     void setAbility(AbilityType);
@@ -35,6 +37,8 @@ protected:
     int heightForWidth(int) const override;
 
 private:
+    QString m_nickname;
+
     QColor m_color = Qt::transparent;
     WeaponType m_weaponType = WeaponType::Empty;
     AbilityType m_abilityType = AbilityType::Empty;

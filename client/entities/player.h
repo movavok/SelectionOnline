@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <QString>
+
 #include "../combat/weapon.h"
 #include "../input/inputtypes.h"
 #include "entity.h"
@@ -36,7 +38,12 @@ public:
 
     void onAttackPerformed();
 
+    void setNickname(const QString&);
+    QString getNickname() const;
+
 private:
+    QString m_nickname;
+
     float m_speed = 100.0f;
 
     Inventory m_inventory;

@@ -31,6 +31,11 @@ GameView::GameView(QWidget* parent)
     scale(m_scaleSize, m_scaleSize);
 }
 
+void GameView::setLocalPlayerNickname(const QString& nickname) {
+    if (Player* player = m_game.getPlayer())
+        player->setNickname(nickname);
+}
+
 void GameView::initDarkOverlay() {
     m_darkOverlay = new QGraphicsRectItem();
     m_darkOverlay->setBrush(QColor(0, 0, 0));
@@ -160,6 +165,14 @@ void GameView::initHpBar(EntityUi& ui) {
     ui.hpTextBlack = createTextItem(ui.hpTextMask, Qt::black, 14);
 }
 
+void GameView::initNameTag(EntityUi& ui) {
+    ui.nameTextWhite = createTextItem(ui.body, QColor(224, 224, 224, 200), 16, 9);
+    ui.nameTextBlack = createTextItem(ui.body, QColor(0, 0, 0, 180), 15, 9);
+
+    ui.nameTextWhite->hide();
+    ui.nameTextBlack->hide();
+}
+
 void GameView::initAttackIndicator(EntityUi& ui) {
     ui.attackIndicator = new QGraphicsPathItem(ui.body);
     ui.attackIndicator->setBrush(QColor(150, 150, 150, 120));
@@ -201,12 +214,45 @@ void GameView::initEntitiesUi() {
         ui.body->setPos(entity->getPosition());
 
         initHpBar(ui);
+        initNameTag(ui);
         initAttackIndicator(ui);
         initSlotIndicator(ui);
         initDamageEffect(ui);
 
         m_entityItems.insert(entity, ui);
     }
+}
+
+void GameView::updateEntityName(Entity* entity, EntityUi& ui) {
+    Player* player = dynamic_cast<Player*>(entity);
+    if (!player || !ui.nameTextWhite || !ui.nameTextBlack || !ui.hpBack) {
+        if (ui.nameTextWhite) ui.nameTextWhite->hide();
+        if (ui.nameTextBlack) ui.nameTextBlack->hide();
+        return;
+    }
+
+    const QString nickname = player->getNickname();
+    if (nickname.trimmed().isEmpty()) {
+        ui.nameTextWhite->hide();
+        ui.nameTextBlack->hide();
+        return;
+    }
+
+    const QRectF backRect = ui.hpBack->rect();
+
+    ui.nameTextWhite->setPlainText(nickname);
+    ui.nameTextBlack->setPlainText(nickname);
+
+    const QRectF textRect = ui.nameTextWhite->boundingRect();
+    const QPointF hpPos = ui.hpBack->pos();
+    const double x = hpPos.x() + backRect.width() / 2.0 - textRect.width() / 2.0;
+    const double y = hpPos.y() - textRect.height() + 3.0;
+
+    ui.nameTextWhite->setPos(x, y);
+    ui.nameTextBlack->setPos(x + 1.0, y + 1.0);
+
+    ui.nameTextWhite->show();
+    ui.nameTextBlack->show();
 }
 
 void GameView::onEnemyHit(const HitInfo& hit) {
@@ -539,6 +585,7 @@ void GameView::updateEntitiesUi() {
 
         updateEntitiesVisibility(entity, ui);
         updateEntityHp(entity, ui);
+        updateEntityName(entity, ui);
         updateEntityAtkIndicator(entity, ui);
         updateEntitySlotIndicator(entity, ui);
 

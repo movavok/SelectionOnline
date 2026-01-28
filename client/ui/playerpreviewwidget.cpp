@@ -11,6 +11,13 @@ PlayerPreviewWidget::PlayerPreviewWidget(QWidget* parent)
     update();
 }
 
+void PlayerPreviewWidget::setNickname(const QString& nickname) {
+    const QString trimmed = nickname.trimmed();
+    if (m_nickname == trimmed) return;
+    m_nickname = trimmed;
+    update();
+}
+
 void PlayerPreviewWidget::setColor(const QColor &color) {
     if (m_color == color) return;
     m_color = color;
@@ -58,6 +65,32 @@ void PlayerPreviewWidget::paintEvent(QPaintEvent*) {
     const QSizeF weaponSize = QSizeF(squareSize * 0.55, squareSize * 0.55);
     const QSizeF playerSize = QSizeF(squareSize, squareSize) * 0.55;
     const QPointF weaponCenter = center + QPointF(0, squareSize * 0.25);
+
+    if (!m_nickname.isEmpty()) {
+        painter.save();
+        painter.setRenderHint(QPainter::TextAntialiasing, false);
+
+        QFont font("Arial");
+        font.setPixelSize(30);
+        painter.setFont(font);
+
+        const QFontMetrics fm(font);
+        const int padding = 4;
+
+        QRect textRect(squareRect.left() + padding, 0, squareRect.width() - padding * 2, fm.height() + 2);
+        const int y = qMax(squareRect.top() + padding,
+                           int(center.y() - playerSize.height() / 2.0 - textRect.height() - 2));
+        textRect.moveTop(y);
+
+        const QString text = fm.elidedText(m_nickname, Qt::ElideRight, textRect.width());
+
+        painter.setPen(QColor(0, 0, 0, 220));
+        painter.drawText(textRect.translated(2, 2), Qt::AlignCenter, text);
+        painter.setPen(QColor(255, 255, 255, 240));
+        painter.drawText(textRect, Qt::AlignCenter, text);
+
+        painter.restore();
+    }
 
     if (m_color != Qt::transparent) drawColoredCircle(painter, center, circleSize);
     if (m_abilityType != AbilityType::Empty) drawPlayerSkin(painter, center, playerSize);

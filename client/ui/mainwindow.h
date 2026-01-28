@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QList>
+#include <QString>
 
 class QPushButton;
 
@@ -35,6 +36,8 @@ private:
     GameView* m_gameView;
     PlayerPreviewWidget* m_playerPreview;
 
+    QString m_localNickname;
+
     QList<QPushButton*> m_colorButtons;
     QList<QPushButton*> m_weaponButtons;
     QList<QPushButton*> m_abilityButtons;
@@ -62,6 +65,10 @@ private:
 
     void resetLobbySelectionState();
     void updateLobbySelectionButtons();
+
+    bool applyNicknameFromStartScreen();
+    void ensureLocalPlayerRow();
+    void updateLocalPlayerRow();
 
     void checkPlayerConfigured();
 

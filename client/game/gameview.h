@@ -27,6 +27,8 @@ public:
 
     void startGameWithCountdown();
 
+    void setLocalPlayerNickname(const QString&);
+
 protected:
     void keyPressEvent(QKeyEvent*) override;
     void keyReleaseEvent(QKeyEvent*) override;
@@ -50,6 +52,8 @@ private:
         QGraphicsRectItem* hpTextMask = nullptr;
         QGraphicsTextItem* hpTextWhite = nullptr;
         QGraphicsTextItem* hpTextBlack = nullptr;
+        QGraphicsTextItem* nameTextWhite = nullptr;
+        QGraphicsTextItem* nameTextBlack = nullptr;
         QGraphicsPathItem* attackIndicator = nullptr;
         QGraphicsPixmapItem* slotIndicator = nullptr;
     };
@@ -103,6 +107,7 @@ private:
 
     void initEntitiesUi();
     void initHpBar(EntityUi&);
+    void initNameTag(EntityUi&);
     void initAttackIndicator(EntityUi&);
     void initSlotIndicator(EntityUi&);
     void initDamageEffect(EntityUi&);
@@ -122,6 +127,7 @@ private:
 
     void updateEntitiesUi();
     void updateEntityHp(Entity*, EntityUi&);
+    void updateEntityName(Entity*, EntityUi&);
     void updateEntityAtkIndicator(Entity*, EntityUi&);
     void updateEntitySlotIndicator(Entity*, EntityUi&);
 

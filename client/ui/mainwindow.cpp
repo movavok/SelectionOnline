@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QPushButton>
+#include <QTableWidgetItem>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->table_playersList->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->table_playersList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     initButtons();
 
@@ -62,15 +64,125 @@ void MainWindow::goToPage(Page page) {
 }
 
 void MainWindow::onHostServer() {
+    if (!applyNicknameFromStartScreen()) return;
     resetLobbySelectionState();
     goToPage(PageLobby);
+    ensureLocalPlayerRow();
+    updateLocalPlayerRow();
     updateLobbySelectionButtons();
 }
 
 void MainWindow::onJoinServer() {
+    if (!applyNicknameFromStartScreen()) return;
     resetLobbySelectionState();
     goToPage(PageLobby);
+    ensureLocalPlayerRow();
+    updateLocalPlayerRow();
     updateLobbySelectionButtons();
+}
+
+bool MainWindow::applyNicknameFromStartScreen() {
+    const QString nick = ui->le_nickname->text().trimmed();
+    if (nick.isEmpty()) {
+        statusBar()->showMessage("Введи ім'я", 2500);
+        ui->le_nickname->setFocus();
+        return false;
+    }
+
+    m_localNickname = nick;
+    if (m_playerPreview)
+        m_playerPreview->setNickname(m_localNickname);
+    if (m_gameView)
+        m_gameView->setLocalPlayerNickname(m_localNickname);
+    return true;
+}
+
+void MainWindow::ensureLocalPlayerRow() {
+    ui->table_playersList->setRowCount(1);
+    ui->table_playersList->clearContents();
+
+    auto ensureItem = [&](int column) {
+        if (!ui->table_playersList->item(0, column))
+            ui->table_playersList->setItem(0, column, new QTableWidgetItem());
+    };
+
+    for (int c = 0; c < ui->table_playersList->columnCount(); ++c)
+        ensureItem(c);
+}
+
+void MainWindow::updateLocalPlayerRow() {
+    if (ui->table_playersList->rowCount() == 0) return;
+
+    auto item = [&](int column) -> QTableWidgetItem* {
+        QTableWidgetItem* it = ui->table_playersList->item(0, column);
+        if (!it) {
+            it = new QTableWidgetItem();
+            ui->table_playersList->setItem(0, column, it);
+        }
+        return it;
+    };
+
+    constexpr int ColName = 0;
+    constexpr int ColWeapon = 1;
+    constexpr int ColAbility = 2;
+    constexpr int ColColor = 3;
+    constexpr int ColReady = 4;
+
+    QFont tableFont("Fixedsys");
+    tableFont.setPixelSize(11);
+    const QColor tableColor(224, 224, 224);
+
+    auto styleItem = [&](QTableWidgetItem* it, bool center = false) {
+        if (!it) return;
+        it->setFont(tableFont);
+        it->setForeground(QBrush(tableColor));
+        if (center) it->setTextAlignment(Qt::AlignCenter);
+    };
+
+    item(ColName)->setText(m_localNickname);
+    styleItem(item(ColName));
+
+    QString weaponText;
+    if (m_selectedWeaponButton) {
+        const int weapon = m_selectedWeaponButton->property("weapon").toInt();
+        weaponText = (weapon == static_cast<int>(PlayerPreviewWidget::WeaponType::Katana)) ? "Катана" : QString::number(weapon);
+    }
+    item(ColWeapon)->setText(weaponText);
+    styleItem(item(ColWeapon), true);
+
+    QString abilityText;
+    if (m_selectedAbilityButton) {
+        const int ability = m_selectedAbilityButton->property("ability").toInt();
+        abilityText = (ability == static_cast<int>(PlayerPreviewWidget::AbilityType::MirrorShield)) ? "Дзеркальний щит" : QString::number(ability);
+    }
+    item(ColAbility)->setText(abilityText);
+    styleItem(item(ColAbility), true);
+
+    QColor color;
+    if (m_selectedColorButton)
+        color = m_selectedColorButton->property("color").value<QColor>();
+
+    QTableWidgetItem* colorItem = item(ColColor);
+    styleItem(colorItem, true);
+    if (color.isValid()) {
+        colorItem->setText(color.name());
+        colorItem->setBackground(QBrush(color));
+        const int brightness = (color.red() * 299 + color.green() * 587 + color.blue() * 114) / 1000;
+        colorItem->setForeground(QBrush(brightness > 140 ? Qt::black : Qt::white));
+    } else {
+        colorItem->setText(QString());
+        colorItem->setBackground(QBrush());
+        colorItem->setForeground(QBrush(tableColor));
+    }
+
+    item(ColReady)->setText(m_playerReady ? "так" : "ні");
+    styleItem(item(ColReady), true);
+
+    QTableWidgetItem* readyItem = item(ColReady);
+    const QColor readyBg = m_playerReady ? QColor(60, 220, 80) : QColor(220, 60, 60);
+    readyItem->setBackground(QBrush(readyBg));
+    const int brightness = (readyBg.red() * 299 + readyBg.green() * 587 + readyBg.blue() * 114) / 1000;
+    readyItem->setForeground(QBrush(brightness > 140 ? Qt::black : Qt::white));
 }
 
 void MainWindow::resetLobbySelectionState() {
@@ -112,6 +224,7 @@ void MainWindow::updateLobbySelectionButtons() {
 void MainWindow::onPlayerReady() {
     m_playerReady = true;
     ui->b_openGameView->setEnabled(m_playerReady);
+    updateLocalPlayerRow();
 }
 
 void MainWindow::goToSettings() {
@@ -177,6 +290,7 @@ void MainWindow::onColorClicked() {
 
     m_colorSelected = true;
     checkPlayerConfigured();
+    updateLocalPlayerRow();
 }
 
 void MainWindow::initWeaponButtons() {
@@ -204,6 +318,7 @@ void MainWindow::onWeaponClicked() {
 
     m_weaponSelected = true;
     checkPlayerConfigured();
+    updateLocalPlayerRow();
 }
 
 void MainWindow::initAbilityButtons() {
@@ -231,6 +346,7 @@ void MainWindow::onAbilityClicked() {
 
     m_abilitySelected = true;
     checkPlayerConfigured();
+    updateLocalPlayerRow();
 }
 
 void MainWindow::checkPlayerConfigured() {

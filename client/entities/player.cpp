@@ -35,6 +35,14 @@ void Player::onAttackPerformed() {
     if (m_inventory.getActiveWeapon()) m_attackCooldown = m_inventory.getActiveWeapon()->getCooldown();
 }
 
+void Player::setNickname(const QString& nickname) {
+    m_nickname = nickname;
+}
+
+QString Player::getNickname() const {
+    return m_nickname;
+}
+
 Player::AttackState Player::getAttackState() const { return m_attackState; }
 
 Inventory& Player::getInventory() { return m_inventory; }

@@ -486,6 +486,9 @@ QPushButton#b_orange:pressed { background-color: rgb(255, 165, 0); border-left-c
                   <property name="text">
                    <string/>
                   </property>
+                  <property name="maxLength">
+                   <number>10</number>
+                  </property>
                   <property name="placeholderText">
                    <string>обов'язково</string>
                   </property>
