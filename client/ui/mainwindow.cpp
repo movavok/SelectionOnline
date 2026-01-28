@@ -1,14 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QPushButton>
-#include <QTableWidgetItem>
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->le_ip->setInputMask("000.000.000.000;_");
+
     ui->table_playersList->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->table_playersList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -39,6 +38,7 @@ void MainWindow::initButtons() {
     //lobby
     connect(ui->b_playerReady, &QPushButton::clicked, this, &MainWindow::onPlayerReady);
     connect(ui->b_settings, &QPushButton::clicked, this, &MainWindow::goToSettings);
+    connect(ui->b_backToStart, &QPushButton::clicked, this, &MainWindow::goToStartScreen);
     connect(ui->b_openGameView, &QPushButton::clicked, this, &MainWindow::startGame);
 
     initColorButtons();
@@ -231,6 +231,10 @@ void MainWindow::goToSettings() {
     goToPage(PageSettings);
 }
 
+void MainWindow::goToStartScreen() {
+    goToPage(PageStart);
+}
+
 void MainWindow::startGame() {
     goToPage(PageGame);
     m_gameView->startGameWithCountdown();
@@ -287,6 +291,8 @@ void MainWindow::onColorClicked() {
 
     QColor color = button->property("color").value<QColor>();
     ui->playerPreviewWidget->setColor(color);
+    if (m_gameView)
+        m_gameView->setLocalPlayerUiColor(color);
 
     m_colorSelected = true;
     checkPlayerConfigured();

@@ -36,6 +36,20 @@ void GameView::setLocalPlayerNickname(const QString& nickname) {
         player->setNickname(nickname);
 }
 
+void GameView::setLocalPlayerUiColor(const QColor& color) {
+    if (Player* player = m_game.getPlayer()) {
+        player->setUiColor(color);
+
+        if (m_entityItems.contains(player) && m_entityItems[player].body) {
+            QColor c = color;
+            if (c.isValid()) c.setAlpha(150);
+            else c = QColor(0, 200, 255, 150);
+
+            m_entityItems[player].body->setBrush(c);
+        }
+    }
+}
+
 void GameView::initDarkOverlay() {
     m_darkOverlay = new QGraphicsRectItem();
     m_darkOverlay->setBrush(QColor(0, 0, 0));
@@ -199,7 +213,14 @@ void GameView::initEntitiesUi() {
 
         const float radius = entity->getRadius();
         ui.body = new QGraphicsEllipseItem(0, 0, entity->getRadius() * 2, entity->getRadius() * 2);
-        ui.body->setBrush(dynamic_cast<Player*>(entity) ? QColor(0, 200, 255, 150) : QColor(255, 50, 50, 150));
+        if (Player* player = dynamic_cast<Player*>(entity)) {
+            QColor c = player->getUiColor();
+            if (c.isValid()) c.setAlpha(150);
+            else c = QColor(0, 200, 255, 150);
+            ui.body->setBrush(c);
+        } else {
+            ui.body->setBrush(QColor(255, 50, 50, 150));
+        }
         ui.body->setPen(Qt::NoPen);
         ui.body->setZValue(5);
         m_scene->addItem(ui.body);

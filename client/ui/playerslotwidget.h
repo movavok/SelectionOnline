@@ -28,6 +28,7 @@ private:
     void drawSlot(QPainter&, int, const Inventory&);
     void drawSlotIcon(QPainter&, const QRect&, const InventorySlot&);
     void drawSlotKey(QPainter&, int, int);
+    void drawSlotCooldown(QPainter&, const QRect&, const InventorySlot&);
 };
 
 #endif // PLAYERSLOTWIDGET_H

@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include <QString>
+#include <QColor>
 
 #include "../combat/weapon.h"
 #include "../input/inputtypes.h"
@@ -38,11 +39,18 @@ public:
 
     void onAttackPerformed();
 
+    float getAttackCooldownRemaining() const;
+    float getAttackCooldownTotal() const;
+
     void setNickname(const QString&);
     QString getNickname() const;
 
+    void setUiColor(const QColor&);
+    QColor getUiColor() const;
+
 private:
     QString m_nickname;
+    QColor m_uiColor;
 
     float m_speed = 100.0f;
 

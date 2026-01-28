@@ -52,6 +52,32 @@ void PlayerSlotWidget::drawSlotKey(QPainter& painter, int index, int width) {
     painter.drawText(keyRect, Qt::AlignCenter, QString::number(index + 1));
 }
 
+void PlayerSlotWidget::drawSlotCooldown(QPainter& painter, const QRect& slotRect, const InventorySlot& slot) {
+    if (!m_player) return;
+    if (slot.m_type != InventorySlot::SlotType::Weapon) return;
+    if (!slot.m_weapon) return;
+
+    const Weapon* activeWeapon = m_player->getActiveWeapon();
+    if (!activeWeapon) return;
+    if (slot.m_weapon != activeWeapon) return;
+
+    const float remaining = m_player->getAttackCooldownRemaining();
+    const float total = m_player->getAttackCooldownTotal();
+    if (remaining <= 0.0001f) return;
+    if (total <= 0.0001f) return;
+
+    // Progress grows upward while reloading.
+    float progress = 1.0f - (remaining / total);
+    if (progress < 0.0f) progress = 0.0f;
+    if (progress > 1.0f) progress = 1.0f;
+
+    const int h = int(slotRect.height() * progress);
+    if (h <= 0) return;
+
+    QRect overlay(slotRect.left(), slotRect.bottom() - h + 1, slotRect.width(), h);
+    painter.fillRect(overlay, QColor(120, 120, 120, 130));
+}
+
 void PlayerSlotWidget::drawSlot(QPainter& painter, int index, const Inventory& inventory) {
     int width = index * (SLOT_SIZE + SLOT_SPACING);
     QRect slotRect(width, 0, SLOT_SIZE, SLOT_SIZE);
@@ -64,6 +90,7 @@ void PlayerSlotWidget::drawSlot(QPainter& painter, int index, const Inventory& i
     const InventorySlot& slot = inventory.getSlot(index);
 
     drawSlotIcon(painter, slotRect, slot);
+    drawSlotCooldown(painter, slotRect, slot);
     drawSlotKey(painter, index, width);
 }
 

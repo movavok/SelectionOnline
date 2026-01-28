@@ -518,7 +518,7 @@ QPushButton#b_orange:pressed { background-color: rgb(255, 165, 0); border-left-c
                        <item>
                         <widget class="QLineEdit" name="le_ip">
                          <property name="text">
-                          <string>127.0.0.1</string>
+                          <string>127.000.000.001</string>
                          </property>
                         </widget>
                        </item>
@@ -961,22 +961,40 @@ QPushButton#b_green:pressed {
                    <item>
                     <layout class="QVBoxLayout" name="verticalLayout_16">
                      <item>
-                      <widget class="QPushButton" name="b_playerReady">
-                       <property name="enabled">
-                        <bool>false</bool>
-                       </property>
-                       <property name="text">
-                        <string>Готово</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
                       <widget class="QPushButton" name="b_openGameView">
                        <property name="enabled">
                         <bool>false</bool>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true"/>
+                       </property>
                        <property name="text">
                         <string>Почати гру</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="b_backToStart">
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton {
+    background-color: #5a2a2a;
+    border: 2px solid #000000;
+    color: #f0f0f0;
+    font-family: &quot;Fixedsys&quot;;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+QPushButton:hover {
+    background-color: #6a3232;
+}
+
+QPushButton:pressed {
+    background-color: #4a2020;
+}</string>
+                       </property>
+                       <property name="text">
+                        <string>Вийти</string>
                        </property>
                       </widget>
                      </item>
@@ -1246,6 +1264,34 @@ QPushButton#b_green:pressed {
                   <width>0</width>
                   <height>0</height>
                  </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="b_playerReady">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton:enabled {
+    background-color: #2f5a3a;
+    border: 2px solid #000000;
+    color: #e0ffe0;
+    font-family: &quot;Fixedsys&quot;;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+QPushButton:hover:enabled {
+    background-color: #356a44;
+}
+
+QPushButton:pressed:enabled {
+    background-color: #254a30;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Готово</string>
                 </property>
                </widget>
               </item>

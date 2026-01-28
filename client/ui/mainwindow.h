@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include <QList>
 #include <QString>
-
-class QPushButton;
+#include <QPushButton>
+#include <QTableWidgetItem>
 
 #include "../game/gameview.h"
 #include "playerpreviewwidget.h"
@@ -78,6 +78,7 @@ private slots:
 
     void onPlayerReady();
     void goToSettings();
+    void goToStartScreen();
     void startGame();
 
     void goToPrevPage();

@@ -7,6 +7,7 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QTimer>
+#include <QColor>
 #include <cstdlib>
 #include <ctime>
 
@@ -28,6 +29,7 @@ public:
     void startGameWithCountdown();
 
     void setLocalPlayerNickname(const QString&);
+    void setLocalPlayerUiColor(const QColor&);
 
 protected:
     void keyPressEvent(QKeyEvent*) override;

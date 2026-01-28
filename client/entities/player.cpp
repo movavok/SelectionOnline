@@ -35,12 +35,29 @@ void Player::onAttackPerformed() {
     if (m_inventory.getActiveWeapon()) m_attackCooldown = m_inventory.getActiveWeapon()->getCooldown();
 }
 
+float Player::getAttackCooldownRemaining() const {
+    return m_attackCooldown;
+}
+
+float Player::getAttackCooldownTotal() const {
+    const Weapon* weapon = m_inventory.getActiveWeapon();
+    return weapon ? weapon->getCooldown() : 0.0f;
+}
+
 void Player::setNickname(const QString& nickname) {
     m_nickname = nickname;
 }
 
 QString Player::getNickname() const {
     return m_nickname;
+}
+
+void Player::setUiColor(const QColor& color) {
+    m_uiColor = color;
+}
+
+QColor Player::getUiColor() const {
+    return m_uiColor;
 }
 
 Player::AttackState Player::getAttackState() const { return m_attackState; }
