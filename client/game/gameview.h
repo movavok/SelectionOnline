@@ -24,7 +24,8 @@ public:
     explicit GameView(QWidget* parent = nullptr);
 
     void useMovementScheme(MovementScheme);
-    void setupSlotKeys();
+    void setupSlotKeys(const QVector<Qt::Key>&);
+    void prepareSlotKeysVector();
 
     void startGameWithCountdown();
 
@@ -35,12 +36,15 @@ protected:
     void keyPressEvent(QKeyEvent*) override;
     void keyReleaseEvent(QKeyEvent*) override;
 
+    void focusOutEvent(QFocusEvent*) override;
+
     void mousePressEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
 
     void wheelEvent(QWheelEvent*) override;
 
     void resizeEvent(QResizeEvent*) override;
+
 
 private:
     struct EntityUi {
@@ -93,7 +97,7 @@ private:
     QHash<const PickupItem*, QGraphicsPixmapItem*> m_pickupItems;
 
     QMap<unsigned short, MoveDirection> m_moveKeyMap;
-    QMap<unsigned short, unsigned short> m_slotKeyMap;
+    QMap<Qt::Key, unsigned short> m_slotKeyMap;
 
     float m_deltaTime = 0.016f;
 

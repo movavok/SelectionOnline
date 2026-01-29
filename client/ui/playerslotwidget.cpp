@@ -12,6 +12,11 @@ void PlayerSlotWidget::setPlayer(const Player* player) {
     update();
 }
 
+void PlayerSlotWidget::setSlotKeys(const QVector<Qt::Key>& keys) {
+    m_slotKeys = keys;
+    update();
+}
+
 void PlayerSlotWidget::drawSlotIcon(QPainter& painter, const QRect& slotRect, const InventorySlot& slot) {
     short margin;
     QPixmap icon;
@@ -49,7 +54,16 @@ void PlayerSlotWidget::drawSlotKey(QPainter& painter, int index, int width) {
     painter.setFont(keyFont);
     bool active = (index == m_player->getActiveSlot());
     painter.setPen(active ? QColor(255, 200, 80, 200) : QColor(255, 255, 255, 200));
-    painter.drawText(keyRect, Qt::AlignCenter, QString::number(index + 1));
+
+    QString text = QString::number(index + 1);
+
+    if (index >= 0 && index < m_slotKeys.size()) {
+        const Qt::Key key = m_slotKeys.at(index);
+        if (key != Qt::Key_unknown)
+            text = QKeySequence(key).toString(QKeySequence::NativeText);
+    }
+
+    painter.drawText(keyRect, Qt::AlignCenter, text);
 }
 
 void PlayerSlotWidget::drawSlotCooldown(QPainter& painter, const QRect& slotRect, const InventorySlot& slot) {

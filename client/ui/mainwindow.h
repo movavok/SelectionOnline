@@ -70,7 +70,17 @@ private:
     void ensureLocalPlayerRow();
     void updateLocalPlayerRow();
 
+    QTableWidgetItem* createTableItem(int);
+    QTableWidgetItem* setTableCellText(int, const QString&, const QFont&, const QColor&, bool = false);
+
+    QString getSelectedWeaponText() const;
+    QString getSelectedAbilityText() const;
+    static QColor contrastingTextColor(const QColor&);
+
     void checkPlayerConfigured();
+
+    MovementScheme getMovementScheme() const;
+    QVector<Qt::Key> getSlotKeys();
 
 private slots:
     void onHostServer();

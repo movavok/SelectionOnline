@@ -1,8 +1,10 @@
 #ifndef PLAYERSLOTWIDGET_H
 #define PLAYERSLOTWIDGET_H
 
+#include <QObject>
 #include <QWidget>
 #include <QPainter>
+#include <QVector>
 
 #include "../entities/player.h"
 #include "../map/tilevisual.h"
@@ -15,11 +17,15 @@ public:
 
     void setPlayer(const Player*);
 
+    void setSlotKeys(const QVector<Qt::Key>&);
+
 protected:
     void paintEvent(QPaintEvent*) override;
 
 private:
     const Player* m_player = nullptr;
+
+    QVector<Qt::Key> m_slotKeys;
 
     static constexpr unsigned short SLOT_SIZE = 50;
     static constexpr unsigned short SLOT_SPACING = 10;

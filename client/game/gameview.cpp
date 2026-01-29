@@ -364,15 +364,29 @@ void GameView::createPickupUi(const PickupItem* pickup) {
 
 void GameView::handleKeyEvent(QKeyEvent* event, bool pressed) {
     if (event->isAutoRepeat()) return;
+
     unsigned short scanCode = static_cast<unsigned short>(event->nativeScanCode());
     if (m_moveKeyMap.contains(scanCode))
         m_game.setPlayerInput(m_moveKeyMap[scanCode], pressed);
-    if (pressed && m_slotKeyMap.contains(scanCode))
-        m_game.getPlayer()->setActiveSlot(m_slotKeyMap[scanCode]);
+
+    Qt::Key key = static_cast<Qt::Key>(event->key());
+    if (pressed && m_slotKeyMap.contains(key))
+        m_game.getPlayer()->setActiveSlot(m_slotKeyMap[key]);
+    // qDebug() << "key:" << event->key()
+    //         << "scan:" << event->nativeScanCode();
 }
 
 void GameView::keyPressEvent(QKeyEvent* event) { handleKeyEvent(event, true); }
 void GameView::keyReleaseEvent(QKeyEvent* event) { handleKeyEvent(event, false); }
+
+void GameView::focusOutEvent(QFocusEvent* event) {
+    QGraphicsView::focusOutEvent(event);
+
+    m_game.setPlayerInput(MoveDirection::MoveUp, false);
+    m_game.setPlayerInput(MoveDirection::MoveDown, false);
+    m_game.setPlayerInput(MoveDirection::MoveLeft, false);
+    m_game.setPlayerInput(MoveDirection::MoveRight, false);
+}
 
 void GameView::mousePressEvent(QMouseEvent* event) {
     if(event->button() == Qt::LeftButton) m_game.getPlayer()->startAiming();
@@ -394,12 +408,14 @@ void GameView::mouseReleaseEvent(QMouseEvent* event) {
 
 void GameView::wheelEvent(QWheelEvent* event) { event->ignore(); }
 
-void GameView::setupSlotKeys() {
-    m_slotKeyMap[2] = 0;
-    m_slotKeyMap[3] = 1;
-    m_slotKeyMap[4] = 2;
-    m_slotKeyMap[5] = 3;
-    m_slotKeyMap[6] = 4;
+void GameView::setupSlotKeys(const QVector<Qt::Key>& keys) {
+    m_slotKeyMap.clear();
+
+    for (int slot = 0; slot < keys.size(); ++slot) {
+        Qt::Key key = keys[slot];
+        if (key != Qt::Key_unknown)
+            m_slotKeyMap[key] = slot;
+    }
 }
 
 void GameView::useMovementScheme(MovementScheme scheme) {
@@ -412,10 +428,10 @@ void GameView::useMovementScheme(MovementScheme scheme) {
         scanRight = 32; // D
     }
     else if (scheme == MovementScheme::Arrows) {
-        scanUp = 72; // Up
-        scanDown = 80; // Down
-        scanLeft = 75; // Left
-        scanRight = 77; // Right
+        scanUp = 57416; // Up
+        scanDown = 57424; // Down
+        scanLeft = 57419; // Left
+        scanRight = 57421; // Right
     }
 
     m_moveKeyMap.clear();
@@ -423,6 +439,21 @@ void GameView::useMovementScheme(MovementScheme scheme) {
     m_moveKeyMap[scanDown] = MoveDirection::MoveDown;
     m_moveKeyMap[scanLeft] = MoveDirection::MoveLeft;
     m_moveKeyMap[scanRight] = MoveDirection::MoveRight;
+}
+
+void GameView::prepareSlotKeysVector() {
+    QVector<Qt::Key> slotKeysVector;
+    slotKeysVector.resize(m_slotKeyMap.size());
+
+    for (QMap<Qt::Key, unsigned short>::iterator iter = m_slotKeyMap.begin(); iter != m_slotKeyMap.end(); ++iter) {
+        Qt::Key key = iter.key();
+        int slot = iter.value();
+        if (slot >= 0 && slot < slotKeysVector.size())
+            slotKeysVector[slot] = key;
+    }
+
+    if (m_slotWidget)
+        m_slotWidget->setSlotKeys(slotKeysVector);
 }
 
 void GameView::updateDarkOverlayRect() {
