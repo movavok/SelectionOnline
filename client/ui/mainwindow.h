@@ -2,11 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QProcess>
 #include <QList>
 #include <QString>
 #include <QPushButton>
 #include <QTableWidgetItem>
 
+#include "../net/netclient.h"
 #include "../game/gameview.h"
 #include "playerpreviewwidget.h"
 
@@ -56,19 +58,6 @@ private:
     bool m_playerReady = false;
 
     void initButtons();
-    //settings
-
-    //lobby
-    void initColorButtons();
-    void initWeaponButtons();
-    void initAbilityButtons();
-
-    void resetLobbySelectionState();
-    void updateLobbySelectionButtons();
-
-    bool applyNicknameFromStartScreen();
-    void ensureLocalPlayerRow();
-    void updateLocalPlayerRow();
 
     QTableWidgetItem* createTableItem(int);
     QTableWidgetItem* setTableCellText(int, const QString&, const QFont&, const QColor&, bool = false);
@@ -82,7 +71,29 @@ private:
     MovementScheme getMovementScheme() const;
     QVector<Qt::Key> getSlotKeys();
 
+    QProcess* m_serverProcess = nullptr;
+    NetClient* m_netClient = nullptr;
+    void initNetClient();
+
+    //start
+    void connectServerByFields();
+    void goToLobby();
+    bool applyNicknameFromStartScreen();
+    void ensureLocalPlayerRow();
+    void updateLocalPlayerRow();
+
+    //settings
+
+    //lobby
+    void initColorButtons();
+    void initWeaponButtons();
+    void initAbilityButtons();
+
+    void resetLobbySelectionState();
+    void updateLobbySelectionButtons();
+
 private slots:
+    void onServerProcessError(QProcess::ProcessError);
     void onHostServer();
     void onJoinServer();
 
@@ -96,6 +107,12 @@ private slots:
     void onColorClicked();
     void onWeaponClicked();
     void onAbilityClicked();
+
+    //net client
+    void onNetConnected();
+    void onNetDisconnected();
+    void onNetErrorText(const QString&);
+    void onNetTextReceived(const QString&);
 };
 
 #endif // MAINWINDOW_H

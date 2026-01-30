@@ -1,4 +1,4 @@
-QT       += core gui
+QT += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,6 +27,7 @@ SOURCES += \
     game/gameview.cpp \
     map/tilecollision.cpp \
     map/tilevisual.cpp \
+    net/netclient.cpp \
     ui/mainwindow.cpp \
     ui/playerpreviewwidget.cpp \
     ui/playerslotwidget.cpp
@@ -51,6 +52,7 @@ HEADERS += \
     input/inputtypes.h \
     map/tilecollision.h \
     map/tilevisual.h \
+    net/netclient.h \
     ui/mainwindow.h \
     ui/playerpreviewwidget.h \
     ui/playerslotwidget.h

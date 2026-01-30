@@ -14,10 +14,11 @@ MainWindow::MainWindow(QWidget *parent)
     initButtons();
 
     m_playerPreview = ui->playerPreviewWidget;
-
     m_gameView = ui->gameViewHolder;
 
     updateLobbySelectionButtons();
+
+    initNetClient();
 }
 
 MainWindow::~MainWindow()
@@ -66,8 +67,7 @@ void MainWindow::goToPage(Page page) {
         updateLobbySelectionButtons();
 }
 
-void MainWindow::onHostServer() {
-    if (!applyNicknameFromStartScreen()) return;
+void MainWindow::goToLobby() {
     resetLobbySelectionState();
     goToPage(PageLobby);
     ensureLocalPlayerRow();
@@ -75,13 +75,73 @@ void MainWindow::onHostServer() {
     updateLobbySelectionButtons();
 }
 
+void MainWindow::onNetConnected() {
+    statusBar()->showMessage("Підключено", 2000);
+    statusBar()->setStyleSheet("color: #77dd77; font-size:12px; font-family:Fixedsys;");
+    m_netClient->sendHello(m_localNickname);
+}
+
+void MainWindow::onNetDisconnected() {
+    statusBar()->showMessage("Відключено", 2000);
+    statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
+}
+
+void MainWindow::onNetErrorText(const QString& text) {
+    statusBar()->showMessage(text, 6000);
+    statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
+}
+
+void MainWindow::onNetTextReceived(const QString& text) {
+    statusBar()->showMessage("Server: " + text.trimmed(), 3000);
+}
+
+void MainWindow::initNetClient() {
+    m_netClient = new NetClient(this);
+    connect(m_netClient, &NetClient::connected, this, &MainWindow::onNetConnected);
+    connect(m_netClient, &NetClient::disconnected, this, &MainWindow::onNetDisconnected);
+    connect(m_netClient, &NetClient::errorText, this, &MainWindow::onNetErrorText);
+    connect(m_netClient, &NetClient::textReceived, this, &MainWindow::onNetTextReceived);
+}
+
+void MainWindow::onServerProcessError(QProcess::ProcessError error) {
+    Q_UNUSED(error);
+
+    statusBar()->showMessage("Не вдалося запустити сервер", 4000);
+    statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
+}
+
+void MainWindow::connectServerByFields() {
+    const QString ip = ui->le_ip->text().trimmed();
+    const unsigned short port = quint16(ui->sb_port->value());
+
+    m_netClient->connectToServer(ip, port);
+}
+
+void MainWindow::onHostServer() {
+    if (!applyNicknameFromStartScreen()) return;
+
+    if (!m_serverProcess) {
+        m_serverProcess = new QProcess(this);
+        connect(m_serverProcess, &QProcess::errorOccurred, this, &MainWindow::onServerProcessError);
+    }
+
+    const QString serverExePath = QCoreApplication::applicationDirPath() + "/SelectionServer.exe";
+
+    QStringList args;
+    args << "--bind" << "0.0.0.0"
+         << "--port" << QString::number(ui->sb_port->value());
+
+    m_serverProcess->start(serverExePath, args);
+
+    onJoinServer();
+}
+
 void MainWindow::onJoinServer() {
     if (!applyNicknameFromStartScreen()) return;
-    resetLobbySelectionState();
-    goToPage(PageLobby);
-    ensureLocalPlayerRow();
-    updateLocalPlayerRow();
-    updateLobbySelectionButtons();
+
+    connectServerByFields();
+
+    goToLobby();
 }
 
 bool MainWindow::applyNicknameFromStartScreen() {
