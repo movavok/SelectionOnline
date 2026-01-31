@@ -135,9 +135,32 @@ void Server::releasePlayer(QTcpSocket* socket) {
     QHash<QTcpSocket*, PlayerState>::iterator iter = m_playerBySocket.find(socket);
     if (iter == m_playerBySocket.end()) return;
 
-    const int index = iter->slotIndex;
-    if (index >= 0 && index < m_lobbySlots.size())
-        m_lobbySlots[index] = LobbySlot();
+    const int removedIndex = iter->slotIndex;
 
     m_playerBySocket.erase(iter);
+
+    if (removedIndex < 0 || removedIndex >= m_lobbySlots.size()) {
+        if (removedIndex >= 0 && removedIndex < m_lobbySlots.size())
+            m_lobbySlots[removedIndex] = LobbySlot();
+        broadcastLobbyState();
+        return;
+    }
+
+    compactSlotsFrom(removedIndex);
+}
+
+void Server::compactSlotsFrom(int removedIndex) {
+    if (removedIndex < 0 || removedIndex >= m_lobbySlots.size()) return;
+
+    for (int index = removedIndex; index + 1 < m_lobbySlots.size(); ++index)
+        m_lobbySlots[index] = m_lobbySlots[index + 1];
+
+    m_lobbySlots[m_lobbySlots.size() - 1] = LobbySlot();
+
+    for (QHash<QTcpSocket*, PlayerState>::iterator iter = m_playerBySocket.begin(); iter != m_playerBySocket.end(); ++iter) {
+        if (iter->slotIndex > removedIndex)
+            --(iter->slotIndex);
+    }
+
+    broadcastLobbyState();
 }

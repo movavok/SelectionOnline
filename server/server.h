@@ -45,6 +45,7 @@ private:
     int findFreeSlot() const;
     void assignPlayerToSlot(QTcpSocket*, const QString& nickname);
     void releasePlayer(QTcpSocket*);
+    void compactSlotsFrom(int removedIndex);
     void handleHello(QTcpSocket*, QDataStream&);
     void handleReady(QTcpSocket*, QDataStream&);
 };

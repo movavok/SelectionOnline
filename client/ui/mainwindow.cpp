@@ -153,9 +153,27 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     QMainWindow::closeEvent(event);
 }
 
+void MainWindow::disconnectServerGraceful() {
+    if (m_netClient) m_netClient->disconnectFromServer();
+}
+
+void MainWindow::stopServerProcessGraceful() {
+    if (m_serverProcess) {
+        disconnect(m_serverProcess, nullptr, this, nullptr);
+
+        if (m_serverProcess->state() != QProcess::NotRunning) {
+            m_serverProcess->terminate();
+            if (!m_serverProcess->waitForFinished(800)) {
+                m_serverProcess->kill();
+                m_serverProcess->waitForFinished(800);
+            }
+        }
+    }
+}
+
 void MainWindow::connectToServer(const QString& ip, unsigned short port) {
     statusBar()->showMessage("Підключення...", 2000);
-    statusBar()->setStyleSheet("color: #77dd77; font-size:12px; font-family:Fixedsys;");
+    statusBar()->setStyleSheet("color: #77dd77; font-size: 12px; font-family: Fixedsys;");
     m_netClient->connectToServer(ip, port);
 }
 
@@ -192,7 +210,7 @@ bool MainWindow::applyNicknameFromStartScreen() {
     const QString nick = ui->le_nickname->text().trimmed();
     if (nick.isEmpty()) {
         statusBar()->showMessage("Введи ім'я", 2500);
-        statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
+        statusBar()->setStyleSheet("color: #dc3c3c; font-size: 12px; font-family: Fixedsys;");
         ui->le_nickname->setFocus();
         return false;
     }
@@ -216,7 +234,6 @@ void MainWindow::ensureLocalPlayerRow() {
 }
 
 QTableWidgetItem* MainWindow::createTableItem(int row, int column) {
-    // Ensure the table has enough rows to address 'row'
     if (ui->table_playersList->rowCount() <= row)
         ui->table_playersList->setRowCount(row + 1);
 
@@ -256,23 +273,24 @@ QColor MainWindow::contrastingTextColor(const QColor& background) {
 }
 
 void MainWindow::updateLocalPlayerRow() {
-    if (ui->table_playersList->rowCount() == 0) return;
-
     LobbySlot slot;
     slot.connected = true;
     slot.nickname = m_localNickname;
     slot.ready = m_playerReady;
 
-    // if (m_selectedWeaponButton)
-    //     slot.weapon = m_selectedWeaponButton->property("weapon").toInt();
+    if (m_selectedWeaponButton)
+        slot.weaponId = m_selectedWeaponButton->property("weaponId").toInt();
+    if (m_selectedAbilityButton)
+        slot.abilityId = m_selectedAbilityButton->property("abilityId").toInt();
+    if (m_selectedColorButton)
+        slot.colorId = m_selectedColorButton->property("colorId").toUInt();
 
-    // if (m_selectedAbilityButton)
-    //     slot.ability = m_selectedAbilityButton->property("ability").toInt();
-
-    // if (m_selectedColorButton)
-    //     slot.color = m_selectedColorButton->property("color").value<QColor>();
-
-    renderLobbyRow(0, slot);
+    if (m_localSlotIndex >= 0) {
+        renderLobbyRow(m_localSlotIndex, slot);
+    } else {
+        if (ui->table_playersList->rowCount() == 0) return;
+        renderLobbyRow(0, slot);
+    }
 }
 
 void MainWindow::renderLobbyRow(int row, const LobbySlot& slot) {
@@ -353,6 +371,9 @@ void MainWindow::goToSettings() {
 }
 
 void MainWindow::goToStartScreen() {
+    disconnectServerGraceful();
+    stopServerProcessGraceful();
+
     goToPage(PageStart);
 }
 

@@ -5,7 +5,6 @@
 #include <QDataStream>
 #include <QString>
 #include <QVector>
-#include <QColor>
 
 enum class MessageType : quint16 {
     Hello = 1,
@@ -41,6 +40,9 @@ struct LobbySlot {
     bool connected = false;
     quint32 playerId = 0;
     QString nickname;
+    quint8 weaponId = 255;
+    quint8 abilityId = 255;
+    quint8 colorId = 255;
     bool ready = false;
 };
 

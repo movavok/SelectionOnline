@@ -75,6 +75,12 @@ private:
     NetClient* m_netClient = nullptr;
     void initNetClient();
     void connectToServer(const QString&, unsigned short);
+    
+    void disconnectServerGraceful();
+    void stopServerProcessGraceful();
+
+    quint32 m_localPlayerId = 0;
+    int m_localSlotIndex = -1;
 
     bool m_closing = false;
     void shutdownServerProcess();
