@@ -32,6 +32,21 @@ private:
     QHash<QTcpSocket*, QByteArray> m_inBuffers;
     quint32 m_nextPlayerId = 1;
     static constexpr quint8 MAX_PLAYERS = 10;
+
+    struct PlayerState {
+        int slotIndex = -1;
+        quint32 playerId = 0;
+    };
+
+    QHash<QTcpSocket*, PlayerState> m_playerBySocket;
+    QVector<LobbySlot> m_lobbySlots;
+
+    void broadcastLobbyState();
+    int findFreeSlot() const;
+    void assignPlayerToSlot(QTcpSocket*, const QString& nickname);
+    void releasePlayer(QTcpSocket*);
+    void handleHello(QTcpSocket*, QDataStream&);
+    void handleReady(QTcpSocket*, QDataStream&);
 };
 
 #endif // SERVER_H

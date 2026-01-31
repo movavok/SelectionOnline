@@ -7,6 +7,8 @@ Server::Server(QObject* parent)
 
     m_tickTimer.setInterval(16);
     connect(&m_tickTimer, &QTimer::timeout, this, &Server::onTick);
+
+    m_lobbySlots.resize(MAX_PLAYERS);
 }
 
 bool Server::start(const QHostAddress& bind, unsigned short port) {
@@ -51,13 +53,8 @@ void Server::onClientReadyRead() {
         dataStream >> typeRaw;
         MessageType type = MessageType(typeRaw);
 
-        if (type == MessageType::Hello) {
-            QString nickname;
-            dataStream >> nickname;
-
-            quint32 playerId = m_nextPlayerId++;
-            sendPacket(socket, makeWelcomePayload(playerId, MAX_PLAYERS));
-        }
+        if (type == MessageType::Hello) handleHello(socket, dataStream);
+        else if (type == MessageType::Ready) handleReady(socket, dataStream);
     }
 }
 
@@ -68,7 +65,79 @@ void Server::onClientDisconnected() {
     qInfo() << "client disconnected:" << socket->peerAddress().toString() << ":" << socket->peerPort();
     m_clients.removeAll(socket);
     m_inBuffers.remove(socket);
+
+    releasePlayer(socket);
+    broadcastLobbyState();
+
     socket->deleteLater();
 }
 
 void Server::onTick() {}
+
+int Server::findFreeSlot() const {
+    for (int index = 0; index < m_lobbySlots.size(); ++index)
+        if (!m_lobbySlots[index].connected) return index;
+    return -1;
+}
+
+void Server::broadcastLobbyState() {
+    const QByteArray payload = makeLobbyStatePayload(m_lobbySlots);
+    for (QTcpSocket* client : m_clients) sendPacket(client, payload);
+}
+
+void Server::handleHello(QTcpSocket* socket, QDataStream& in) {
+    QString nickname;
+    in >> nickname;
+
+    if (m_playerBySocket.contains(socket)) {
+        int idx = m_playerBySocket[socket].slotIndex;
+        if (idx >= 0 && idx < m_lobbySlots.size()) {
+            m_lobbySlots[idx].nickname = nickname;
+        }
+        broadcastLobbyState();
+        return;
+    }
+
+    const int freeSlot = findFreeSlot();
+    if (freeSlot < 0) {
+        socket->disconnectFromHost();
+        return;
+    }
+
+    const quint32 playerId = m_nextPlayerId++;
+    m_playerBySocket[socket] = PlayerState{freeSlot, playerId};
+
+    LobbySlot& slot = m_lobbySlots[freeSlot];
+    slot.connected = true;
+    slot.playerId = playerId;
+    slot.nickname = nickname;
+    slot.ready = false;
+
+    sendPacket(socket, makeWelcomePayload(playerId, MAX_PLAYERS));
+    broadcastLobbyState();
+}
+
+void Server::handleReady(QTcpSocket* socket, QDataStream& in) {
+    bool ready = false;
+    in >> ready;
+
+    QHash<QTcpSocket*, PlayerState>::iterator iter = m_playerBySocket.find(socket);
+    if (iter == m_playerBySocket.end()) return;
+
+    const int index = iter->slotIndex;
+    if (index < 0 || index >= m_lobbySlots.size()) return;
+
+    m_lobbySlots[index].ready = ready;
+    broadcastLobbyState();
+}
+
+void Server::releasePlayer(QTcpSocket* socket) {
+    QHash<QTcpSocket*, PlayerState>::iterator iter = m_playerBySocket.find(socket);
+    if (iter == m_playerBySocket.end()) return;
+
+    const int index = iter->slotIndex;
+    if (index >= 0 && index < m_lobbySlots.size())
+        m_lobbySlots[index] = LobbySlot();
+
+    m_playerBySocket.erase(iter);
+}

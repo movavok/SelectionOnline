@@ -24,6 +24,10 @@ void NetClient::sendHello(const QString& nickname) {
     sendPacket(&m_socket, makeHelloPayload(nickname));
 }
 
+void NetClient::sendReady(bool ready) {
+    sendPacket(&m_socket, makeReadyPayload(ready));
+}
+
 void NetClient::onConnected() { emit connected(); }
 void NetClient::onDisconnected() { emit disconnected(); }
 
@@ -45,6 +49,18 @@ void NetClient::onReadyRead() {
 
             dataStream >> playerId >> maxPlayers;
             emit welcomeReceived(playerId, maxPlayers);
+        } else if (type == MessageType::LobbyState) {
+            quint8 count = 0;
+            dataStream >> count;
+
+            QVector<LobbySlot> lobbySlots;
+            lobbySlots.resize(count);
+
+            for (int index = 0; index < count; ++index)
+                dataStream >> lobbySlots[index].connected >> lobbySlots[index].playerId
+                           >> lobbySlots[index].nickname >> lobbySlots[index].ready;
+
+            emit lobbyStateReceived(lobbySlots);
         }
     }
 }

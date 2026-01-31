@@ -99,12 +99,23 @@ void MainWindow::onWelcomeReceived(quint32 playerId, quint8 maxPlayers) {
     goToLobby();
 }
 
+void MainWindow::onLobbyStateReceived(const QVector<LobbySlot>& lobbySlots) {
+    ui->table_playersList->setRowCount(lobbySlots.size());
+    ui->table_playersList->clearContents();
+
+    for (int row = 0; row < lobbySlots.size(); ++row)
+        renderLobbyRow(row, lobbySlots[row]);
+
+    updateLobbySelectionButtons();
+}
+
 void MainWindow::initNetClient() {
     m_netClient = new NetClient(this);
     connect(m_netClient, &NetClient::connected, this, &MainWindow::onNetConnected);
     connect(m_netClient, &NetClient::disconnected, this, &MainWindow::onNetDisconnected);
     connect(m_netClient, &NetClient::errorText, this, &MainWindow::onNetErrorText);
     connect(m_netClient, &NetClient::welcomeReceived, this, &MainWindow::onWelcomeReceived);
+    connect(m_netClient, &NetClient::lobbyStateReceived, this, &MainWindow::onLobbyStateReceived);
 }
 
 void MainWindow::onServerProcessError(QProcess::ProcessError error) {
@@ -198,23 +209,27 @@ void MainWindow::ensureLocalPlayerRow() {
     ui->table_playersList->setRowCount(1);
     ui->table_playersList->clearContents();
 
-    for (int c = 0; c < ui->table_playersList->columnCount(); ++c) {
-        if (!ui->table_playersList->item(0, c))
-            ui->table_playersList->setItem(0, c, new QTableWidgetItem());
+    for (int column = 0; column < ui->table_playersList->columnCount(); ++column) {
+        if (!ui->table_playersList->item(0, column))
+            ui->table_playersList->setItem(0, column, new QTableWidgetItem());
     }
 }
 
-QTableWidgetItem* MainWindow::createTableItem(int column) {
-    QTableWidgetItem* item = ui->table_playersList->item(0, column);
+QTableWidgetItem* MainWindow::createTableItem(int row, int column) {
+    // Ensure the table has enough rows to address 'row'
+    if (ui->table_playersList->rowCount() <= row)
+        ui->table_playersList->setRowCount(row + 1);
+
+    QTableWidgetItem* item = ui->table_playersList->item(row, column);
     if (!item) {
         item = new QTableWidgetItem();
-        ui->table_playersList->setItem(0, column, item);
+        ui->table_playersList->setItem(row, column, item);
     }
     return item;
 }
 
-QTableWidgetItem* MainWindow::setTableCellText(int column, const QString& text, const QFont& tableFont, const QColor& tableColor, bool center) {
-    QTableWidgetItem* item = createTableItem(column);
+QTableWidgetItem* MainWindow::setTableCellText(int row, int column, const QString& text, const QFont& tableFont, const QColor& tableColor, bool center) {
+    QTableWidgetItem* item = createTableItem(row, column);
     item->setText(text);
     item->setToolTip(text);
     item->setFont(tableFont);
@@ -243,6 +258,24 @@ QColor MainWindow::contrastingTextColor(const QColor& background) {
 void MainWindow::updateLocalPlayerRow() {
     if (ui->table_playersList->rowCount() == 0) return;
 
+    LobbySlot slot;
+    slot.connected = true;
+    slot.nickname = m_localNickname;
+    slot.ready = m_playerReady;
+
+    // if (m_selectedWeaponButton)
+    //     slot.weapon = m_selectedWeaponButton->property("weapon").toInt();
+
+    // if (m_selectedAbilityButton)
+    //     slot.ability = m_selectedAbilityButton->property("ability").toInt();
+
+    // if (m_selectedColorButton)
+    //     slot.color = m_selectedColorButton->property("color").value<QColor>();
+
+    renderLobbyRow(0, slot);
+}
+
+void MainWindow::renderLobbyRow(int row, const LobbySlot& slot) {
     constexpr int ColName = 0;
     constexpr int ColWeapon = 1;
     constexpr int ColAbility = 2;
@@ -253,28 +286,18 @@ void MainWindow::updateLocalPlayerRow() {
     tableFont.setPixelSize(11);
     const QColor tableColor(224, 224, 224);
 
-    setTableCellText(ColName, m_localNickname, tableFont, tableColor);
-    setTableCellText(ColWeapon, getSelectedWeaponText(), tableFont, tableColor, true);
-    setTableCellText(ColAbility, getSelectedAbilityText(), tableFont, tableColor, true);
+    setTableCellText(row, ColName, slot.connected ? slot.nickname : "", tableFont, tableColor, false);
 
-    QColor color;
-    if (m_selectedColorButton)
-        color = m_selectedColorButton->property("color").value<QColor>();
+    setTableCellText(row, ColWeapon, "", tableFont, tableColor, true);
+    setTableCellText(row, ColAbility, "", tableFont, tableColor, true);
+    setTableCellText(row, ColColor, "", tableFont, tableColor, true);
 
+    const bool isReady = slot.connected && slot.ready;
+    const QString readyText = isReady ? "так" : "ні";
+    setTableCellText(row, ColReady, readyText, tableFont, tableColor, true);
 
-    const QString colorText = color.isValid() ? color.name() : QString();
-    QTableWidgetItem* colorItem = setTableCellText(ColColor, colorText, tableFont, tableColor, true);
-    if (color.isValid()) {
-        colorItem->setBackground(QBrush(color));
-        colorItem->setForeground(QBrush(contrastingTextColor(color)));
-    } else {
-        colorItem->setBackground(QBrush());
-        colorItem->setForeground(QBrush(tableColor));
-    }
-
-    const QString readyText = m_playerReady ? "так" : "ні";
-    QTableWidgetItem* readyItem = setTableCellText(ColReady, readyText, tableFont, tableColor, true);
-    const QColor readyBg = m_playerReady ? QColor(60, 220, 80) : QColor(220, 60, 60);
+    QTableWidgetItem* readyItem = createTableItem(row, ColReady);
+    const QColor readyBg = isReady ? QColor(60, 220, 80) : QColor(220, 60, 60);
     readyItem->setBackground(readyBg);
     readyItem->setForeground(QBrush(contrastingTextColor(readyBg)));
 }
@@ -318,6 +341,10 @@ void MainWindow::updateLobbySelectionButtons() {
 void MainWindow::onPlayerReady() {
     m_playerReady = true;
     ui->b_openGameView->setEnabled(m_playerReady);
+
+    if (m_netClient)
+        m_netClient->sendReady(true);
+
     updateLocalPlayerRow();
 }
 
@@ -399,8 +426,8 @@ void MainWindow::initWeaponButtons() {
     connect(ui->b_katana, &QPushButton::clicked, this, &MainWindow::onWeaponClicked);
 
     m_weaponButtons = { ui->b_katana };
-    for (QPushButton* b : m_weaponButtons)
-        if (b) b->setEnabled(false);
+    for (QPushButton* button : m_weaponButtons)
+        if (button) button->setEnabled(false);
 }
 
 void MainWindow::onWeaponClicked() {

@@ -12,7 +12,7 @@ static inline void sendPacket(QTcpSocket* socket, const QByteArray& payload) {
     QDataStream dataStream(&packetBuffer, QIODevice::WriteOnly);
     dataStream.setVersion(QDataStream::Qt_6_5);
 
-    dataStream << quint32(payload.size());;
+    dataStream << quint32(payload.size());
     packetBuffer.append(payload);
     socket->write(packetBuffer);
 }

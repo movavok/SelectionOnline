@@ -59,8 +59,8 @@ private:
 
     void initButtons();
 
-    QTableWidgetItem* createTableItem(int);
-    QTableWidgetItem* setTableCellText(int, const QString&, const QFont&, const QColor&, bool = false);
+    QTableWidgetItem* createTableItem(int, int);
+    QTableWidgetItem* setTableCellText(int, int, const QString&, const QFont&, const QColor&, bool = false);
 
     QString getSelectedWeaponText() const;
     QString getSelectedAbilityText() const;
@@ -84,6 +84,7 @@ private:
     bool applyNicknameFromStartScreen();
     void ensureLocalPlayerRow();
     void updateLocalPlayerRow();
+    void renderLobbyRow(int row, const LobbySlot&);
 
     //settings
 
@@ -119,6 +120,7 @@ private slots:
     void onNetDisconnected();
     void onNetErrorText(const QString&);
     void onWelcomeReceived(quint32, quint8);
+    void onLobbyStateReceived(const QVector<LobbySlot>&);
 };
 
 #endif // MAINWINDOW_H

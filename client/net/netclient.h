@@ -15,13 +15,17 @@ public:
 
     void connectToServer(const QString& ip, unsigned short port);
     void disconnectFromServer();
+
     void sendHello(const QString& nickname);
+    void sendReady(bool);
 
 signals:
     void connected();
     void disconnected();
     void errorText(const QString&);
+
     void welcomeReceived(quint32 playerId, quint8 maxPlayers);
+    void lobbyStateReceived(const QVector<LobbySlot>&);
 
 private slots:
     void onConnected();
