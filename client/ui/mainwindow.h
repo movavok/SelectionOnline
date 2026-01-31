@@ -74,9 +74,12 @@ private:
     QProcess* m_serverProcess = nullptr;
     NetClient* m_netClient = nullptr;
     void initNetClient();
+    void connectToServer(const QString&, unsigned short);
+
+    bool m_closing = false;
+    void shutdownServerProcess();
 
     //start
-    void connectServerByFields();
     void goToLobby();
     bool applyNicknameFromStartScreen();
     void ensureLocalPlayerRow();
@@ -91,6 +94,9 @@ private:
 
     void resetLobbySelectionState();
     void updateLobbySelectionButtons();
+
+protected slots:
+    void closeEvent(QCloseEvent*) override;
 
 private slots:
     void onServerProcessError(QProcess::ProcessError);
@@ -112,7 +118,7 @@ private slots:
     void onNetConnected();
     void onNetDisconnected();
     void onNetErrorText(const QString&);
-    void onNetTextReceived(const QString&);
+    void onWelcomeReceived(quint32, quint8);
 };
 
 #endif // MAINWINDOW_H

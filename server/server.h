@@ -8,6 +8,9 @@
 #include <QHostAddress>
 #include <QStringList>
 
+#include "shared/net/packet.h"
+#include "shared/net/protocol.h"
+
 class Server : public QObject {
     Q_OBJECT
 public:
@@ -25,6 +28,10 @@ private:
     QTcpServer m_tcpServer;
     QList<QTcpSocket*> m_clients;
     QTimer m_tickTimer;
+
+    QHash<QTcpSocket*, QByteArray> m_inBuffers;
+    quint32 m_nextPlayerId = 1;
+    static constexpr quint8 MAX_PLAYERS = 10;
 };
 
 #endif // SERVER_H

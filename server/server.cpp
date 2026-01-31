@@ -25,6 +25,7 @@ bool Server::start(const QHostAddress& bind, unsigned short port) {
 void Server::onNewConnection() {
     while (QTcpSocket* socket = m_tcpServer.nextPendingConnection()) {
         m_clients.push_back(socket);
+        m_inBuffers[socket] = QByteArray();
         socket->setParent(this);
 
         connect(socket, &QTcpSocket::readyRead, this, &Server::onClientReadyRead);
@@ -38,10 +39,26 @@ void Server::onClientReadyRead() {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     if (!socket) return;
 
-    const QByteArray data = socket->readAll();
-    qInfo() << "rx bytes:" << data.size();
+    QByteArray& buffer = m_inBuffers[socket];
+    buffer.append(socket->readAll());
 
-    socket->write("OK\n");
+    QByteArray payload;
+    while (tryExtractPayload(buffer, payload)) {
+        QDataStream dataStream(payload);
+        dataStream.setVersion(QDataStream::Qt_6_5);
+
+        quint16 typeRaw = 0;
+        dataStream >> typeRaw;
+        MessageType type = MessageType(typeRaw);
+
+        if (type == MessageType::Hello) {
+            QString nickname;
+            dataStream >> nickname;
+
+            quint32 playerId = m_nextPlayerId++;
+            sendPacket(socket, makeWelcomePayload(playerId, MAX_PLAYERS));
+        }
+    }
 }
 
 void Server::onClientDisconnected() {
@@ -50,6 +67,7 @@ void Server::onClientDisconnected() {
 
     qInfo() << "client disconnected:" << socket->peerAddress().toString() << ":" << socket->peerPort();
     m_clients.removeAll(socket);
+    m_inBuffers.remove(socket);
     socket->deleteLater();
 }
 

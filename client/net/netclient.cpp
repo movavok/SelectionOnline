@@ -21,8 +21,7 @@ void NetClient::disconnectFromServer() {
 }
 
 void NetClient::sendHello(const QString& nickname) {
-    const QByteArray line = "HELLO " + nickname.toUtf8() + "\n";
-    m_socket.write(line);
+    sendPacket(&m_socket, makeHelloPayload(nickname));
 }
 
 void NetClient::onConnected() { emit connected(); }
@@ -31,9 +30,23 @@ void NetClient::onDisconnected() { emit disconnected(); }
 void NetClient::onReadyRead() {
     m_buffer.append(m_socket.readAll());
 
-    const QString text = QString::fromUtf8(m_buffer);
-    m_buffer.clear();
-    emit textReceived(text);
+    QByteArray payload;
+    while (tryExtractPayload(m_buffer, payload)) {
+        QDataStream dataStream(payload);
+        dataStream.setVersion(QDataStream::Qt_6_5);
+
+        quint16 typeRaw = 0;
+        dataStream >> typeRaw;
+        MessageType type = MessageType(typeRaw);
+
+        if (type == MessageType::Welcome) {
+            quint32 playerId = 0;
+            quint8 maxPlayers = 0;
+
+            dataStream >> playerId >> maxPlayers;
+            emit welcomeReceived(playerId, maxPlayers);
+        }
+    }
 }
 
 void NetClient::onSocketErrorOccurred(QAbstractSocket::SocketError error) {

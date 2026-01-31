@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QTcpSocket>
 
+#include "../../server/shared/net/packet.h"
+#include "../../server/shared/net/protocol.h"
+
 class NetClient : public QObject
 {
     Q_OBJECT
@@ -18,7 +21,7 @@ signals:
     void connected();
     void disconnected();
     void errorText(const QString&);
-    void textReceived(const QString&);
+    void welcomeReceived(quint32 playerId, quint8 maxPlayers);
 
 private slots:
     void onConnected();

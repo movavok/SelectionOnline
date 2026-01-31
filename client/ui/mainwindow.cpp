@@ -84,6 +84,7 @@ void MainWindow::onNetConnected() {
 void MainWindow::onNetDisconnected() {
     statusBar()->showMessage("Відключено", 2000);
     statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
+    goToStartScreen();
 }
 
 void MainWindow::onNetErrorText(const QString& text) {
@@ -91,8 +92,11 @@ void MainWindow::onNetErrorText(const QString& text) {
     statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
 }
 
-void MainWindow::onNetTextReceived(const QString& text) {
-    statusBar()->showMessage("Server: " + text.trimmed(), 3000);
+void MainWindow::onWelcomeReceived(quint32 playerId, quint8 maxPlayers) {
+    Q_UNUSED(playerId);
+    Q_UNUSED(maxPlayers);
+
+    goToLobby();
 }
 
 void MainWindow::initNetClient() {
@@ -100,7 +104,7 @@ void MainWindow::initNetClient() {
     connect(m_netClient, &NetClient::connected, this, &MainWindow::onNetConnected);
     connect(m_netClient, &NetClient::disconnected, this, &MainWindow::onNetDisconnected);
     connect(m_netClient, &NetClient::errorText, this, &MainWindow::onNetErrorText);
-    connect(m_netClient, &NetClient::textReceived, this, &MainWindow::onNetTextReceived);
+    connect(m_netClient, &NetClient::welcomeReceived, this, &MainWindow::onWelcomeReceived);
 }
 
 void MainWindow::onServerProcessError(QProcess::ProcessError error) {
@@ -110,10 +114,37 @@ void MainWindow::onServerProcessError(QProcess::ProcessError error) {
     statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
 }
 
-void MainWindow::connectServerByFields() {
-    const QString ip = ui->le_ip->text().trimmed();
-    const unsigned short port = quint16(ui->sb_port->value());
+void MainWindow::shutdownServerProcess() {
+    if (m_closing) return;
+    m_closing = true;
 
+    if (m_netClient) {
+        disconnect(m_netClient, nullptr, this, nullptr);
+        m_netClient->disconnectFromServer();
+        m_netClient->blockSignals(true);
+    }
+
+    if (m_serverProcess) {
+        disconnect(m_serverProcess, nullptr, this, nullptr);
+
+        if (m_serverProcess->state() != QProcess::NotRunning) {
+            m_serverProcess->terminate();
+            if (!m_serverProcess->waitForFinished(800)) {
+                m_serverProcess->kill();
+                m_serverProcess->waitForFinished(800);
+            }
+        }
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+    shutdownServerProcess();
+    QMainWindow::closeEvent(event);
+}
+
+void MainWindow::connectToServer(const QString& ip, unsigned short port) {
+    statusBar()->showMessage("Підключення...", 2000);
+    statusBar()->setStyleSheet("color: #77dd77; font-size:12px; font-family:Fixedsys;");
     m_netClient->connectToServer(ip, port);
 }
 
@@ -126,22 +157,24 @@ void MainWindow::onHostServer() {
     }
 
     const QString serverExePath = QCoreApplication::applicationDirPath() + "/SelectionServer.exe";
+    unsigned short port = ui->sb_port->value();
 
     QStringList args;
     args << "--bind" << "0.0.0.0"
-         << "--port" << QString::number(ui->sb_port->value());
+         << "--port" << QString::number(port);
 
     m_serverProcess->start(serverExePath, args);
 
-    onJoinServer();
+    connectToServer("127.0.0.1", port);
 }
 
 void MainWindow::onJoinServer() {
     if (!applyNicknameFromStartScreen()) return;
 
-    connectServerByFields();
+    const QString ip = ui->le_ip->text().trimmed();
+    const unsigned short port = ui->sb_port->value();
 
-    goToLobby();
+    connectToServer(ip, port);
 }
 
 bool MainWindow::applyNicknameFromStartScreen() {

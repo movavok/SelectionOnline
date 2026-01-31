@@ -10,4 +10,6 @@ SOURCES += \
 
 HEADERS += \
     ai/enemy.h \
-    server.h
+    server.h \
+    shared/net/packet.h \
+    shared/net/protocol.h
