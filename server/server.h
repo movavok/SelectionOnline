@@ -27,6 +27,7 @@ private slots:
 private:
     QTcpServer m_tcpServer;
     QList<QTcpSocket*> m_clients;
+    QTcpSocket* m_host = nullptr;
     QTimer m_tickTimer;
 
     QHash<QTcpSocket*, QByteArray> m_inBuffers;
@@ -42,12 +43,18 @@ private:
     QVector<LobbySlot> m_lobbySlots;
 
     void broadcastLobbyState();
+    void broadcastLobbyControl();
+    quint32 hostPlayerId() const;
+    bool canStartGame() const;
+    void ensureHostAssigned();
     int findFreeSlot() const;
     void assignPlayerToSlot(QTcpSocket*, const QString& nickname);
     void releasePlayer(QTcpSocket*);
     void compactSlotsFrom(int removedIndex);
     void handleHello(QTcpSocket*, QDataStream&);
     void handleReady(QTcpSocket*, QDataStream&);
+    void handlePlayerConfigUpdate(QTcpSocket*, QDataStream&);
+    void handleStartGame(QTcpSocket*, QDataStream&);
 };
 
 #endif // SERVER_H

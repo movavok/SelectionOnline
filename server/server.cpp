@@ -55,6 +55,8 @@ void Server::onClientReadyRead() {
 
         if (type == MessageType::Hello) handleHello(socket, dataStream);
         else if (type == MessageType::Ready) handleReady(socket, dataStream);
+        else if (type == MessageType::PlayerConfigUpdate) handlePlayerConfigUpdate(socket, dataStream);
+        else if (type == MessageType::StartGame) handleStartGame(socket, dataStream);
     }
 }
 
@@ -66,8 +68,14 @@ void Server::onClientDisconnected() {
     m_clients.removeAll(socket);
     m_inBuffers.remove(socket);
 
+    if (socket == m_host)
+        m_host = nullptr;
+
     releasePlayer(socket);
+
+    ensureHostAssigned();
     broadcastLobbyState();
+    broadcastLobbyControl();
 
     socket->deleteLater();
 }
@@ -85,6 +93,44 @@ void Server::broadcastLobbyState() {
     for (QTcpSocket* client : m_clients) sendPacket(client, payload);
 }
 
+quint32 Server::hostPlayerId() const {
+    if (!m_host) return 0;
+    const QHash<QTcpSocket*, PlayerState>::const_iterator iter = m_playerBySocket.find(m_host);
+    if (iter == m_playerBySocket.end()) return 0;
+    return iter->playerId;
+}
+
+bool Server::canStartGame() const {
+    if (hostPlayerId() == 0) return false;
+
+    bool anyConnected = false;
+    for (const LobbySlot& slot : m_lobbySlots) {
+        if (!slot.connected) continue;
+        anyConnected = true;
+        if (!slot.ready) return false;
+    }
+
+    return anyConnected;
+}
+
+void Server::broadcastLobbyControl() {
+    const QByteArray payload = makeLobbyControlPayload(canStartGame(), hostPlayerId());
+    for (QTcpSocket* client : m_clients) sendPacket(client, payload);
+}
+
+void Server::ensureHostAssigned() {
+    if (m_host && m_playerBySocket.contains(m_host)) return;
+    m_host = nullptr;
+
+    for (QTcpSocket* client : m_clients) {
+        if (!client) continue;
+        if (m_playerBySocket.contains(client)) {
+            m_host = client;
+            return;
+        }
+    }
+}
+
 void Server::handleHello(QTcpSocket* socket, QDataStream& in) {
     QString nickname;
     in >> nickname;
@@ -94,7 +140,9 @@ void Server::handleHello(QTcpSocket* socket, QDataStream& in) {
         if (idx >= 0 && idx < m_lobbySlots.size()) {
             m_lobbySlots[idx].nickname = nickname;
         }
+        ensureHostAssigned();
         broadcastLobbyState();
+        broadcastLobbyControl();
         return;
     }
 
@@ -113,8 +161,12 @@ void Server::handleHello(QTcpSocket* socket, QDataStream& in) {
     slot.nickname = nickname;
     slot.ready = false;
 
+    if (!m_host) m_host = socket;
+
     sendPacket(socket, makeWelcomePayload(playerId, MAX_PLAYERS));
+    ensureHostAssigned();
     broadcastLobbyState();
+    broadcastLobbyControl();
 }
 
 void Server::handleReady(QTcpSocket* socket, QDataStream& in) {
@@ -129,6 +181,36 @@ void Server::handleReady(QTcpSocket* socket, QDataStream& in) {
 
     m_lobbySlots[index].ready = ready;
     broadcastLobbyState();
+    broadcastLobbyControl();
+}
+
+void Server::handlePlayerConfigUpdate(QTcpSocket* socket, QDataStream& in) {
+    quint8 weaponId = 255, abilityId = 255, colorId = 255;
+    in >> weaponId >> abilityId >> colorId;
+
+    QHash<QTcpSocket*, PlayerState>::iterator iter = m_playerBySocket.find(socket);
+    if (iter == m_playerBySocket.end()) return;
+
+    int index = iter->slotIndex;
+    if (index < 0 || index >= m_lobbySlots.size()) return;
+
+    m_lobbySlots[index].weaponId = weaponId;
+    m_lobbySlots[index].abilityId = abilityId;
+    m_lobbySlots[index].colorId = colorId;
+
+    broadcastLobbyState();
+    broadcastLobbyControl();
+}
+
+void Server::handleStartGame(QTcpSocket* socket, QDataStream& in) {
+    Q_UNUSED(in);
+
+    ensureHostAssigned();
+    if (!m_host || socket != m_host) return;
+    if (!canStartGame()) return;
+
+    const QByteArray payload = makeStartGamePayload();
+    for (QTcpSocket* client : m_clients) sendPacket(client, payload);
 }
 
 void Server::releasePlayer(QTcpSocket* socket) {

@@ -10,29 +10,31 @@ enum class MessageType : quint16 {
     Hello = 1,
     Welcome = 2,
     LobbyState = 3,
-    Ready = 4
+    Ready = 4,
+    PlayerConfigUpdate = 5,
+    LobbyControl = 6,
+    StartGame = 7
 };
 
 static constexpr quint32 MAX_PACKET_SIZE = 64 * 1024;
 
 static inline QByteArray makeHelloPayload(const QString& nickname) {
     QByteArray payload;
-    QDataStream payloadStream(&payload, QIODevice::WriteOnly);
-    payloadStream.setVersion(QDataStream::Qt_6_5);
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
 
-    payloadStream << quint16(MessageType::Hello);
-    payloadStream << nickname;
+    out << quint16(MessageType::Hello);
+    out << nickname;
     return payload;
 }
 
 static inline QByteArray makeWelcomePayload(quint32 playerId, quint8 maxPlayers) {
     QByteArray payload;
-    QDataStream payloadStream(&payload, QIODevice::WriteOnly);
-    payloadStream.setVersion(QDataStream::Qt_6_5);
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
 
-    payloadStream << quint16(MessageType::Welcome);
-    payloadStream << playerId;
-    payloadStream << maxPlayers;
+    out << quint16(MessageType::Welcome);
+    out << playerId << maxPlayers;
     return payload;
 }
 
@@ -48,14 +50,17 @@ struct LobbySlot {
 
 static inline QByteArray makeLobbyStatePayload(const QVector<LobbySlot>& lobbySlots) {
     QByteArray payload;
-    QDataStream payloadStream(&payload, QIODevice::WriteOnly);
-    payloadStream.setVersion(QDataStream::Qt_6_5);
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
 
-    payloadStream << quint16(MessageType::LobbyState);
-    payloadStream << quint8(lobbySlots.size());
+    out << quint16(MessageType::LobbyState);
+    out << quint8(lobbySlots.size());
 
     for (const LobbySlot& slot : lobbySlots)
-        payloadStream << slot.connected << slot.playerId << slot.nickname << slot.ready;
+        out << slot.connected
+            << slot.playerId << slot.nickname
+            << slot.weaponId << slot.abilityId << slot.colorId
+            << slot.ready;
 
     return payload;
 }
@@ -67,6 +72,36 @@ static inline QByteArray makeReadyPayload(bool ready) {
 
     out << quint16(MessageType::Ready);
     out << ready;
+    return payload;
+}
+
+static inline QByteArray makePlayerConfigUpdatePayload(quint8 weaponId, quint8 abilityId, quint8 colorId) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PlayerConfigUpdate);
+    out << weaponId << abilityId << colorId;
+    return payload;
+}
+
+static inline QByteArray makeLobbyControlPayload(bool canStart, quint32 hostPlayerId) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::LobbyControl);
+    out << canStart;
+    out << hostPlayerId;
+    return payload;
+}
+
+static inline QByteArray makeStartGamePayload() {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::StartGame);
     return payload;
 }
 
