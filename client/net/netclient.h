@@ -18,6 +18,8 @@ public:
 
     void sendHello(const QString& nickname);
     void sendReady(bool);
+    void sendPlayerConfigUpdate(quint8 weaponId, quint8 abilityId, quint8 colorId);
+    void sendStartGame();
 
 signals:
     void connected();
@@ -26,6 +28,8 @@ signals:
 
     void welcomeReceived(quint32 playerId, quint8 maxPlayers);
     void lobbyStateReceived(const QVector<LobbySlot>&);
+    void lobbyControlReceived(bool canStart, quint32 hostPlayerId);
+    void startGameReceived();
 
 private slots:
     void onConnected();

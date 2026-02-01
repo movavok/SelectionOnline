@@ -67,12 +67,16 @@ private:
     static QColor contrastingTextColor(const QColor&);
 
     void checkPlayerConfigured();
+    void preparePlayerConfigUpdate();
 
     MovementScheme getMovementScheme() const;
     QVector<Qt::Key> getSlotKeys();
-
+    bool m_isHost = false;
     QProcess* m_serverProcess = nullptr;
     NetClient* m_netClient = nullptr;
+    
+    quint32 m_hostPlayerId = 0;
+    bool m_canStartGame = false;
     void initNetClient();
     void connectToServer(const QString&, unsigned short);
     
@@ -100,6 +104,7 @@ private:
     void initAbilityButtons();
 
     void resetLobbySelectionState();
+    void applyReservedColorsFromLobby(const QVector<LobbySlot>&);
     void updateLobbySelectionButtons();
 
 protected slots:
@@ -127,6 +132,8 @@ private slots:
     void onNetErrorText(const QString&);
     void onWelcomeReceived(quint32, quint8);
     void onLobbyStateReceived(const QVector<LobbySlot>&);
+    void onLobbyControlReceived(bool canStart, quint32 hostPlayerId);
+    void onStartGameReceived();
 };
 
 #endif // MAINWINDOW_H

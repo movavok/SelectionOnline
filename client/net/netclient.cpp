@@ -28,6 +28,14 @@ void NetClient::sendReady(bool ready) {
     sendPacket(&m_socket, makeReadyPayload(ready));
 }
 
+void NetClient::sendPlayerConfigUpdate(quint8 weaponId, quint8 abilityId, quint8 colorId) {
+    sendPacket(&m_socket, makePlayerConfigUpdatePayload(weaponId, abilityId, colorId));
+}
+
+void NetClient::sendStartGame() {
+    sendPacket(&m_socket, makeStartGamePayload());
+}
+
 void NetClient::onConnected() { emit connected(); }
 void NetClient::onDisconnected() { emit disconnected(); }
 
@@ -56,11 +64,21 @@ void NetClient::onReadyRead() {
             QVector<LobbySlot> lobbySlots;
             lobbySlots.resize(count);
 
-            for (int index = 0; index < count; ++index)
-                dataStream >> lobbySlots[index].connected >> lobbySlots[index].playerId
-                           >> lobbySlots[index].nickname >> lobbySlots[index].ready;
+            for (int index = 0; index < count; ++index) {
+                dataStream >> lobbySlots[index].connected
+                           >> lobbySlots[index].playerId >> lobbySlots[index].nickname
+                           >> lobbySlots[index].weaponId >> lobbySlots[index].abilityId >> lobbySlots[index].colorId
+                           >> lobbySlots[index].ready;
+            }
 
             emit lobbyStateReceived(lobbySlots);
+        } else if (type == MessageType::LobbyControl) {
+            bool canStart = false;
+            quint32 hostPlayerId = 0;
+            dataStream >> canStart >> hostPlayerId;
+            emit lobbyControlReceived(canStart, hostPlayerId);
+        } else if (type == MessageType::StartGame) {
+            emit startGameReceived();
         }
     }
 }

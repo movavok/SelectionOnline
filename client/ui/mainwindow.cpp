@@ -69,10 +69,16 @@ void MainWindow::goToPage(Page page) {
 
 void MainWindow::goToLobby() {
     resetLobbySelectionState();
+    m_hostPlayerId = 0;
+    m_canStartGame = false;
+    m_isHost = false;
     goToPage(PageLobby);
     ensureLocalPlayerRow();
     updateLocalPlayerRow();
     updateLobbySelectionButtons();
+
+    ui->b_openGameView->setEnabled(false);
+    ui->b_openGameView->setVisible(false);
 }
 
 void MainWindow::onNetConnected() {
@@ -93,19 +99,30 @@ void MainWindow::onNetErrorText(const QString& text) {
 }
 
 void MainWindow::onWelcomeReceived(quint32 playerId, quint8 maxPlayers) {
-    Q_UNUSED(playerId);
     Q_UNUSED(maxPlayers);
+
+    m_localPlayerId = playerId;
 
     goToLobby();
 }
 
 void MainWindow::onLobbyStateReceived(const QVector<LobbySlot>& lobbySlots) {
+    m_localSlotIndex = -1;
+    for (int index = 0; index < lobbySlots.size(); ++index) {
+        if (lobbySlots[index].connected && lobbySlots[index].playerId == m_localPlayerId) {
+            m_localSlotIndex = index;
+            break;
+        }
+    }
+
     ui->table_playersList->setRowCount(lobbySlots.size());
     ui->table_playersList->clearContents();
 
     for (int row = 0; row < lobbySlots.size(); ++row)
         renderLobbyRow(row, lobbySlots[row]);
 
+
+    applyReservedColorsFromLobby(lobbySlots);
     updateLobbySelectionButtons();
 }
 
@@ -116,6 +133,8 @@ void MainWindow::initNetClient() {
     connect(m_netClient, &NetClient::errorText, this, &MainWindow::onNetErrorText);
     connect(m_netClient, &NetClient::welcomeReceived, this, &MainWindow::onWelcomeReceived);
     connect(m_netClient, &NetClient::lobbyStateReceived, this, &MainWindow::onLobbyStateReceived);
+    connect(m_netClient, &NetClient::lobbyControlReceived, this, &MainWindow::onLobbyControlReceived);
+    connect(m_netClient, &NetClient::startGameReceived, this, &MainWindow::onStartGameReceived);
 }
 
 void MainWindow::onServerProcessError(QProcess::ProcessError error) {
@@ -279,11 +298,11 @@ void MainWindow::updateLocalPlayerRow() {
     slot.ready = m_playerReady;
 
     if (m_selectedWeaponButton)
-        slot.weaponId = m_selectedWeaponButton->property("weaponId").toInt();
+        slot.weaponId = quint8(m_selectedWeaponButton->property("weapon").toInt());
     if (m_selectedAbilityButton)
-        slot.abilityId = m_selectedAbilityButton->property("abilityId").toInt();
+        slot.abilityId = quint8(m_selectedAbilityButton->property("ability").toInt());
     if (m_selectedColorButton)
-        slot.colorId = m_selectedColorButton->property("colorId").toUInt();
+        slot.colorId = quint8(m_colorButtons.indexOf(m_selectedColorButton));
 
     if (m_localSlotIndex >= 0) {
         renderLobbyRow(m_localSlotIndex, slot);
@@ -291,6 +310,33 @@ void MainWindow::updateLocalPlayerRow() {
         if (ui->table_playersList->rowCount() == 0) return;
         renderLobbyRow(0, slot);
     }
+}
+
+QString weaponTextFromId(quint8 id) {
+    if (id == 255) return QString();
+    switch (static_cast<PlayerPreviewWidget::WeaponType>(id)) {
+    case PlayerPreviewWidget::WeaponType::Katana: return "Катана";
+    default: return QString::number(id);
+    }
+}
+
+QString abilityTextFromId(quint8 id) {
+    if (id == 255) return QString();
+    switch (static_cast<PlayerPreviewWidget::AbilityType>(id)) {
+    case PlayerPreviewWidget::AbilityType::MirrorShield: return "Дзеркальний щит";
+    default: return QString::number(id);
+    }
+}
+
+static QColor colorFromId(quint8 colorId, const QList<QPushButton*>& colorButtons) {
+    if (colorId == 255) return QColor();
+    const int index = int(colorId);
+    if (index < 0 || index >= colorButtons.size()) return QColor();
+
+    QPushButton* button = colorButtons[index];
+    if (!button) return QColor();
+
+    return button->property("color").value<QColor>();
 }
 
 void MainWindow::renderLobbyRow(int row, const LobbySlot& slot) {
@@ -306,9 +352,25 @@ void MainWindow::renderLobbyRow(int row, const LobbySlot& slot) {
 
     setTableCellText(row, ColName, slot.connected ? slot.nickname : "", tableFont, tableColor, false);
 
-    setTableCellText(row, ColWeapon, "", tableFont, tableColor, true);
-    setTableCellText(row, ColAbility, "", tableFont, tableColor, true);
-    setTableCellText(row, ColColor, "", tableFont, tableColor, true);
+    setTableCellText(row, ColWeapon, slot.connected ? weaponTextFromId(slot.weaponId) : "", tableFont, tableColor, true);
+    setTableCellText(row, ColAbility, slot.connected ? abilityTextFromId(slot.abilityId) : "", tableFont, tableColor, true);
+
+    QTableWidgetItem* colorItem = createTableItem(row, ColColor);
+
+    if (slot.connected) {
+        const QColor color = colorFromId(slot.colorId, m_colorButtons);
+        if (color.isValid()) {
+            colorItem->setText("");
+            colorItem->setBackground(color);
+            colorItem->setForeground(QBrush(contrastingTextColor(color)));
+        } else {
+            colorItem->setText("");
+            colorItem->setBackground(QBrush(Qt::NoBrush));
+        }
+    } else {
+        colorItem->setText("");
+        colorItem->setBackground(QBrush(Qt::NoBrush));
+    }
 
     const bool isReady = slot.connected && slot.ready;
     const QString readyText = isReady ? "так" : "ні";
@@ -335,21 +397,41 @@ void MainWindow::resetLobbySelectionState() {
     ui->b_openGameView->setEnabled(false);
 }
 
+void MainWindow::applyReservedColorsFromLobby(const QVector<LobbySlot>& lobbySlots) {
+    for (QPushButton* button : m_colorButtons)
+        if (button) button->setProperty("reserved", false);
+
+    for (const LobbySlot& slot : lobbySlots) {
+        if (!slot.connected) continue;
+        if (slot.colorId == 255) continue;
+        if (slot.playerId == m_localPlayerId) continue;
+
+        const int index = int(slot.colorId);
+        if (index < 0 || index >= m_colorButtons.size()) continue;
+
+        if (QPushButton* button = m_colorButtons[index])
+            button->setProperty("reserved", true);
+    }
+
+    if (m_selectedColorButton)
+        m_selectedColorButton->setProperty("reserved", false);
+}
+
 void MainWindow::updateLobbySelectionButtons() {
-    for (QPushButton* button : m_colorButtons) {
+    for (QPushButton* &button : m_colorButtons) {
         if (!button) continue;
         const bool reserved = button->property("reserved").toBool();
         const bool selected = (button == m_selectedColorButton);
         button->setEnabled(!reserved && !selected);
     }
 
-    for (QPushButton* button : m_weaponButtons) {
+    for (QPushButton* &button : m_weaponButtons) {
         if (!button) continue;
         const bool selected = (button == m_selectedWeaponButton);
         button->setEnabled(!selected);
     }
 
-    for (QPushButton* button : m_abilityButtons) {
+    for (QPushButton* &button : m_abilityButtons) {
         if (!button) continue;
         const bool selected = (button == m_selectedAbilityButton);
         button->setEnabled(!selected);
@@ -358,7 +440,6 @@ void MainWindow::updateLobbySelectionButtons() {
 
 void MainWindow::onPlayerReady() {
     m_playerReady = true;
-    ui->b_openGameView->setEnabled(m_playerReady);
 
     if (m_netClient)
         m_netClient->sendReady(true);
@@ -378,6 +459,21 @@ void MainWindow::goToStartScreen() {
 }
 
 void MainWindow::startGame() {
+    if (!m_netClient) return;
+    if (!m_isHost || !m_canStartGame) return;
+    m_netClient->sendStartGame();
+}
+
+void MainWindow::onLobbyControlReceived(bool canStart, quint32 hostPlayerId) {
+    m_canStartGame = canStart;
+    m_hostPlayerId = hostPlayerId;
+    m_isHost = (m_localPlayerId != 0 && m_localPlayerId == m_hostPlayerId);
+
+    ui->b_openGameView->setVisible(m_isHost);
+    ui->b_openGameView->setEnabled(m_isHost && m_canStartGame);
+}
+
+void MainWindow::onStartGameReceived() {
     goToPage(PageGame);
     m_gameView->startGameWithCountdown();
 }
@@ -412,7 +508,7 @@ void MainWindow::initColorButtons() {
         ui->b_orange
     };
 
-    for (QPushButton* button : m_colorButtons) {
+    for (QPushButton* &button : m_colorButtons) {
         connect(button, &QPushButton::clicked, this, &MainWindow::onColorClicked);
         button->setProperty("reserved", false);
         button->setEnabled(false);
@@ -439,6 +535,8 @@ void MainWindow::onColorClicked() {
     m_colorSelected = true;
     checkPlayerConfigured();
     updateLocalPlayerRow();
+    preparePlayerConfigUpdate();
+    updateLobbySelectionButtons();
 }
 
 void MainWindow::initWeaponButtons() {
@@ -447,7 +545,7 @@ void MainWindow::initWeaponButtons() {
     connect(ui->b_katana, &QPushButton::clicked, this, &MainWindow::onWeaponClicked);
 
     m_weaponButtons = { ui->b_katana };
-    for (QPushButton* button : m_weaponButtons)
+    for (QPushButton* &button : m_weaponButtons)
         if (button) button->setEnabled(false);
 }
 
@@ -467,6 +565,7 @@ void MainWindow::onWeaponClicked() {
     m_weaponSelected = true;
     checkPlayerConfigured();
     updateLocalPlayerRow();
+    preparePlayerConfigUpdate();
 }
 
 void MainWindow::initAbilityButtons() {
@@ -475,7 +574,7 @@ void MainWindow::initAbilityButtons() {
     connect(ui->b_mirrorShield, &QPushButton::clicked, this, &MainWindow::onAbilityClicked);
 
     m_abilityButtons = { ui->b_mirrorShield };
-    for (QPushButton* button : m_abilityButtons)
+    for (QPushButton* &button : m_abilityButtons)
         if (button) button->setEnabled(false);
 }
 
@@ -495,11 +594,20 @@ void MainWindow::onAbilityClicked() {
     m_abilitySelected = true;
     checkPlayerConfigured();
     updateLocalPlayerRow();
+    preparePlayerConfigUpdate();
 }
 
 void MainWindow::checkPlayerConfigured() {
     m_playerConfigured = m_colorSelected && m_weaponSelected && m_abilitySelected;
     ui->b_playerReady->setEnabled(m_playerConfigured);
+}
+
+void MainWindow::preparePlayerConfigUpdate() {
+    quint8 weaponId = m_selectedWeaponButton ? quint8(m_selectedWeaponButton->property("weapon").toInt()) : 255;
+    quint8 abilityId = m_selectedAbilityButton ? quint8(m_selectedAbilityButton->property("ability").toInt()) : 255;
+    quint8 colorId = m_selectedColorButton ? quint8(m_colorButtons.indexOf(m_selectedColorButton)) : 255;
+
+    if (m_netClient) m_netClient->sendPlayerConfigUpdate(weaponId, abilityId, colorId);
 }
 
 MovementScheme MainWindow::getMovementScheme() const { return static_cast<MovementScheme>(ui->cb_movement->currentIndex()); }
