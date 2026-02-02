@@ -55,6 +55,12 @@ private:
     void handleReady(QTcpSocket*, QDataStream&);
     void handlePlayerConfigUpdate(QTcpSocket*, QDataStream&);
     void handleStartGame(QTcpSocket*, QDataStream&);
+    void handleGameSnapshot(QTcpSocket*, QDataStream&);
+    void handlePlayerState(QTcpSocket*, QDataStream&);
+    void handleTileUpdate(QTcpSocket*, QDataStream&);
+    void handlePlayerHit(QTcpSocket*, QDataStream&);
+
+    const LobbySlot* findLobbySlotByPlayerId(quint32 playerId) const;
 };
 
 #endif // SERVER_H

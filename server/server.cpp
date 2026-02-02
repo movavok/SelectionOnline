@@ -57,7 +57,19 @@ void Server::onClientReadyRead() {
         else if (type == MessageType::Ready) handleReady(socket, dataStream);
         else if (type == MessageType::PlayerConfigUpdate) handlePlayerConfigUpdate(socket, dataStream);
         else if (type == MessageType::StartGame) handleStartGame(socket, dataStream);
+        else if (type == MessageType::GameSnapshot) handleGameSnapshot(socket, dataStream);
+        else if (type == MessageType::PlayerState) handlePlayerState(socket, dataStream);
+        else if (type == MessageType::TileUpdate) handleTileUpdate(socket, dataStream);
+        else if (type == MessageType::PlayerHit) handlePlayerHit(socket, dataStream);
     }
+}
+
+const LobbySlot* Server::findLobbySlotByPlayerId(quint32 playerId) const {
+    for (const LobbySlot& slot : m_lobbySlots) {
+        if (!slot.connected) continue;
+        if (slot.playerId == playerId) return &slot;
+    }
+    return nullptr;
 }
 
 void Server::onClientDisconnected() {
@@ -136,9 +148,9 @@ void Server::handleHello(QTcpSocket* socket, QDataStream& in) {
     in >> nickname;
 
     if (m_playerBySocket.contains(socket)) {
-        int idx = m_playerBySocket[socket].slotIndex;
-        if (idx >= 0 && idx < m_lobbySlots.size()) {
-            m_lobbySlots[idx].nickname = nickname;
+        const int slotIndex = m_playerBySocket[socket].slotIndex;
+        if (slotIndex >= 0 && slotIndex < m_lobbySlots.size()) {
+            m_lobbySlots[slotIndex].nickname = nickname;
         }
         ensureHostAssigned();
         broadcastLobbyState();
@@ -211,6 +223,82 @@ void Server::handleStartGame(QTcpSocket* socket, QDataStream& in) {
 
     const QByteArray payload = makeStartGamePayload();
     for (QTcpSocket* client : m_clients) sendPacket(client, payload);
+}
+
+void Server::handleGameSnapshot(QTcpSocket* socket, QDataStream& in) {
+    quint32 tick = 0;
+    QByteArray snapshotBytes;
+    in >> tick >> snapshotBytes;
+
+    ensureHostAssigned();
+    if (!m_host || socket != m_host) return;
+
+    const QByteArray payload = makeGameSnapshotPayload(tick, snapshotBytes);
+    for (QTcpSocket* client : m_clients) {
+        if (!client || client == socket) continue;
+        sendPacket(client, payload);
+    }
+}
+
+void Server::handlePlayerState(QTcpSocket* socket, QDataStream& in) {
+    quint32 tick = 0;
+    float posX = 0.0f;
+    float posY = 0.0f;
+    quint16 hp = 0, maxHp = 0;
+    in >> tick >> posX >> posY >> hp >> maxHp;
+
+    const QHash<QTcpSocket*, PlayerState>::const_iterator iter = m_playerBySocket.find(socket);
+    if (iter == m_playerBySocket.end()) return;
+    const quint32 playerId = iter->playerId;
+    if (playerId == 0) return;
+
+    const LobbySlot* slot = findLobbySlotByPlayerId(playerId);
+    const QString nickname = slot ? slot->nickname : QString();
+    const quint8 colorId = slot ? slot->colorId : quint8(255);
+
+    const QByteArray payload = makePlayerStateBroadcastPayload(playerId, tick, posX, posY, hp, maxHp, nickname, colorId);
+    for (QTcpSocket* client : m_clients) {
+        if (!client || client == socket) continue;
+        sendPacket(client, payload);
+    }
+}
+
+void Server::handleTileUpdate(QTcpSocket* socket, QDataStream& in) {
+    qint16 tileX = 0, tileY = 0;
+    quint8 tileType = 0;
+    in >> tileX >> tileY >> tileType;
+
+    if (!m_playerBySocket.contains(socket)) return;
+
+    const QByteArray payload = makeTileUpdatePayload(tileX, tileY, tileType);
+    for (QTcpSocket* client : m_clients) {
+        if (!client || client == socket) continue;
+        sendPacket(client, payload);
+    }
+}
+
+void Server::handlePlayerHit(QTcpSocket* socket, QDataStream& in) {
+    quint32 targetPlayerId = 0;
+    quint16 damage = 0;
+    in >> targetPlayerId >> damage;
+
+    const QHash<QTcpSocket*, PlayerState>::const_iterator attackerIter = m_playerBySocket.find(socket);
+    if (attackerIter == m_playerBySocket.end()) return;
+    const quint32 attackerPlayerId = attackerIter->playerId;
+    if (attackerPlayerId == 0 || targetPlayerId == 0) return;
+    if (attackerPlayerId == targetPlayerId) return;
+    if (damage == 0) return;
+
+    QTcpSocket* targetSocket = nullptr;
+    for (auto iter = m_playerBySocket.constBegin(); iter != m_playerBySocket.constEnd(); ++iter) {
+        if (iter->playerId == targetPlayerId) {
+            targetSocket = iter.key();
+            break;
+        }
+    }
+    if (!targetSocket) return;
+
+    sendPacket(targetSocket, makePlayerHitNotifyPayload(attackerPlayerId, targetPlayerId, damage));
 }
 
 void Server::releasePlayer(QTcpSocket* socket) {

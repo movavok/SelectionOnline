@@ -13,7 +13,11 @@ enum class MessageType : quint16 {
     Ready = 4,
     PlayerConfigUpdate = 5,
     LobbyControl = 6,
-    StartGame = 7
+    StartGame = 7,
+    GameSnapshot = 8,
+    PlayerState = 9,
+    TileUpdate = 10,
+    PlayerHit = 11
 };
 
 static constexpr quint32 MAX_PACKET_SIZE = 64 * 1024;
@@ -102,6 +106,81 @@ static inline QByteArray makeStartGamePayload() {
     out.setVersion(QDataStream::Qt_6_5);
 
     out << quint16(MessageType::StartGame);
+    return payload;
+}
+
+static inline QByteArray makeGameSnapshotPayload(quint32 tick, const QByteArray& snapshotBytes) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::GameSnapshot);
+    out << tick;
+    out << snapshotBytes;
+    return payload;
+}
+
+static inline QByteArray makePlayerStateUpdatePayload(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PlayerState);
+    out << tick;
+    out << posX << posY;
+    out << hp << maxHp;
+    return payload;
+}
+
+static inline QByteArray makePlayerStateBroadcastPayload(quint32 playerId,
+                                                        quint32 tick,
+                                                        float posX,
+                                                        float posY,
+                                                        quint16 hp,
+                                                        quint16 maxHp,
+                                                        const QString& nickname,
+                                                        quint8 colorId) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PlayerState);
+    out << playerId;
+    out << tick;
+    out << posX << posY;
+    out << hp << maxHp;
+    out << nickname;
+    out << colorId;
+    return payload;
+}
+
+static inline QByteArray makeTileUpdatePayload(qint16 tileX, qint16 tileY, quint8 tileType) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::TileUpdate);
+    out << tileX << tileY << tileType;
+    return payload;
+}
+
+static inline QByteArray makePlayerHitRequestPayload(quint32 targetPlayerId, quint16 damage) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PlayerHit);
+    out << targetPlayerId << damage;
+    return payload;
+}
+
+static inline QByteArray makePlayerHitNotifyPayload(quint32 attackerPlayerId, quint32 targetPlayerId, quint16 damage) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PlayerHit);
+    out << attackerPlayerId << targetPlayerId << damage;
     return payload;
 }
 

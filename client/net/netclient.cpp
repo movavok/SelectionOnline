@@ -36,6 +36,22 @@ void NetClient::sendStartGame() {
     sendPacket(&m_socket, makeStartGamePayload());
 }
 
+void NetClient::sendGameSnapshot(quint32 tick, const QByteArray& snapshotBytes) {
+    sendPacket(&m_socket, makeGameSnapshotPayload(tick, snapshotBytes));
+}
+
+void NetClient::sendPlayerState(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp) {
+    sendPacket(&m_socket, makePlayerStateUpdatePayload(tick, posX, posY, hp, maxHp));
+}
+
+void NetClient::sendTileUpdate(qint16 tileX, qint16 tileY, quint8 tileType) {
+    sendPacket(&m_socket, makeTileUpdatePayload(tileX, tileY, tileType));
+}
+
+void NetClient::sendPlayerHit(quint32 targetPlayerId, quint16 damage) {
+    sendPacket(&m_socket, makePlayerHitRequestPayload(targetPlayerId, damage));
+}
+
 void NetClient::onConnected() { emit connected(); }
 void NetClient::onDisconnected() { emit disconnected(); }
 
@@ -79,6 +95,32 @@ void NetClient::onReadyRead() {
             emit lobbyControlReceived(canStart, hostPlayerId);
         } else if (type == MessageType::StartGame) {
             emit startGameReceived();
+        } else if (type == MessageType::GameSnapshot) {
+            quint32 tick = 0;
+            QByteArray snapshotBytes;
+            dataStream >> tick >> snapshotBytes;
+            emit gameSnapshotReceived(tick, snapshotBytes);
+        } else if (type == MessageType::PlayerState) {
+            quint32 playerId = 0;
+            quint32 tick = 0;
+            float posX = 0.0f;
+            float posY = 0.0f;
+            quint16 hp = 0, maxHp = 0;
+            QString nickname;
+            quint8 colorId = 255;
+
+            dataStream >> playerId >> tick >> posX >> posY >> hp >> maxHp >> nickname >> colorId;
+            emit playerStateReceived(playerId, tick, posX, posY, hp, maxHp, nickname, colorId);
+        } else if (type == MessageType::TileUpdate) {
+            qint16 tileX = 0, tileY = 0;
+            quint8 tileType = 0;
+            dataStream >> tileX >> tileY >> tileType;
+            emit tileUpdateReceived(tileX, tileY, tileType);
+        } else if (type == MessageType::PlayerHit) {
+            quint32 attackerPlayerId = 0, targetPlayerId = 0;
+            quint16 damage = 0;
+            dataStream >> attackerPlayerId >> targetPlayerId >> damage;
+            emit playerHitReceived(attackerPlayerId, targetPlayerId, damage);
         }
     }
 }

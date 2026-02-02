@@ -20,6 +20,10 @@ public:
     void sendReady(bool);
     void sendPlayerConfigUpdate(quint8 weaponId, quint8 abilityId, quint8 colorId);
     void sendStartGame();
+    void sendGameSnapshot(quint32 tick, const QByteArray& snapshotBytes);
+    void sendPlayerState(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp);
+    void sendTileUpdate(qint16 tileX, qint16 tileY, quint8 tileType);
+    void sendPlayerHit(quint32 targetPlayerId, quint16 damage);
 
 signals:
     void connected();
@@ -30,6 +34,10 @@ signals:
     void lobbyStateReceived(const QVector<LobbySlot>&);
     void lobbyControlReceived(bool canStart, quint32 hostPlayerId);
     void startGameReceived();
+    void gameSnapshotReceived(quint32 tick, const QByteArray& snapshotBytes);
+    void playerStateReceived(quint32 playerId, quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp, const QString& nickname, quint8 colorId);
+    void tileUpdateReceived(qint16 tileX, qint16 tileY, quint8 tileType);
+    void playerHitReceived(quint32 attackerPlayerId, quint32 targetPlayerId, quint16 damage);
 
 private slots:
     void onConnected();
