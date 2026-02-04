@@ -7,14 +7,16 @@
 
 #include "fakesnapshot.h"
 #include "game.h"
+#include "../entities/entity.h"
+#include "../entities/player.h"
+#include "../map/tilevisual.h"
+#include "../combat/weapon.h"
 
 class Entity;
 class Player;
 
 class FakeServer {
 public:
-    FakeServer();
-
     void update(float);
 
     void setPlayerInput(MoveDirection, bool);
@@ -36,10 +38,10 @@ public:
     quint32 entityIdFor(const Entity*) const;
 
 private:
-    EntitySnapshot makeEntitySnapshot(Entity* entity, const Player* localPlayer, const QPointF& mouseScene);
-    void fillEntitySnapshotCommon(EntitySnapshot& entitySnapshot, const Entity* entity) const;
-    void fillPlayerSnapshot(EntitySnapshot& entitySnapshot, const Player& player) const;
-    void fillLocalPlayerSnapshot(EntitySnapshot& entitySnapshot, const Player& localPlayer, const QPointF& mouseScene);
+    EntitySnapshot makeEntitySnapshot(Entity* entity, const Player*, const QPointF& mouseScene);
+    void fillEntitySnapshotCommon(EntitySnapshot&, const Entity*) const;
+    void fillPlayerSnapshot(EntitySnapshot&, const Player&) const;
+    void fillLocalPlayerSnapshot(EntitySnapshot&, const Player&, const QPointF& mouseScene);
 
     void ensureEntityIds();
     quint32 ensureIdFor(const Entity*);

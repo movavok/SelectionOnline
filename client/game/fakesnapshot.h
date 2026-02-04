@@ -20,6 +20,7 @@ struct EntitySnapshot {
     bool alive = false;
     QPointF pos;
     QPointF prevPos;
+    QPointF aimDir;
     float radius = 0.0f;
 
     quint16 hp = 0;

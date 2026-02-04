@@ -1,10 +1,5 @@
 #include "fakeserver.h"
 
-#include "../entities/entity.h"
-#include "../entities/player.h"
-#include "../map/tilevisual.h"
-#include "../combat/weapon.h"
-
 void FakeServer::update(float dt) { m_game.update(dt); }
 
 void FakeServer::setPlayerInput(MoveDirection direction, bool pressed) {
@@ -35,7 +30,7 @@ const Game& FakeServer::game() const { return m_game; }
 
 quint32 FakeServer::entityIdFor(const Entity* entity) const {
     if (!entity) return 0;
-    QHash<const Entity*, quint32>::iterator iter = m_entityIds.find(entity);
+    QHash<const Entity*, quint32>::const_iterator iter = m_entityIds.find(entity);
     if (iter == m_entityIds.end()) return 0;
     return iter.value();
 }
@@ -53,14 +48,14 @@ quint32 FakeServer::ensureIdFor(const Entity* entity) {
 
 void FakeServer::ensureEntityIds() {
     const QList<Entity*>& entities = m_game.getEntities();
-    for (const Entity* entity : entities)
-        ensureIdFor(entity);
+    for (const Entity* entity : entities) ensureIdFor(entity);
 }
 
 void FakeServer::fillEntitySnapshotCommon(EntitySnapshot& entitySnapshot, const Entity* entity) const {
     entitySnapshot.alive = entity->isAlive();
     entitySnapshot.pos = entity->getPosition();
     entitySnapshot.prevPos = entity->getPrevPosition();
+    entitySnapshot.aimDir = QPointF(0, 0);
     entitySnapshot.radius = entity->getRadius();
     entitySnapshot.hp = entity->getCurrentHp();
     entitySnapshot.maxHp = entity->getMaxHp();
@@ -71,8 +66,13 @@ void FakeServer::fillPlayerSnapshot(EntitySnapshot& entitySnapshot, const Player
     entitySnapshot.uiColor = player.getUiColor();
 }
 
-void FakeServer::fillLocalPlayerSnapshot(EntitySnapshot& entitySnapshot, const Player& localPlayer,
-                                         const QPointF& mouseScene) {
+void FakeServer::fillLocalPlayerSnapshot(EntitySnapshot& entitySnapshot, const Player& localPlayer, const QPointF& mouseScene) {
+    QPointF aimDir = mouseScene - localPlayer.getPosition();
+    const double aimLen = std::hypot(aimDir.x(), aimDir.y());
+    if (aimLen > 0.0001) aimDir /= aimLen;
+    else aimDir = QPointF(1.0, 0.0);
+    entitySnapshot.aimDir = aimDir;
+
     const Weapon* weapon = localPlayer.getInventory().getActiveWeapon();
     entitySnapshot.showAttackIndicator = (weapon && localPlayer.getAttackState() != Player::AttackState::Idle);
     entitySnapshot.canAttack = localPlayer.canAttack();
