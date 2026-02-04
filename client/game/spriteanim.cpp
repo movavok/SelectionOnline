@@ -29,18 +29,18 @@ void SpriteAnim::stop() { m_playing = false; }
 void SpriteAnim::play() { m_playing = true; }
 bool SpriteAnim::isPlaying() const { return m_playing; }
 
-int SpriteAnim::frameIndexForTime(float time) const {
+quint16 SpriteAnim::frameIndexForTime(float time) const {
     if (m_frames.isEmpty()) return 0;
 
-    const quint16 framesSize = m_frames.size();
-    quint16 index = quint16(time * m_fps);
+    const int framesSize = m_frames.size();
+    int index = int(time * m_fps);
 
     if (m_loop) {
         if (framesSize > 0) index %= framesSize;
         return index;
     }
 
-    return std::clamp(index, 0, framesSize - 1);
+    return quint16(std::clamp(index, 0, framesSize - 1));
 }
 
 const QPixmap& SpriteAnim::tick(float dt) {
@@ -71,7 +71,7 @@ const QPixmap& SpriteAnim::currentFrame() const {
     return m_frames[index];
 }
 
-int SpriteAnim::currentIndex() const {
+quint16 SpriteAnim::currentIndex() const {
     if (m_frames.isEmpty()) return -1;
     return frameIndexForTime(m_time);
 }

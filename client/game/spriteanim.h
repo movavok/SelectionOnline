@@ -3,21 +3,22 @@
 
 #include <QPixmap>
 #include <QVector>
+#include <algorithm>
 
 class SpriteAnim
 {
 public:
     SpriteAnim() = default;
-    explicit SpriteAnim(QVector<QPixmap> frames, float fps = 12.0f, bool loop = true);
+    explicit SpriteAnim(QVector<QPixmap>, float fps = 12.0f, bool loop = true);
 
-    void setFrames(QVector<QPixmap> frames);
-    const QVector<QPixmap>& frames() const;
+    void setFrames(QVector<QPixmap>);
+    const QVector<QPixmap>& getFrames() const;
 
     void setFps(float fps);
-    float fps() const;
+    float getFps() const;
 
     void setLoop(bool loop);
-    bool loop() const;
+    bool getLoop() const;
 
     void reset();
     void stop();
@@ -39,7 +40,7 @@ private:
     bool m_loop = true;
     bool m_playing = true;
 
-    int frameIndexForTime(float) const;
+    quint16 frameIndexForTime(float) const;
 };
 
 #endif // SPRITEANIM_H
