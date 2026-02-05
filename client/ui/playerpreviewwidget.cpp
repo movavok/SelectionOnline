@@ -42,7 +42,7 @@ void PlayerPreviewWidget::setAbility(AbilityType type) {
     m_abilityType = type;
 
     switch (m_abilityType) {
-    case AbilityType::MirrorShield: m_skinSprite = QPixmap(":/entities/tank.png"); break;
+    case AbilityType::MirrorShield: m_skinSprite = QPixmap(":/entities/tank/tank_stand.png"); break;
     case AbilityType::Empty:
     default: m_skinSprite = QPixmap(); break;
     }

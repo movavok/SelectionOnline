@@ -40,8 +40,11 @@ void NetClient::sendGameSnapshot(quint32 tick, const QByteArray& snapshotBytes) 
     sendPacket(&m_socket, makeGameSnapshotPayload(tick, snapshotBytes));
 }
 
-void NetClient::sendPlayerState(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp) {
-    sendPacket(&m_socket, makePlayerStateUpdatePayload(tick, posX, posY, hp, maxHp));
+void NetClient::sendPlayerState(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp, quint8 activeItemKind,
+                                quint8 activeResourceType, float aimDirX, float aimDirY) {
+    sendPacket(&m_socket,
+               makePlayerStateUpdatePayload(tick, posX, posY, hp, maxHp, activeItemKind, activeResourceType,
+                                            aimDirX, aimDirY));
 }
 
 void NetClient::sendTileUpdate(qint16 tileX, qint16 tileY, quint8 tileType) {
@@ -50,6 +53,14 @@ void NetClient::sendTileUpdate(qint16 tileX, qint16 tileY, quint8 tileType) {
 
 void NetClient::sendPlayerHit(quint32 targetPlayerId, quint16 damage) {
     sendPacket(&m_socket, makePlayerHitRequestPayload(targetPlayerId, damage));
+}
+
+void NetClient::sendPickupCollected(qint16 tileX, qint16 tileY) {
+    sendPacket(&m_socket, makePickupCollectedPayload(tileX, tileY));
+}
+
+void NetClient::sendPlayerAttack(quint32 tick, float dirX, float dirY) {
+    sendPacket(&m_socket, makePlayerAttackRequestPayload(tick, dirX, dirY));
 }
 
 void NetClient::onConnected() { emit connected(); }
@@ -101,16 +112,11 @@ void NetClient::onReadyRead() {
             dataStream >> tick >> snapshotBytes;
             emit gameSnapshotReceived(tick, snapshotBytes);
         } else if (type == MessageType::PlayerState) {
-            quint32 playerId = 0;
-            quint32 tick = 0;
-            float posX = 0.0f;
-            float posY = 0.0f;
-            quint16 hp = 0, maxHp = 0;
-            QString nickname;
-            quint8 colorId = 255;
-
-            dataStream >> playerId >> tick >> posX >> posY >> hp >> maxHp >> nickname >> colorId;
-            emit playerStateReceived(playerId, tick, posX, posY, hp, maxHp, nickname, colorId);
+            RemotePlayerStateUpdate update;
+            dataStream >> update.playerId >> update.tick >> update.posX >> update.posY >> update.hp >> update.maxHp
+                       >> update.nickname >> update.colorId >> update.activeItemKind >> update.activeResourceType
+                       >> update.aimDirX >> update.aimDirY;
+            emit playerStateReceived(update);
         } else if (type == MessageType::TileUpdate) {
             qint16 tileX = 0, tileY = 0;
             quint8 tileType = 0;
@@ -121,6 +127,22 @@ void NetClient::onReadyRead() {
             quint16 damage = 0;
             dataStream >> attackerPlayerId >> targetPlayerId >> damage;
             emit playerHitReceived(attackerPlayerId, targetPlayerId, damage);
+        } else if (type == MessageType::PickupCollected) {
+            qint16 tileX = 0, tileY = 0;
+            dataStream >> tileX >> tileY;
+            emit pickupCollectedReceived(tileX, tileY);
+        } else if (type == MessageType::PlayerAttack) {
+            quint32 attackerPlayerId = 0;
+            quint32 tick = 0;
+            float dirX = 0.0f;
+            float dirY = 0.0f;
+            dataStream >> attackerPlayerId >> tick >> dirX >> dirY;
+            emit playerAttackReceived(attackerPlayerId, tick, dirX, dirY);
+        } else if (type == MessageType::GameTimeSync) {
+            quint8 phase = 0;
+            quint32 msLeft = 0;
+            dataStream >> phase >> msLeft;
+            emit gameTimeSyncReceived(phase, msLeft);
         }
     }
 }

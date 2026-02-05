@@ -14,8 +14,12 @@ public:
     QPointF getGripPoint() const override;
 
     QPainterPath indicatorShape(const Entity&) const override;
+    QPainterPath indicatorShapeForRadius(float entityRadius) const;
+
     double getWeaponRange() const override;
+
     double insideOffset(const Entity&) const override;
+    double insideOffsetForRadius(float entityRadius) const;
 };
 
 #endif // KATANA_H

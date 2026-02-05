@@ -124,6 +124,21 @@ void MainWindow::onLobbyStateReceived(const QVector<LobbySlot>& lobbySlots) {
 
     applyReservedColorsFromLobby(lobbySlots);
     updateLobbySelectionButtons();
+
+    // If we're already in-game, also use this to remove disconnected players from the world.
+    if (ui->stackedWidget->currentIndex() == PageGame && m_gameView) {
+        QVector<quint32> connectedRemoteIds;
+        connectedRemoteIds.reserve(lobbySlots.size());
+
+        for (const LobbySlot& slot : lobbySlots) {
+            if (!slot.connected) continue;
+            if (slot.playerId == 0) continue;
+            if (slot.playerId == m_localPlayerId) continue;
+            connectedRemoteIds.push_back(slot.playerId);
+        }
+
+        m_gameView->setConnectedRemotePlayers(connectedRemoteIds);
+    }
 }
 
 void MainWindow::initNetClient() {
@@ -135,6 +150,73 @@ void MainWindow::initNetClient() {
     connect(m_netClient, &NetClient::lobbyStateReceived, this, &MainWindow::onLobbyStateReceived);
     connect(m_netClient, &NetClient::lobbyControlReceived, this, &MainWindow::onLobbyControlReceived);
     connect(m_netClient, &NetClient::startGameReceived, this, &MainWindow::onStartGameReceived);
+    connect(m_netClient, &NetClient::playerStateReceived, this, &MainWindow::onRemotePlayerStateReceived);
+    connect(m_netClient, &NetClient::tileUpdateReceived, this, &MainWindow::onRemoteTileUpdateReceived);
+    connect(m_netClient, &NetClient::playerHitReceived, this, &MainWindow::onPlayerHitReceived);
+    connect(m_netClient, &NetClient::pickupCollectedReceived, this, &MainWindow::onRemotePickupCollectedReceived);
+    connect(m_netClient, &NetClient::playerAttackReceived, this, &MainWindow::onPlayerAttackReceived);
+    connect(m_netClient, &NetClient::gameTimeSyncReceived, m_gameView, &GameView::onGameTimeSync);
+
+    if (m_gameView) {
+        connect(m_gameView, &GameView::localPlayerStateProduced, this, &MainWindow::onLocalPlayerStateProduced);
+        connect(m_gameView, &GameView::localTileChanged, this, &MainWindow::onLocalTileChanged);
+        connect(m_gameView, &GameView::localPlayerHitProduced, this, &MainWindow::onLocalPlayerHitProduced);
+        connect(m_gameView, &GameView::localPickupCollected, this, &MainWindow::onLocalPickupCollected);
+        connect(m_gameView, &GameView::localPlayerAttackProduced, this, &MainWindow::onLocalPlayerAttackProduced);
+    }
+}
+
+void MainWindow::onLocalPlayerAttackProduced(quint32 tick, float dirX, float dirY) {
+    if (!m_netClient) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    m_netClient->sendPlayerAttack(tick, dirX, dirY);
+}
+
+void MainWindow::onPlayerAttackReceived(quint32 attackerPlayerId, quint32 tick, float dirX, float dirY) {
+    if (!m_gameView) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    if (attackerPlayerId == 0) return;
+    if (attackerPlayerId == m_localPlayerId) return;
+    m_gameView->onRemotePlayerAttack(attackerPlayerId, tick, dirX, dirY);
+}
+
+void MainWindow::onLocalPickupCollected(qint16 tileX, qint16 tileY) {
+    if (!m_netClient) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    m_netClient->sendPickupCollected(tileX, tileY);
+}
+
+void MainWindow::onRemotePickupCollectedReceived(qint16 tileX, qint16 tileY) {
+    if (!m_gameView) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    m_gameView->onRemotePickupCollected(tileX, tileY);
+}
+
+void MainWindow::onLocalPlayerHitProduced(quint32 targetPlayerId, quint16 damage) {
+    if (!m_netClient) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    if (targetPlayerId == 0 || damage == 0) return;
+    m_netClient->sendPlayerHit(targetPlayerId, damage);
+}
+
+void MainWindow::onPlayerHitReceived(quint32 attackerPlayerId, quint32 targetPlayerId, quint16 damage) {
+    if (!m_gameView) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    if (targetPlayerId != m_localPlayerId) return;
+    m_gameView->applyLocalPlayerHit(attackerPlayerId, targetPlayerId, damage);
+}
+
+void MainWindow::onLocalTileChanged(qint16 tileX, qint16 tileY, quint8 tileType) {
+    if (!m_netClient) return;
+    // Only send while in-game to avoid lobby churn.
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    m_netClient->sendTileUpdate(tileX, tileY, tileType);
+}
+
+void MainWindow::onRemoteTileUpdateReceived(qint16 tileX, qint16 tileY, quint8 tileType) {
+    if (!m_gameView) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    m_gameView->onRemoteTileUpdate(tileX, tileY, tileType);
 }
 
 void MainWindow::onServerProcessError(QProcess::ProcessError error) {
@@ -142,6 +224,11 @@ void MainWindow::onServerProcessError(QProcess::ProcessError error) {
 
     statusBar()->showMessage("Не вдалося запустити сервер", 4000);
     statusBar()->setStyleSheet("color: #dc3c3c; font-size:12px; font-family:Fixedsys;");
+}
+
+void MainWindow::onServerProcessStarted() {
+    if (m_pendingHostPort == 0) return;
+    connectToServer("127.0.0.1", m_pendingHostPort);
 }
 
 void MainWindow::shutdownServerProcess() {
@@ -206,6 +293,7 @@ void MainWindow::onHostServer() {
 
     const QString serverExePath = QCoreApplication::applicationDirPath() + "/SelectionServer.exe";
     unsigned short port = ui->sb_port->value();
+    m_pendingHostPort = port;
 
     QStringList args;
     args << "--bind" << "0.0.0.0"
@@ -213,14 +301,26 @@ void MainWindow::onHostServer() {
 
     m_serverProcess->start(serverExePath, args);
 
-    connectToServer("127.0.0.1", port);
+    // Connect only after the process actually starts (prevents race where connect happens before listen()).
+    connect(m_serverProcess, &QProcess::started, this, &MainWindow::onServerProcessStarted, Qt::UniqueConnection);
 }
 
 void MainWindow::onJoinServer() {
     if (!applyNicknameFromStartScreen()) return;
 
-    const QString ip = ui->le_ip->text().trimmed();
+    QString ip = ui->le_ip->text().trimmed();
+    ip.remove('_');
+    ip = ip.trimmed();
     const unsigned short port = ui->sb_port->value();
+
+    QHostAddress addr;
+    const bool ok = addr.setAddress(ip);
+    if (!ok) {
+        statusBar()->showMessage("Невірний IP", 3000);
+        statusBar()->setStyleSheet("color: #dc3c3c; font-size: 12px; font-family: Fixedsys;");
+        ui->le_ip->setFocus();
+        return;
+    }
 
     connectToServer(ip, port);
 }
@@ -476,6 +576,23 @@ void MainWindow::onLobbyControlReceived(bool canStart, quint32 hostPlayerId) {
 void MainWindow::onStartGameReceived() {
     goToPage(PageGame);
     m_gameView->startGameWithCountdown();
+}
+
+void MainWindow::onLocalPlayerStateProduced(const LocalPlayerStateUpdate& update) {
+    if (!m_netClient) return;
+    if (m_localPlayerId == 0) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+
+    m_netClient->sendPlayerState(update.tick, update.posX, update.posY, update.hp, update.maxHp,
+                                 update.activeItemKind, update.activeResourceType, update.aimDirX, update.aimDirY);
+}
+
+void MainWindow::onRemotePlayerStateReceived(const RemotePlayerStateUpdate& update) {
+    if (!m_gameView) return;
+    if (ui->stackedWidget->currentIndex() != PageGame) return;
+    if (update.playerId != 0 && update.playerId == m_localPlayerId) return;
+
+    m_gameView->onRemotePlayerState(update);
 }
 
 void MainWindow::goToPrevPage() {

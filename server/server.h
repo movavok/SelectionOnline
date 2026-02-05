@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QHostAddress>
 #include <QStringList>
+#include <QElapsedTimer>
 
 #include "shared/net/packet.h"
 #include "shared/net/protocol.h"
@@ -29,6 +30,14 @@ private:
     QList<QTcpSocket*> m_clients;
     QTcpSocket* m_host = nullptr;
     QTimer m_tickTimer;
+
+    QElapsedTimer m_clock;
+    GamePhase m_gamePhase = GamePhase::Idle;
+    qint64 m_phaseEndMs = 0;
+    qint64 m_lastTimeSyncMs = 0;
+    static constexpr int COUNTDOWN_SECONDS = 5;
+    static constexpr int MATCH_SECONDS = 180;
+    static constexpr int TIME_SYNC_INTERVAL_MS = 250;
 
     QHash<QTcpSocket*, QByteArray> m_inBuffers;
     quint32 m_nextPlayerId = 1;
@@ -59,6 +68,10 @@ private:
     void handlePlayerState(QTcpSocket*, QDataStream&);
     void handleTileUpdate(QTcpSocket*, QDataStream&);
     void handlePlayerHit(QTcpSocket*, QDataStream&);
+    void handlePickupCollected(QTcpSocket*, QDataStream&);
+    void handlePlayerAttack(QTcpSocket*, QDataStream&);
+
+    void broadcastGameTimeSync();
 
     const LobbySlot* findLobbySlotByPlayerId(quint32 playerId) const;
 };

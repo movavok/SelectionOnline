@@ -8,9 +8,13 @@
 #include <QPushButton>
 #include <QTableWidgetItem>
 
+#include <QHostAddress>
+
 #include "../net/netclient.h"
 #include "../game/gameview.h"
 #include "playerpreviewwidget.h"
+
+#include "../net/playerstateupdates.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -74,6 +78,8 @@ private:
     bool m_isHost = false;
     QProcess* m_serverProcess = nullptr;
     NetClient* m_netClient = nullptr;
+
+    unsigned short m_pendingHostPort = 0;
     
     quint32 m_hostPlayerId = 0;
     bool m_canStartGame = false;
@@ -112,6 +118,7 @@ protected slots:
 
 private slots:
     void onServerProcessError(QProcess::ProcessError);
+    void onServerProcessStarted();
     void onHostServer();
     void onJoinServer();
 
@@ -134,6 +141,21 @@ private slots:
     void onLobbyStateReceived(const QVector<LobbySlot>&);
     void onLobbyControlReceived(bool canStart, quint32 hostPlayerId);
     void onStartGameReceived();
+
+    void onLocalPlayerStateProduced(const LocalPlayerStateUpdate&);
+    void onRemotePlayerStateReceived(const RemotePlayerStateUpdate&);
+
+    void onLocalTileChanged(qint16 tileX, qint16 tileY, quint8 tileType);
+    void onRemoteTileUpdateReceived(qint16 tileX, qint16 tileY, quint8 tileType);
+
+    void onLocalPlayerHitProduced(quint32 targetPlayerId, quint16 damage);
+    void onPlayerHitReceived(quint32 attackerPlayerId, quint32 targetPlayerId, quint16 damage);
+
+    void onLocalPlayerAttackProduced(quint32 tick, float dirX, float dirY);
+    void onPlayerAttackReceived(quint32 attackerPlayerId, quint32 tick, float dirX, float dirY);
+
+    void onLocalPickupCollected(qint16 tileX, qint16 tileY);
+    void onRemotePickupCollectedReceived(qint16 tileX, qint16 tileY);
 };
 
 #endif // MAINWINDOW_H

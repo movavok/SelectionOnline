@@ -9,10 +9,19 @@
         <file alias="katana.png">assets/ui/icons/katana.png</file>
     </qresource>
     <qresource prefix="/entities">
-        <file alias="tank.png">assets/entities/tank.png</file>
+        <file alias="tank/tank_stand.png">assets/entities/tank/tank_stand.png</file>
+        <file alias="tank/tank_walk_1.png">assets/entities/tank/tank_walk_1.png</file>
+        <file alias="tank/tank_walk_2.png">assets/entities/tank/tank_walk_2.png</file>
+        <file alias="ghost/ghost.png">assets/entities/ghost/ghost.png</file>
     </qresource>
     <qresource prefix="/weapons">
         <file alias="katana.png">assets/weapons/katana.png</file>
+    </qresource>
+
+    <qresource prefix="/attack/katana">
+        <file alias="1.png">assets/attack/katana/1.png</file>
+        <file alias="2.png">assets/attack/katana/2.png</file>
+        <file alias="3.png">assets/attack/katana/3.png</file>
     </qresource>
     <qresource prefix="/tiles">
         <file alias="empty_1.png">assets/tiles/empty_1.png</file>

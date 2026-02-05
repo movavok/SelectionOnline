@@ -1,5 +1,7 @@
 #include "server.h"
 
+#include <limits>
+
 Server::Server(QObject* parent)
     : QObject(parent)
 {
@@ -9,6 +11,8 @@ Server::Server(QObject* parent)
     connect(&m_tickTimer, &QTimer::timeout, this, &Server::onTick);
 
     m_lobbySlots.resize(MAX_PLAYERS);
+
+    m_clock.start();
 }
 
 bool Server::start(const QHostAddress& bind, unsigned short port) {
@@ -61,6 +65,8 @@ void Server::onClientReadyRead() {
         else if (type == MessageType::PlayerState) handlePlayerState(socket, dataStream);
         else if (type == MessageType::TileUpdate) handleTileUpdate(socket, dataStream);
         else if (type == MessageType::PlayerHit) handlePlayerHit(socket, dataStream);
+        else if (type == MessageType::PickupCollected) handlePickupCollected(socket, dataStream);
+        else if (type == MessageType::PlayerAttack) handlePlayerAttack(socket, dataStream);
     }
 }
 
@@ -92,7 +98,42 @@ void Server::onClientDisconnected() {
     socket->deleteLater();
 }
 
-void Server::onTick() {}
+void Server::broadcastGameTimeSync() {
+    const qint64 nowMs = m_clock.elapsed();
+    const qint64 remainingMs = (m_phaseEndMs > nowMs) ? (m_phaseEndMs - nowMs) : 0;
+    qint64 boundedMs = remainingMs;
+    if (boundedMs < 0) boundedMs = 0;
+    const qint64 maxU32 = qint64(std::numeric_limits<quint32>::max());
+    if (boundedMs > maxU32) boundedMs = maxU32;
+
+    const QByteArray payload = makeGameTimeSyncPayload(m_gamePhase, quint32(boundedMs));
+    for (QTcpSocket* client : m_clients) {
+        if (!client) continue;
+        sendPacket(client, payload);
+    }
+    m_lastTimeSyncMs = nowMs;
+}
+
+void Server::onTick() {
+    const qint64 nowMs = m_clock.elapsed();
+
+    if (m_gamePhase == GamePhase::Countdown) {
+        if (nowMs >= m_phaseEndMs) {
+            m_gamePhase = GamePhase::Game;
+            m_phaseEndMs = nowMs + qint64(MATCH_SECONDS) * 1000;
+            broadcastGameTimeSync();
+        }
+    } else if (m_gamePhase == GamePhase::Game) {
+        if (nowMs >= m_phaseEndMs) {
+            m_gamePhase = GamePhase::Idle;
+            m_phaseEndMs = 0;
+            broadcastGameTimeSync();
+        }
+    }
+
+    if (m_gamePhase != GamePhase::Idle && (nowMs - m_lastTimeSyncMs) >= TIME_SYNC_INTERVAL_MS)
+        broadcastGameTimeSync();
+}
 
 int Server::findFreeSlot() const {
     for (int index = 0; index < m_lobbySlots.size(); ++index)
@@ -221,8 +262,18 @@ void Server::handleStartGame(QTcpSocket* socket, QDataStream& in) {
     if (!m_host || socket != m_host) return;
     if (!canStartGame()) return;
 
+    if (m_gamePhase != GamePhase::Idle)
+        return;
+
+    const qint64 nowMs = m_clock.elapsed();
+    m_gamePhase = GamePhase::Countdown;
+    m_phaseEndMs = nowMs + qint64(COUNTDOWN_SECONDS) * 1000;
+    m_lastTimeSyncMs = 0;
+
     const QByteArray payload = makeStartGamePayload();
     for (QTcpSocket* client : m_clients) sendPacket(client, payload);
+
+    broadcastGameTimeSync();
 }
 
 void Server::handleGameSnapshot(QTcpSocket* socket, QDataStream& in) {
@@ -245,7 +296,11 @@ void Server::handlePlayerState(QTcpSocket* socket, QDataStream& in) {
     float posX = 0.0f;
     float posY = 0.0f;
     quint16 hp = 0, maxHp = 0;
-    in >> tick >> posX >> posY >> hp >> maxHp;
+    quint8 activeItemKind = 0;
+    quint8 activeResourceType = 0;
+    float aimDirX = 1.0f;
+    float aimDirY = 0.0f;
+    in >> tick >> posX >> posY >> hp >> maxHp >> activeItemKind >> activeResourceType >> aimDirX >> aimDirY;
 
     const QHash<QTcpSocket*, PlayerState>::const_iterator iter = m_playerBySocket.find(socket);
     if (iter == m_playerBySocket.end()) return;
@@ -256,7 +311,9 @@ void Server::handlePlayerState(QTcpSocket* socket, QDataStream& in) {
     const QString nickname = slot ? slot->nickname : QString();
     const quint8 colorId = slot ? slot->colorId : quint8(255);
 
-    const QByteArray payload = makePlayerStateBroadcastPayload(playerId, tick, posX, posY, hp, maxHp, nickname, colorId);
+    const QByteArray payload = makePlayerStateBroadcastPayload(playerId, tick, posX, posY, hp, maxHp, nickname,
+                                                               colorId, activeItemKind, activeResourceType,
+                                                               aimDirX, aimDirY);
     for (QTcpSocket* client : m_clients) {
         if (!client || client == socket) continue;
         sendPacket(client, payload);
@@ -299,6 +356,38 @@ void Server::handlePlayerHit(QTcpSocket* socket, QDataStream& in) {
     if (!targetSocket) return;
 
     sendPacket(targetSocket, makePlayerHitNotifyPayload(attackerPlayerId, targetPlayerId, damage));
+}
+
+void Server::handlePickupCollected(QTcpSocket* socket, QDataStream& in) {
+    qint16 tileX = 0;
+    qint16 tileY = 0;
+    in >> tileX >> tileY;
+
+    if (!m_playerBySocket.contains(socket)) return;
+
+    const QByteArray payload = makePickupCollectedPayload(tileX, tileY);
+    for (QTcpSocket* client : m_clients) {
+        if (!client || client == socket) continue;
+        sendPacket(client, payload);
+    }
+}
+
+void Server::handlePlayerAttack(QTcpSocket* socket, QDataStream& in) {
+    quint32 tick = 0;
+    float dirX = 0.0f;
+    float dirY = 0.0f;
+    in >> tick >> dirX >> dirY;
+
+    const QHash<QTcpSocket*, PlayerState>::const_iterator iter = m_playerBySocket.find(socket);
+    if (iter == m_playerBySocket.end()) return;
+    const quint32 playerId = iter->playerId;
+    if (playerId == 0) return;
+
+    const QByteArray payload = makePlayerAttackBroadcastPayload(playerId, tick, dirX, dirY);
+    for (QTcpSocket* client : m_clients) {
+        if (!client || client == socket) continue;
+        sendPacket(client, payload);
+    }
 }
 
 void Server::releasePlayer(QTcpSocket* socket) {

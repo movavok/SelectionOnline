@@ -7,6 +7,8 @@
 #include "../../server/shared/net/packet.h"
 #include "../../server/shared/net/protocol.h"
 
+#include "playerstateupdates.h"
+
 class NetClient : public QObject
 {
     Q_OBJECT
@@ -21,9 +23,12 @@ public:
     void sendPlayerConfigUpdate(quint8 weaponId, quint8 abilityId, quint8 colorId);
     void sendStartGame();
     void sendGameSnapshot(quint32 tick, const QByteArray& snapshotBytes);
-    void sendPlayerState(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp);
+    void sendPlayerState(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp, quint8 activeItemKind,
+                         quint8 activeResourceType, float aimDirX, float aimDirY);
     void sendTileUpdate(qint16 tileX, qint16 tileY, quint8 tileType);
     void sendPlayerHit(quint32 targetPlayerId, quint16 damage);
+    void sendPickupCollected(qint16 tileX, qint16 tileY);
+    void sendPlayerAttack(quint32 tick, float dirX, float dirY);
 
 signals:
     void connected();
@@ -35,9 +40,13 @@ signals:
     void lobbyControlReceived(bool canStart, quint32 hostPlayerId);
     void startGameReceived();
     void gameSnapshotReceived(quint32 tick, const QByteArray& snapshotBytes);
-    void playerStateReceived(quint32 playerId, quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp, const QString& nickname, quint8 colorId);
+    void playerStateReceived(const RemotePlayerStateUpdate&);
     void tileUpdateReceived(qint16 tileX, qint16 tileY, quint8 tileType);
     void playerHitReceived(quint32 attackerPlayerId, quint32 targetPlayerId, quint16 damage);
+    void pickupCollectedReceived(qint16 tileX, qint16 tileY);
+    void playerAttackReceived(quint32 attackerPlayerId, quint32 tick, float dirX, float dirY);
+
+    void gameTimeSyncReceived(quint8 phase, quint32 msLeft);
 
 private slots:
     void onConnected();

@@ -15,8 +15,11 @@ SOURCES += \
     entities/enemy.cpp \
     entities/entity.cpp \
     entities/player.cpp \
+    game/attackfxutils.cpp \
     game/attackraycast.cpp \
     game/game.cpp \
+    game/fakeserver.cpp \
+    game/spriteanim.cpp \
     game/gametimer.cpp \
     game/inventory.cpp \
     game/inventoryslot.cpp \
@@ -30,7 +33,8 @@ SOURCES += \
     net/netclient.cpp \
     ui/mainwindow.cpp \
     ui/playerpreviewwidget.cpp \
-    ui/playerslotwidget.cpp
+    ui/playerslotwidget.cpp \
+    ui/minimapwidget.cpp
 
 HEADERS += \
     combat/katana.h \
@@ -39,11 +43,15 @@ HEADERS += \
     entities/enemy.h \
     entities/entity.h \
     entities/player.h \
+    game/attackfxutils.h \
     game/attackraycast.h \
     game/game.h \
+    game/fakeserver.h \
+    game/fakesnapshot.h \
     game/hitinfo.h \
     game/gametimer.h \
     game/gameview.h \
+    game/spriteanim.h \
     game/inventory.h \
     game/inventoryslot.h \
     map/map.h \
@@ -55,7 +63,8 @@ HEADERS += \
     net/netclient.h \
     ui/mainwindow.h \
     ui/playerpreviewwidget.h \
-    ui/playerslotwidget.h
+    ui/playerslotwidget.h \
+    ui/minimapwidget.h
 
 FORMS += \
     ui/mainwindow.ui

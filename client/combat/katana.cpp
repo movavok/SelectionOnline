@@ -18,7 +18,11 @@ QPixmap Katana::getSprite() const { return m_weaponSprite;  }
 QSize Katana::getSpriteSize() const { return QSize(m_spriteWidth, m_spriteHeight); }
 
 QPainterPath Katana::indicatorShape(const Entity& person) const {
-    const double insideRadius = insideOffset(person);
+    return indicatorShapeForRadius(person.getRadius());
+}
+
+QPainterPath Katana::indicatorShapeForRadius(float entityRadius) const {
+    const double insideRadius = insideOffsetForRadius(entityRadius);
     const double outsideRadius = m_weaponRange;
 
     const double angleDeg = 90.0;
@@ -39,7 +43,9 @@ QPainterPath Katana::indicatorShape(const Entity& person) const {
     return path;
 }
 
-double Katana::insideOffset(const Entity& person) const { return person.getRadius() + 6; }
+double Katana::insideOffset(const Entity& person) const { return insideOffsetForRadius(person.getRadius()); }
+
+double Katana::insideOffsetForRadius(float entityRadius) const { return double(entityRadius) + 6.0; }
 
 double Katana::getWeaponRange() const { return m_weaponRange; }
 

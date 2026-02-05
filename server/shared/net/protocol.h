@@ -17,7 +17,16 @@ enum class MessageType : quint16 {
     GameSnapshot = 8,
     PlayerState = 9,
     TileUpdate = 10,
-    PlayerHit = 11
+    PlayerHit = 11,
+    PickupCollected = 12,
+    PlayerAttack = 13,
+    GameTimeSync = 14
+};
+
+enum class GamePhase : quint8 {
+    Idle = 0,
+    Countdown = 1,
+    Game = 2
 };
 
 static constexpr quint32 MAX_PACKET_SIZE = 64 * 1024;
@@ -109,6 +118,17 @@ static inline QByteArray makeStartGamePayload() {
     return payload;
 }
 
+static inline QByteArray makeGameTimeSyncPayload(GamePhase phase, quint32 msLeft) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::GameTimeSync);
+    out << quint8(phase);
+    out << msLeft;
+    return payload;
+}
+
 static inline QByteArray makeGameSnapshotPayload(quint32 tick, const QByteArray& snapshotBytes) {
     QByteArray payload;
     QDataStream out(&payload, QIODevice::WriteOnly);
@@ -120,7 +140,15 @@ static inline QByteArray makeGameSnapshotPayload(quint32 tick, const QByteArray&
     return payload;
 }
 
-static inline QByteArray makePlayerStateUpdatePayload(quint32 tick, float posX, float posY, quint16 hp, quint16 maxHp) {
+static inline QByteArray makePlayerStateUpdatePayload(quint32 tick,
+                                                      float posX,
+                                                      float posY,
+                                                      quint16 hp,
+                                                      quint16 maxHp,
+                                                      quint8 activeItemKind,
+                                                      quint8 activeResourceType,
+                                                      float aimDirX,
+                                                      float aimDirY) {
     QByteArray payload;
     QDataStream out(&payload, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_5);
@@ -129,6 +157,9 @@ static inline QByteArray makePlayerStateUpdatePayload(quint32 tick, float posX, 
     out << tick;
     out << posX << posY;
     out << hp << maxHp;
+    out << activeItemKind;
+    out << activeResourceType;
+    out << aimDirX << aimDirY;
     return payload;
 }
 
@@ -139,7 +170,11 @@ static inline QByteArray makePlayerStateBroadcastPayload(quint32 playerId,
                                                         quint16 hp,
                                                         quint16 maxHp,
                                                         const QString& nickname,
-                                                        quint8 colorId) {
+                                                        quint8 colorId,
+                                                        quint8 activeItemKind,
+                                                        quint8 activeResourceType,
+                                                        float aimDirX,
+                                                        float aimDirY) {
     QByteArray payload;
     QDataStream out(&payload, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_5);
@@ -151,6 +186,9 @@ static inline QByteArray makePlayerStateBroadcastPayload(quint32 playerId,
     out << hp << maxHp;
     out << nickname;
     out << colorId;
+    out << activeItemKind;
+    out << activeResourceType;
+    out << aimDirX << aimDirY;
     return payload;
 }
 
@@ -181,6 +219,39 @@ static inline QByteArray makePlayerHitNotifyPayload(quint32 attackerPlayerId, qu
 
     out << quint16(MessageType::PlayerHit);
     out << attackerPlayerId << targetPlayerId << damage;
+    return payload;
+}
+
+static inline QByteArray makePickupCollectedPayload(qint16 tileX, qint16 tileY) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PickupCollected);
+    out << tileX << tileY;
+    return payload;
+}
+
+static inline QByteArray makePlayerAttackRequestPayload(quint32 tick, float dirX, float dirY) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PlayerAttack);
+    out << tick;
+    out << dirX << dirY;
+    return payload;
+}
+
+static inline QByteArray makePlayerAttackBroadcastPayload(quint32 playerId, quint32 tick, float dirX, float dirY) {
+    QByteArray payload;
+    QDataStream out(&payload, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_5);
+
+    out << quint16(MessageType::PlayerAttack);
+    out << playerId;
+    out << tick;
+    out << dirX << dirY;
     return payload;
 }
 
