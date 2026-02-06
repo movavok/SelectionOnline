@@ -1,0 +1,79 @@
+#ifndef SERVER_H
+#define SERVER_H
+
+#include <QObject>
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QTimer>
+#include <QHostAddress>
+#include <QStringList>
+#include <QElapsedTimer>
+
+#include "shared/net/packet.h"
+#include "shared/net/protocol.h"
+
+class Server : public QObject {
+    Q_OBJECT
+public:
+    explicit Server(QObject* parent = nullptr);
+
+    bool start(const QHostAddress& bind, unsigned short port);
+
+private slots:
+    void onNewConnection();
+    void onClientReadyRead();
+    void onClientDisconnected();
+    void onTick();
+
+private:
+    QTcpServer m_tcpServer;
+    QList<QTcpSocket*> m_clients;
+    QTcpSocket* m_host = nullptr;
+    QTimer m_tickTimer;
+
+    QElapsedTimer m_clock;
+    GamePhase m_gamePhase = GamePhase::Idle;
+    qint64 m_phaseEndMs = 0;
+    qint64 m_lastTimeSyncMs = 0;
+    static constexpr int COUNTDOWN_SECONDS = 5;
+    static constexpr int MATCH_SECONDS = 180;
+    static constexpr int TIME_SYNC_INTERVAL_MS = 250;
+
+    QHash<QTcpSocket*, QByteArray> m_inBuffers;
+    quint32 m_nextPlayerId = 1;
+    static constexpr quint8 MAX_PLAYERS = 10;
+
+    struct PlayerState {
+        int slotIndex = -1;
+        quint32 playerId = 0;
+    };
+
+    QHash<QTcpSocket*, PlayerState> m_playerBySocket;
+    QVector<LobbySlot> m_lobbySlots;
+
+    void broadcastLobbyState();
+    void broadcastLobbyControl();
+    quint32 hostPlayerId() const;
+    bool canStartGame() const;
+    void ensureHostAssigned();
+    int findFreeSlot() const;
+    void assignPlayerToSlot(QTcpSocket*, const QString& nickname);
+    void releasePlayer(QTcpSocket*);
+    void compactSlotsFrom(int removedIndex);
+    void handleHello(QTcpSocket*, QDataStream&);
+    void handleReady(QTcpSocket*, QDataStream&);
+    void handlePlayerConfigUpdate(QTcpSocket*, QDataStream&);
+    void handleStartGame(QTcpSocket*, QDataStream&);
+    void handleGameSnapshot(QTcpSocket*, QDataStream&);
+    void handlePlayerState(QTcpSocket*, QDataStream&);
+    void handleTileUpdate(QTcpSocket*, QDataStream&);
+    void handlePlayerHit(QTcpSocket*, QDataStream&);
+    void handlePickupCollected(QTcpSocket*, QDataStream&);
+    void handlePlayerAttack(QTcpSocket*, QDataStream&);
+
+    void broadcastGameTimeSync();
+
+    const LobbySlot* findLobbySlotByPlayerId(quint32 playerId) const;
+};
+
+#endif // SERVER_H

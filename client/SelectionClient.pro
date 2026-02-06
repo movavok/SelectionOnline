@@ -1,0 +1,78 @@
+QT += core gui network
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++17
+
+# You can make your code fail to compile if it uses deprecated APIs.
+# In order to do so, uncomment the following line.
+#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+SOURCES += \
+    combat/katana.cpp \
+    combat/weapon.cpp \
+    combat/weaponmanager.cpp \
+    entities/enemy.cpp \
+    entities/entity.cpp \
+    entities/player.cpp \
+    game/attackfxutils.cpp \
+    game/attackraycast.cpp \
+    game/game.cpp \
+    game/fakeserver.cpp \
+    game/spriteanim.cpp \
+    game/gametimer.cpp \
+    game/inventory.cpp \
+    game/inventoryslot.cpp \
+    map/map.cpp \
+    map/pickupitem.cpp \
+    map/tile.cpp \
+    main.cpp \
+    game/gameview.cpp \
+    map/tilecollision.cpp \
+    map/tilevisual.cpp \
+    net/netclient.cpp \
+    ui/mainwindow.cpp \
+    ui/playerpreviewwidget.cpp \
+    ui/playerslotwidget.cpp \
+    ui/minimapwidget.cpp
+
+HEADERS += \
+    combat/katana.h \
+    combat/weapon.h \
+    combat/weaponmanager.h \
+    entities/enemy.h \
+    entities/entity.h \
+    entities/player.h \
+    game/attackfxutils.h \
+    game/attackraycast.h \
+    game/game.h \
+    game/fakeserver.h \
+    game/fakesnapshot.h \
+    game/hitinfo.h \
+    game/gametimer.h \
+    game/gameview.h \
+    game/spriteanim.h \
+    game/inventory.h \
+    game/inventoryslot.h \
+    map/map.h \
+    map/pickupitem.h \
+    map/tile.h \
+    input/inputtypes.h \
+    map/tilecollision.h \
+    map/tilevisual.h \
+    net/netclient.h \
+    ui/mainwindow.h \
+    ui/playerpreviewwidget.h \
+    ui/playerslotwidget.h \
+    ui/minimapwidget.h
+
+FORMS += \
+    ui/mainwindow.ui
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resourses.qrc

@@ -1,0 +1,1993 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>608</width>
+    <height>608</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>608</width>
+    <height>608</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+/* Pixel UI theme (Fixedsys-like) */
+
+/* Global */
+QMainWindow,
+QWidget#centralwidget {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+
+/* Pages */
+#page_startScreen,
+#page_lobbyScreen,
+#page_settingsScreen {
+    background-color: #1f1f1f;
+}
+
+/* Tooltips */
+QToolTip {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 0;
+    padding: 4px 6px;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+
+/* QMessageBox / dialogs */
+QMessageBox,
+QDialog {
+    background-color: #3e3e3e;
+    color: #f0f0f0;
+    border: 2px solid #dcdcdc;
+    border-radius: 0;
+    padding: 8px 10px;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+
+QMessageBox QLabel#qt_msgbox_label {
+    color: #f0f0f0;
+    background: transparent;
+    margin: 6px 0 0 0;
+    qproperty-alignment: AlignCenter;
+}
+
+QMessageBox QLabel#qt_msgboxex_icon_label {
+    min-width: 0px;
+    max-width: 0px;
+    width: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+QMessageBox QDialogButtonBox {
+    qproperty-centerButtons: true;
+    padding-top: 10px;
+}
+
+QMessageBox QPushButton,
+QDialog QPushButton {
+    background-color: #5a5a5a;
+    border: 2px solid #1e1e1e;
+    border-radius: 0;
+    padding: 6px 12px;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+}
+QMessageBox QPushButton:hover,
+QDialog QPushButton:hover {
+    background-color: #6a6a6a;
+}
+QMessageBox QPushButton:pressed,
+QDialog QPushButton:pressed {
+    background-color: #4a4a4a;
+    border-left-color: #2a2a2a;
+    border-top-color: #2a2a2a;
+    border-right-color: #777777;
+    border-bottom-color: #777777;
+}
+
+/* Typography for main pages */
+#page_startScreen QLabel,
+#page_startScreen QPushButton,
+#page_startScreen QGroupBox,
+#page_startScreen QComboBox,
+#page_startScreen QSpinBox,
+#page_startScreen QAbstractSpinBox,
+#page_lobbyScreen QLabel,
+#page_lobbyScreen QPushButton,
+#page_lobbyScreen QGroupBox,
+#page_lobbyScreen QComboBox,
+#page_lobbyScreen QSpinBox,
+#page_lobbyScreen QAbstractSpinBox,
+#page_settingsScreen QLabel,
+#page_settingsScreen QPushButton,
+#page_settingsScreen QGroupBox,
+#page_settingsScreen QComboBox,
+#page_settingsScreen QSpinBox,
+#page_settingsScreen QAbstractSpinBox {
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    color: #ffffff;
+}
+
+/* GroupBox pixel border */
+QGroupBox {
+    border: 2px solid #000000;
+    border-radius: 0;
+    margin-top: 10px;
+    background-color: rgba(0,0,0,0.35);
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 2px 6px;
+    background-color: rgba(0,0,0,0.6);
+    color: #ffffff;
+}
+
+/* Labels */
+QLabel {
+    background-color: transparent;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #3a3a3a;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 6px 10px;
+    color: #ffffff;
+}
+QPushButton:hover { background-color: #4a4a4a; }
+QPushButton:pressed {
+    background-color: #2a2a2a;
+    border-left-color: #111111;
+    border-top-color:  #111111;
+    border-right-color:#555555;
+    border-bottom-color:#555555;
+}
+QPushButton:disabled {
+    background-color: #1f1f1f;
+    border: 2px solid #444444;
+    color: #888888;
+}
+
+/* Inputs */
+QLineEdit,
+QComboBox,
+QSpinBox,
+QAbstractSpinBox {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    padding: 2px 6px;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    selection-background-color: #5a5a5a;
+    selection-color: #ffffff;
+}
+QLineEdit:focus,
+QComboBox:focus,
+QSpinBox:focus,
+QAbstractSpinBox:focus {
+    border-color: #ffffff;
+}
+
+QComboBox::drop-down {
+    width: 18px;
+    border-left: 2px solid #000000;
+    background-color: #3a3a3a;
+}
+QComboBox::down-arrow { image: none; }
+
+QAbstractSpinBox {
+    padding-right: 14px; /* room for up/down */
+}
+QAbstractSpinBox QLineEdit {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: #ffffff;
+    font-family: Fixedsys, &quot;Lucida Console&quot;, &quot;Courier New&quot;, monospace;
+    font-size: 10pt;
+    qproperty-alignment: AlignVCenter | AlignRight;
+}
+QAbstractSpinBox::up-button,
+QAbstractSpinBox::down-button {
+    width: 12px;
+    background-color: #3a3a3a;
+    border-left: 2px solid #000000;
+}
+QAbstractSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    height: 50%;
+    border-bottom: 1px solid #000000;
+}
+QAbstractSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    height: 50%;
+    border-top: 1px solid #000000;
+}
+QAbstractSpinBox::up-button:hover,
+QAbstractSpinBox::down-button:hover {
+    background-color: #4a4a4a;
+}
+QAbstractSpinBox::up-button:pressed,
+QAbstractSpinBox::down-button:pressed {
+    background-color: #2a2a2a;
+}
+QAbstractSpinBox::up-arrow,
+QAbstractSpinBox::down-arrow {
+    image: none;
+}
+
+/* Tables */
+QTableWidget,
+QTableView {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    gridline-color: #000000;
+    selection-background-color: #5a5a5a;
+}
+QTableWidget::item,
+QTableView::item {
+    padding: 2px 6px;
+}
+QTableWidget::item:selected,
+QTableView::item:selected {
+    background-color: #5a5a5a;
+    color: #ffffff;
+}
+QTableCornerButton::section {
+    background-color: #3a3a3a;
+    border: 2px solid #000000;
+}
+QHeaderView::section {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 2px solid #000000;
+    padding: 4px 6px;
+}
+
+QScrollBar:vertical {
+    background: #2f2f2f;
+    width: 14px;
+    margin: 0;
+    border-left: 2px solid #000000;
+}
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-height: 24px;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar:horizontal {
+    background: #2f2f2f;
+    height: 14px;
+    margin: 0;
+    border-top: 2px solid #000000;
+}
+QScrollBar::handle:horizontal {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-width: 24px;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
+/* Menu */
+QMenuBar {
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+QMenuBar::item {
+    background: transparent;
+    padding: 4px 10px;
+}
+QMenuBar::item:selected {
+    background-color: #3a3a3a;
+}
+QMenu {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 2px solid #000000;
+}
+QMenu::item:selected {
+    background-color: #4a4a4a;
+}
+
+/* Player preview frame */
+QWidget#playerPreviewWidget {
+    background: transparent;
+    border: 2px solid #000000;
+    border-radius: 0;
+}
+
+/* Color swatches */
+QPushButton#b_red, QPushButton#b_blue, QPushButton#b_yellow, QPushButton#b_green,
+QPushButton#b_gray, QPushButton#b_white, QPushButton#b_black, QPushButton#b_purple,
+QPushButton#b_pink, QPushButton#b_orange {
+    padding: 0;
+    border-radius: 0;
+    border: 2px solid #000000;
+    color: transparent;
+}
+QPushButton#b_red { background-color: rgb(255, 0, 0); }
+QPushButton#b_blue { background-color: rgb(0, 0, 255); }
+QPushButton#b_yellow { background-color: rgb(255, 255, 0); }
+QPushButton#b_green { background-color: rgb(0, 255, 0); }
+QPushButton#b_gray { background-color: rgb(128, 128, 128); }
+QPushButton#b_white { background-color: rgb(255, 255, 255); }
+QPushButton#b_black { background-color: rgb(0, 0, 0); }
+QPushButton#b_purple { background-color: rgb(128, 0, 128); }
+QPushButton#b_pink { background-color: rgb(255, 105, 180); }
+QPushButton#b_orange { background-color: rgb(255, 165, 0); }
+
+QPushButton#b_red:hover, QPushButton#b_blue:hover, QPushButton#b_yellow:hover, QPushButton#b_green:hover,
+QPushButton#b_gray:hover, QPushButton#b_white:hover, QPushButton#b_black:hover, QPushButton#b_purple:hover,
+QPushButton#b_pink:hover, QPushButton#b_orange:hover {
+    border-color: #ffffff;
+}
+
+QPushButton#b_red:hover { background-color: rgb(255, 0, 0); }
+QPushButton#b_blue:hover { background-color: rgb(0, 0, 255); }
+QPushButton#b_yellow:hover { background-color: rgb(255, 255, 0); }
+QPushButton#b_green:hover { background-color: rgb(0, 255, 0); }
+QPushButton#b_gray:hover { background-color: rgb(128, 128, 128); }
+QPushButton#b_white:hover { background-color: rgb(255, 255, 255); }
+QPushButton#b_black:hover { background-color: rgb(0, 0, 0); }
+QPushButton#b_purple:hover { background-color: rgb(128, 0, 128); }
+QPushButton#b_pink:hover { background-color: rgb(255, 105, 180); }
+QPushButton#b_orange:hover { background-color: rgb(255, 165, 0); }
+
+QPushButton#b_red:pressed { background-color: rgb(255, 0, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_blue:pressed { background-color: rgb(0, 0, 255); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_yellow:pressed { background-color: rgb(255, 255, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_green:pressed { background-color: rgb(0, 255, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_gray:pressed { background-color: rgb(128, 128, 128); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_white:pressed { background-color: rgb(255, 255, 255); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_black:pressed { background-color: rgb(0, 0, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_purple:pressed { background-color: rgb(128, 0, 128); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_pink:pressed { background-color: rgb(255, 105, 180); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+QPushButton#b_orange:pressed { background-color: rgb(255, 165, 0); border-left-color: #111111; border-top-color: #111111; border-right-color: #555555; border-bottom-color: #555555; }
+
+QStatusBar {
+        background: #1e1e1e;
+        color: #e6e6e6;      /* інколи ігнорується для showMessage */
+        border-top: 1px solid #333;
+        font-size: 12px;
+		font-family: Fixedsys;
+    }
+
+QStatusBar QLabel {
+    color: #e6e6e6;
+    font-size: 12px;
+    font-family: Fixedsys;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page_startScreen">
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QLabel" name="l_logo">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Лого</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <property name="topMargin">
+                 <number>10</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>10</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="l_nickname">
+                  <property name="text">
+                   <string>Введи ім'я:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="le_nickname">
+                  <property name="font">
+                   <font>
+                    <family>Fixedsys</family>
+                    <pointsize>10</pointsize>
+                    <italic>false</italic>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
+                  <property name="inputMask">
+                   <string/>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="maxLength">
+                   <number>10</number>
+                  </property>
+                  <property name="placeholderText">
+                   <string>обов'язково</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="gb_connection">
+                <property name="title">
+                 <string>Підключення</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout_5">
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayout_3">
+                       <item>
+                        <widget class="QLabel" name="l_ip">
+                         <property name="text">
+                          <string>IP-адреса</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLineEdit" name="le_ip">
+                         <property name="text">
+                          <string>127.000.000.001</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayout_4">
+                       <item>
+                        <widget class="QLabel" name="l_port">
+                         <property name="text">
+                          <string>Порт</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QSpinBox" name="sb_port">
+                         <property name="maximum">
+                          <number>65535</number>
+                         </property>
+                         <property name="value">
+                          <number>8081</number>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                     <item>
+                      <widget class="QPushButton" name="b_hostServer">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="text">
+                        <string>Створити гру</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="b_joinServer">
+                       <property name="text">
+                        <string>Приєднатися</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_lobbyScreen">
+       <layout class="QVBoxLayout" name="verticalLayout_28">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_15">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_19">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <widget class="QGroupBox" name="gb_color">
+                  <property name="maximumSize">
+                   <size>
+                    <width>205</width>
+                    <height>150</height>
+                   </size>
+                  </property>
+                  <property name="title">
+                   <string>Колір</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_14">
+                   <item>
+                    <layout class="QGridLayout" name="gridLayout">
+                     <item row="0" column="0">
+                      <widget class="QPushButton" name="b_red">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_red {
+    background-color: rgb(255, 0, 0);
+    border-radius: 5px;
+}
+QPushButton#b_red:hover {
+    background-color: rgb(255, 80, 80);
+}
+QPushButton#b_red:pressed {
+    background-color: rgb(180, 0, 0);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QPushButton" name="b_yellow">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_yellow {
+    background-color: rgb(255, 255, 0);
+    border-radius: 5px;
+}
+QPushButton#b_yellow:hover {
+    background-color: rgb(255, 255, 120);
+}
+QPushButton#b_yellow:pressed {
+    background-color: rgb(200, 200, 0);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="2">
+                      <widget class="QPushButton" name="b_pink">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_pink {
+    background-color: rgb(255, 105, 180);
+    border-radius: 5px;
+}
+QPushButton#b_pink:hover {
+    background-color: rgb(255, 150, 205);
+}
+QPushButton#b_pink:pressed {
+    background-color: rgb(200, 80, 140);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="3">
+                      <widget class="QPushButton" name="b_orange">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_orange {
+    background-color: rgb(255, 165, 0);
+    border-radius: 5px;
+}
+QPushButton#b_orange:hover {
+    background-color: rgb(255, 190, 80);
+}
+QPushButton#b_orange:pressed {
+    background-color: rgb(200, 130, 0);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="4">
+                      <widget class="QPushButton" name="b_white">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_white {
+    background-color: rgb(240, 240, 240);
+    border-radius: 5px;
+}
+QPushButton#b_white:hover {
+    background-color: rgb(255, 255, 255);
+}
+QPushButton#b_white:pressed {
+    background-color: rgb(200, 200, 200);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QPushButton" name="b_blue">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_blue {
+    background-color: rgb(0, 0, 255);
+    border-radius: 5px;
+}
+QPushButton#b_blue:hover {
+    background-color: rgb(80, 80, 255);
+}
+QPushButton#b_blue:pressed {
+    background-color: rgb(0, 0, 180);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1">
+                      <widget class="QPushButton" name="b_purple">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_purple {
+    background-color: rgb(128, 0, 128);
+    border-radius: 5px;
+}
+QPushButton#b_purple:hover {
+    background-color: rgb(170, 80, 170);
+}
+QPushButton#b_purple:pressed {
+    background-color: rgb(90, 0, 90);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="3">
+                      <widget class="QPushButton" name="b_cyan">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_cyan {
+    background-color: rgb(0, 255, 255);
+    border-radius: 5px;
+}
+QPushButton#b_cyan:hover {
+    background-color: rgb(120, 255, 255);
+}
+QPushButton#b_cyan:pressed {
+    background-color: rgb(0, 180, 180);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="4">
+                      <widget class="QPushButton" name="b_black">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_black {
+    background-color: rgb(30, 30, 30);
+    border-radius: 5px;
+}
+QPushButton#b_black:hover {
+    background-color: rgb(70, 70, 70);
+}
+QPushButton#b_black:pressed {
+    background-color: rgb(0, 0, 0);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="2">
+                      <widget class="QPushButton" name="b_green">
+                       <property name="minimumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>30</width>
+                         <height>30</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton#b_green {
+    background-color: rgb(0, 180, 0);
+    border-radius: 5px;
+}
+QPushButton#b_green:hover {
+    background-color: rgb(80, 220, 80);
+}
+QPushButton#b_green:pressed {
+    background-color: rgb(0, 130, 0);
+}</string>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="gb_play">
+                  <property name="maximumSize">
+                   <size>
+                    <width>140</width>
+                    <height>150</height>
+                   </size>
+                  </property>
+                  <property name="title">
+                   <string>Запуск</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_18">
+                   <item>
+                    <layout class="QVBoxLayout" name="verticalLayout_16">
+                     <item>
+                      <widget class="QPushButton" name="b_openGameView">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true"/>
+                       </property>
+                       <property name="text">
+                        <string>Почати гру</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="b_backToStart">
+                       <property name="styleSheet">
+                        <string notr="true">QPushButton {
+    background-color: #5a2a2a;
+    border: 2px solid #000000;
+    color: #f0f0f0;
+    font-family: &quot;Fixedsys&quot;;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+QPushButton:hover {
+    background-color: #6a3232;
+}
+
+QPushButton:pressed {
+    background-color: #4a2020;
+}</string>
+                       </property>
+                       <property name="text">
+                        <string>Вийти</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="b_settings">
+                       <property name="text">
+                        <string>Налаштування</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="gb_weapon">
+                <property name="maximumSize">
+                 <size>
+                  <width>350</width>
+                  <height>100</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Зброя</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_11">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_7">
+                   <item>
+                    <widget class="QPushButton" name="b_katana">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;*Катана*&lt;br/&gt;75 урону&lt;br/&gt;0.5с перезарядка&lt;br/&gt;коротка дальність &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QPushButton#b_katana {
+    background-image: url(:/ui/icons/katana.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_2">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_3">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_4">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_5">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="gb_ability">
+                <property name="maximumSize">
+                 <size>
+                  <width>350</width>
+                  <height>100</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Здібність</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_12">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_8">
+                   <item>
+                    <widget class="QPushButton" name="b_mirrorShield">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_7">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_8">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_9">
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>50</width>
+                       <height>50</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_10">
+              <item>
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="PlayerPreviewWidget" name="playerPreviewWidget" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>200</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>400</width>
+                  <height>400</height>
+                 </size>
+                </property>
+                <property name="baseSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="b_playerReady">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton:enabled {
+    background-color: #2f5a3a;
+    border: 2px solid #000000;
+    color: #e0ffe0;
+    font-family: &quot;Fixedsys&quot;;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+QPushButton:hover:enabled {
+    background-color: #356a44;
+}
+
+QPushButton:pressed:enabled {
+    background-color: #254a30;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Готово</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="gb_playersList">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Список гравців</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_27">
+             <item>
+              <widget class="QTableWidget" name="table_playersList">
+               <property name="styleSheet">
+                <string notr="true">QTableWidget,
+QTableView {
+    background-color: #2f2f2f;
+    border: 2px solid #000000;
+    border-radius: 0;
+    gridline-color: #000000;
+    selection-background-color: #5a5a5a;
+}
+QTableWidget::item,
+QTableView::item {
+    padding: 2px 6px;
+}
+QTableWidget::item:selected,
+QTableView::item:selected {
+    background-color: #5a5a5a;
+    color: #ffffff;
+}
+QTableCornerButton::section {
+    background-color: #3a3a3a;
+    border: 2px solid #000000;
+}
+QHeaderView::section {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 0px solid #000000;
+    padding: 4px 6px;
+	font-family: &quot;Fixedsys&quot;;
+    font-size: 12px;
+}
+
+QScrollBar:vertical {
+    background: #2f2f2f;
+    width: 14px;
+    margin: 0;
+    border-left: 2px solid #000000;
+}
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-height: 24px;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar:horizontal {
+    background: #2f2f2f;
+    height: 14px;
+    margin: 0;
+    border-top: 2px solid #000000;
+}
+QScrollBar::handle:horizontal {
+    background: #3a3a3a;
+    border: 2px solid #000000;
+    min-width: 24px;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
+}</string>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
+               </property>
+               <attribute name="horizontalHeaderCascadingSectionResizes">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Ім'я</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Зброя</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Здібність</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Колір</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Готовий</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_gameView">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="GameView" name="gameViewHolder" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_settingsScreen">
+       <layout class="QVBoxLayout" name="verticalLayout_26">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_25">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <item>
+             <widget class="QPushButton" name="b_back">
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>70</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Назад</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_18">
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_17">
+              <item>
+               <widget class="QGroupBox" name="gb_control">
+                <property name="maximumSize">
+                 <size>
+                  <width>220</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Керування</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_21">
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout_19">
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_15">
+                     <item>
+                      <widget class="QLabel" name="l_movement">
+                       <property name="text">
+                        <string>Переміщення</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="cb_movement">
+                       <item>
+                        <property name="text">
+                         <string>WASD</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Стрілки</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_14">
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayout_20">
+                       <item>
+                        <widget class="QLabel" name="l_changeSlot">
+                         <property name="text">
+                          <string>Зміна слоту</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLabel" name="label_2">
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLabel" name="label_3">
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLabel" name="label_4">
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLabel" name="label_5">
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayout_17">
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_6">
+                         <item>
+                          <widget class="QLabel" name="l_1">
+                           <property name="text">
+                            <string>1.</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QKeySequenceEdit" name="kse_firstSlot">
+                           <property name="minimumSize">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>16777215</height>
+                            </size>
+                           </property>
+                           <property name="keySequence">
+                            <string>1</string>
+                           </property>
+                           <property name="maximumSequenceLength">
+                            <longLong>1</longLong>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_10">
+                         <item>
+                          <widget class="QLabel" name="l_2">
+                           <property name="text">
+                            <string>2.</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QKeySequenceEdit" name="kse_secondSlot">
+                           <property name="minimumSize">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>16777215</height>
+                            </size>
+                           </property>
+                           <property name="keySequence">
+                            <string>2</string>
+                           </property>
+                           <property name="maximumSequenceLength">
+                            <longLong>1</longLong>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_11">
+                         <item>
+                          <widget class="QLabel" name="l_3">
+                           <property name="text">
+                            <string>3.</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QKeySequenceEdit" name="kse_thirdSlot">
+                           <property name="minimumSize">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>16777215</height>
+                            </size>
+                           </property>
+                           <property name="keySequence">
+                            <string>3</string>
+                           </property>
+                           <property name="maximumSequenceLength">
+                            <longLong>1</longLong>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_12">
+                         <item>
+                          <widget class="QLabel" name="l_4">
+                           <property name="text">
+                            <string>4.</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QKeySequenceEdit" name="kse_fourthSlot">
+                           <property name="minimumSize">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>16777215</height>
+                            </size>
+                           </property>
+                           <property name="keySequence">
+                            <string>4</string>
+                           </property>
+                           <property name="maximumSequenceLength">
+                            <longLong>1</longLong>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_13">
+                         <item>
+                          <widget class="QLabel" name="l_5">
+                           <property name="text">
+                            <string>5.</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QKeySequenceEdit" name="kse_fifthSlot">
+                           <property name="minimumSize">
+                            <size>
+                             <width>0</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>16777215</height>
+                            </size>
+                           </property>
+                           <property name="keySequence">
+                            <string>5</string>
+                           </property>
+                           <property name="maximumSequenceLength">
+                            <longLong>1</longLong>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_24">
+                <item>
+                 <widget class="QGroupBox" name="gb_view">
+                  <property name="title">
+                   <string>Вигляд</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_22">
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_9">
+                     <item>
+                      <widget class="QLabel" name="l_maxFps">
+                       <property name="text">
+                        <string>Максимальна частота кадрів</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="sb_maxFps">
+                       <property name="minimum">
+                        <number>15</number>
+                       </property>
+                       <property name="maximum">
+                        <number>400</number>
+                       </property>
+                       <property name="value">
+                        <number>60</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="gb_sound">
+                  <property name="title">
+                   <string>Звук</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_23">
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_16">
+                     <item>
+                      <widget class="QLabel" name="l_volume">
+                       <property name="text">
+                        <string>Гучність</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSlider" name="sl_volume">
+                       <property name="maximum">
+                        <number>100</number>
+                       </property>
+                       <property name="value">
+                        <number>100</number>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Orientation::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="l_volumePercent">
+                       <property name="text">
+                        <string>100%</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>608</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Меню</string>
+    </property>
+    <addaction name="act_settingsScreen"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Звук</string>
+    </property>
+    <addaction name="action_5"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <action name="act_settingsScreen">
+   <property name="text">
+    <string>Екран налаштувань</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>Вимк. звук</string>
+   </property>
+  </action>
+  <action name="action_5">
+   <property name="text">
+    <string>Гучність</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GameView</class>
+   <extends>QWidget</extends>
+   <header>game/gameview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlayerPreviewWidget</class>
+   <extends>QWidget</extends>
+   <header>ui/playerpreviewwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
